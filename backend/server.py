@@ -16,6 +16,7 @@ from PIL import Image
 from stripe_routes import router as stripe_router
 import uuid
 from session import sessions
+from contextlib import asynccontextmanager
 our_secret_key = os.getenv("our_secret_key")
 
 
@@ -33,10 +34,15 @@ client = AsyncAzureOpenAI(
 )
 
 
-# Tables()
+
 
 converter = LatexNodes2Text()
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await Tables()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(stripe_router)
 app.add_middleware(
