@@ -1,0 +1,29 @@
+# Environment variables - NEVER commit these
+.env
+*.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+*.db
+*.sqlite3
+
+# Database
+mydatabase1.db
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Chrome extension build artifacts
+extension/node_modules/

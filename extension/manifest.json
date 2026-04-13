@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "WebWork AI Solver",
+  "version": "1.0",
+  "description": "AI explanations for WebWork problems",
+  "permissions": ["activeTab", "scripting", "storage", "tabCapture","sidePanel","identity"],
+  "host_permissions": [
+    "http://localhost:8000/*",
+    "https://*/*",
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "WebWork AI Solver"
+  },
+  "side_panel": {
+    "default_path":"popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*/*", "http://*/*"],
+      "js": ["background.js"],
+      "run_at": "document_start"
+    }
+  ]
+}

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Upgrade</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      background: #f5f4fb;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid #e8e7f5;
+      overflow: hidden;
+    }
+    .card-header {
+      background: #534AB7;
+      padding: 2rem 2rem 1.75rem;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 99px;
+      margin-bottom: 1rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .card-header .sub {
+      color: rgba(255,255,255,0.85);
+      font-size: 14px;
+      margin-bottom: 0.25rem;
+    }
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .price {
+      color: #fff;
+      font-size: 48px;
+      font-weight: 600;
+      line-height: 1;
+    }
+    .price-label {
+      color: rgba(255,255,255,0.7);
+      font-size: 15px;
+    }
+    .features {
+      padding: 1.75rem 2rem 0.5rem;
+    }
+    .features-title {
+      font-size: 12px;
+      color: #888;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1.25rem;
+    }
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .check-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #EEEDFE;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .feature-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin-bottom: 2px;
+    }
+    .feature-desc {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+    }
+    .cta-area {
+      padding: 1.75rem 2rem 2rem;
+    }
+    #payBtn {
+      width: 100%;
+      padding: 14px;
+      background: #534AB7;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #payBtn:hover { background: #3C3489; }
+    #payBtn:disabled { opacity: 0.7; cursor: not-allowed; }
+    .trust-line {
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+
+    <div class="card-header">
+      <div class="badge">Lifetime deal</div>
+      <p class="sub">One-time payment</p>
+      <div class="price-row">
+        <span class="price">$10</span>
+        <span class="price-label">forever</span>
+      </div>
+    </div>
+
+    <div class="features">
+      <p class="features-title">What you get</p>
+      <div class="feature-list">
+
+        <div class="feature-item">
+          <div class="check-circle">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M2 5.5L4.5 8L9 3" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <p class="feature-title">Unlimited tries</p>
+            <p class="feature-desc">No caps, no limits — use it as much as you want.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="check-circle">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M2 5.5L4.5 8L9 3" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <p class="feature-title">Free for lifetime</p>
+            <p class="feature-desc">Pay once, never pay again. No subscriptions.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="check-circle">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M2 5.5L4.5 8L9 3" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <p class="feature-title">Powered by our flagship model</p>
+            <p class="feature-desc">Richer, deeper explanations from our best AI.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="cta-area">
+      <button id="payBtn">Get lifetime access — $10</button>
+      <p class="trust-line">Secured by Stripe. One-time charge only.</p>
+    </div>
+
+  </div>
+
+  <script src="stripe.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,273 @@
+from fastapi import FastAPI,Header
+from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from openai import OpenAI
+import os
+from dotenv import load_dotenv
+from pylatexenc.latex2text import LatexNodes2Text
+from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status
+from openai import AsyncAzureOpenAI
+import jwt
+from jwt import ExpiredSignatureError, InvalidTokenError
+from datetime import datetime, timezone,timedelta
+import base64
+from io import BytesIO
+from PIL import Image
+from stripe_routes import router as stripe_router
+import uuid
+from session import sessions
+our_secret_key = os.getenv("our_secret_key")
+
+
+
+load_dotenv()
+endpoint = "https://foundry-ai-prd-eus2-01.cognitiveservices.azure.com/"
+model_name = "gpt-5.4-mini"
+deployment = "gpt-5.4-mini"
+subscription_key = os.getenv("subscription_key")
+api_version = "2024-12-01-preview"
+client = AsyncAzureOpenAI(
+    api_version=api_version,
+    azure_endpoint=endpoint,
+    api_key=subscription_key,
+)
+
+
+# Tables()
+
+converter = LatexNodes2Text()
+app = FastAPI()
+
+app.include_router(stripe_router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+
+class Problem(BaseModel):
+    screenshot: str
+class Geti(BaseModel):
+    Auth: dict
+class RefreshTokenRequest(BaseModel):
+    Refresh_token: str
+
+# def decoding_and_reducing(image_bas64):
+#     image_data = base64.b64decode(image_bas64)
+#     img = Image.open(BytesIO(image_data))
+#     img = img.convert('L') 
+#     img = img.resize((256, 192))
+#     buffer = BytesIO()
+#     img.save(buffer, format='JPEG', quality=25, optimize=True)
+#     buffer.seek(0)
+#     new_base64 = base64.b64encode(buffer.read()).decode()
+#     return new_base64
+
+
+@app.post("/solve")
+async def solve(problem_data:Problem, authorization:str= Header(None)):
+    #deleting_everything()
+    global our_secret_key
+
+
+    token = authorization.replace("Bearer ", "")
+
+    if token == "undefined":
+        return {"answer":"Login_again"}
+    
+    try:
+        print("Hjk")
+        payload = jwt.decode(token,our_secret_key,algorithms=["HS256"])
+        print("jn")
+        user_id = payload["key"]
+        print("ujn")
+
+    except:
+        print("as")
+        return {"answer":"Login_again"}
+
+    user = await getting_user(user_id)
+    if not user:
+        return {"answer": "Login_again"}  
+    
+    total_tries = await get_tries(user_id)
+    status = await payment_status(user_id)
+    print(status)
+
+
+    if total_tries[0] >10 and status[0] == 0:
+        return {"answer":"False"}
+    # image = decoding_and_reducing(problem_data.screenshot)
+    print("sdf")
+
+    response1 = await client.chat.completions.create(
+        messages=[
+            {
+                "role": "system",
+                "content": """Solve the following math problem. Format your response using Markdown:
+                - Use **bold** for Steps Headings,important things and final answers
+                - Use bullet points for steps
+                - YOU MUST wrap every math expression in $ or $$
+                - NEVER use unicode symbols like ∑ ∞ · — use LaTeX commands like \\sum \\infty \\cdot
+                - WRONG: ∑_n=1^∞n/n+2
+                - CORRECT: $$\\sum_{n=1}^{\\infty} \\frac{n}{n+2}$$
+                - Keep it clean """
+            },
+        
+            {
+                "role": "user",
+                "content": [    
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/png;base64,{problem_data.screenshot}",
+                            "detail": "low"
+                        }
+                    },
+                    # {
+                    #     "type": "text",
+                    #     "text": f" {problem_data.problem} "
+                    # }
+                ]
+            }
+        ],
+        max_completion_tokens=600,
+        temperature=0,
+        model=deployment
+    )
+    print("sd")
+    
+    answer = response1.choices[0].message.content
+    print(response1.usage)
+    
+    # answer = converter.latex_to_text(answer)
+    await increment_tries(user_id)
+
+    return {"answer":answer}
+
+
+
+@app.post("/get")
+async def get(data:Geti):
+    global our_secret_key
+    user_data = data.Auth
+    await Inserting(user_data["id"],user_data["email"],user_data["name"],user_data["given_name"],user_data["family_name"],user_data["picture"])
+    await inserting_payment(user_data["id"],0,0)
+
+    Refresh_token = jwt.encode(
+        {"user_id": "generatingrefreshtoken", "exp": datetime.utcnow() + timedelta(days=100)},
+        our_secret_key,
+        algorithm="HS256"
+    )
+    Access_token = jwt.encode(
+        {"key": user_data["id"], "exp": datetime.utcnow() + timedelta(seconds=10)},
+        our_secret_key,
+        algorithm="HS256"
+    )
+    
+
+    print(Refresh_token)
+    decoded = jwt.decode(Refresh_token, options={"verify_signature": False})
+    print("hello")
+    exp = decoded['exp']
+    print("hello")
+    expiration_date = datetime.fromtimestamp(exp, tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    print("hello")
+
+    
+    
+    await refresh_token(user_data["id"],Refresh_token,expiration_date,0)
+   
+    return {"Acess_token":Access_token,"Refresh_token":Refresh_token}
+
+@app.post("/refresh_token")
+async def validating(request:RefreshTokenRequest):
+
+    print("yellow")
+    if(request == None):
+        return {"log":"true"}
+    data = await extracting_data(request.Refresh_token)
+    print(data)
+    if len(data) == 0:
+        print("yellow1")
+        return {"Data":"No"}
+
+    else:
+        print("yellow2")
+        Access_token = jwt.encode(
+            {"key": data[0][1], "exp": datetime.utcnow() + timedelta(seconds=10)},
+            our_secret_key,
+            algorithm="HS256"
+        )
+        print("yellow3")
+
+
+        return {"Data":Access_token}
+        
+
+
+@app.post("/logout")
+async def logout(authorization: str = Header(None)):
+    global our_secret_key
+    token = authorization.replace("Bearer ", "")
+    
+    try:
+        payload = jwt.decode(token, our_secret_key, algorithms=["HS256"])
+        user_id = payload["key"]
+        await updating_refresh_token(user_id)
+        return {"logout": "true"}
+    
+    except ExpiredSignatureError:
+        return {"logout": "false", "reason": "token_expired"}
+    
+    except InvalidTokenError:
+        return {"logout": "false", "reason": "invalid_token"}
+    
+
+@app.get("/admin")
+async def admin():
+    # deleting_everything()
+    data = await Get_users()
+    #await print(Get())
+    print(data)
+    #await print(get_payment())
+    final = [
+        {"name": i[0], "email": i[1], "token_status": i[2],"payment_status":i[3],"tries":i[4]} 
+        for i in data
+    ]
+    
+    return {"data": final}
+
+
+
+@app.post("/create-session")
+async def create_session(authorization: str = Header(None)):
+    token = authorization.replace("Bearer ", "")
+    try:
+        payload = jwt.decode(token, our_secret_key, algorithms=["HS256"])
+        user_id = payload["key"]
+        user = await getting_user(user_id)
+
+        if not user:
+            return {"Verify": "false"}
+
+        
+        session_id = str(uuid.uuid4())
+        sessions[session_id] = user_id
+        print(session_id) 
+
+        
+        plans_url = f"http://localhost:8004/stripe.html?session_id={session_id}"
+        return {"plans_url": plans_url}
+
+    except ExpiredSignatureError:
+        return {"Verify": "false", "reason": "token_expired"}
+    except InvalidTokenError:
+        return {"Verify": "false", "reason": "invalid_token"}
+
+
+

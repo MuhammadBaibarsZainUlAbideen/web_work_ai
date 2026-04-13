@@ -1,0 +1,10 @@
+What Problem does Docker Solves?
+It allows  you to Package all of your libraries(Import Pandas), Python version(3.11 etc), One-Standerad-OS(Mostly linux due to it small size),
+Your code itself   inside the static file known as  image so your fried doesnot have to download all of these things when they run your code. 
+
+What is Image?
+This is the "File" that contians all of the  above mentioned things like Your code, OS, Packages etc.
+
+
+
+

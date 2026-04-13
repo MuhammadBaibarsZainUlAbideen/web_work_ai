@@ -1,0 +1,58 @@
+async function refreshAccessToken() {
+    const result = await chrome.storage.local.get(["Refresh_token"]);
+    const refresh_token = result.Refresh_token;
+
+    const response = await fetch("http://localhost:8000/refresh_token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ Refresh_token: refresh_token })
+    });
+
+    const data = await response.json();
+
+    if (data.Data && data.Data !== "No") {
+      
+        await chrome.storage.local.set({ Access_token: data.Data });
+        return data.Data;
+    }
+
+    return null; 
+}
+
+
+async function performLogout(access_token) {
+    const response = await fetch("http://localhost:8000/logout", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${access_token}`
+        }
+    });
+    return await response.json();
+}
+
+document.getElementById("Logout").addEventListener('click', async function () {
+    let result = await chrome.storage.local.get(["Access_token"]);
+    let access_token = result.Access_token;
+
+    let data = await performLogout(access_token);
+
+   
+    if (data.reason === "token_expired") {
+        console.log("Token expired, refreshing...");
+        access_token = await refreshAccessToken();
+
+        if (access_token) {
+            data = await performLogout(access_token); 
+        } else {
+            console.log("Refresh token invalid. Forcing local logout.");
+            chrome.storage.local.remove(["Access_token", "Refresh_token"]);
+            return;
+        }
+    }
+
+    if (data.logout === "true") {
+        chrome.storage.local.remove(["Access_token", "Refresh_token"]);
+        console.log("Logged out successfully.");
+    }
+});
