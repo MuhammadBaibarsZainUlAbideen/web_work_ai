@@ -105,7 +105,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
     print(status)
 
 
-    if total_tries[0] >10 and status[0] == 0:
+    if total_tries[0] >3 and status[0] == 0:
         return {"answer":"False"}
     # image = decoding_and_reducing(problem_data.screenshot)
     print("sdf")
