@@ -267,7 +267,7 @@ async def create_session(authorization: str = Header(None)):
         print(session_id) 
 
         
-        plans_url = f"https://webworkai-production.up.railway.app/stripe.html?session_id={session_id}"
+        plans_url = f"https://webworkaipayment.netlify.app//stripe.html?session_id={session_id}"
         return {"plans_url": plans_url}
 
     except ExpiredSignatureError:

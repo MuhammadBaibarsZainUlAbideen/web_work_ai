@@ -52,8 +52,8 @@ def create_checkout(authorization: str = Header(None)):
         line_items=[{"price": PRICE_ID, "quantity": 1}],
         mode="payment",
         metadata={"user_id": user_id},
-        success_url="http://localhost:8003/success.html",
-        cancel_url=f"http://localhost:8002/cancel.html?session_id={session_id}",
+        success_url="https://webworkaipayment.netlify.app//success.html",
+        cancel_url=f"https://webworkaipayment.netlify.app//cancel.html?session_id={session_id}",
     )
     return {"url": session.url}
 
