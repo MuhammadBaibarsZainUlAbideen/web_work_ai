@@ -23,7 +23,7 @@ async function storingLocal(token){
 
 async function sendingBakcend(jsObject){
     console.log("h")
-    const sending = await fetch("http://localhost:8000/get",{
+    const sending = await fetch("https://webworkai-production.up.railway.app/get",{
         method:"POST",
         headers:{"Content-Type": "application/json"},
         body:JSON.stringify({Auth:jsObject})

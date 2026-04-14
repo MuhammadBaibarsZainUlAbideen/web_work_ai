@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
                 const base64Image = screenshotUrl.split(',')[1];
 
-                fetch("http://localhost:8000/solve", {
+                fetch("https://webworkai-production.up.railway.app/solve", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

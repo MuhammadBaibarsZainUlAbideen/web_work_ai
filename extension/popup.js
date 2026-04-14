@@ -117,7 +117,7 @@ redirect.onclick = async () => {
 
 
 async function callCheckout(token) {
-        const response = await fetch("http://localhost:8000/create-session", {
+        const response = await fetch("https://webworkai-production.up.railway.app/create-session", {
             method: "POST",
             headers: { "Authorization": `Bearer ${token}` }
         });
@@ -135,7 +135,7 @@ async function refreshAccessToken() {
     // const Refresh_token = localStorage.getItem("Refresh_token");
     // console.log(Refresh_token)
 
-    const response = await fetch("http://localhost:8000/refresh_token", {
+    const response = await fetch("https://webworkai-production.up.railway.app/refresh_token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ Refresh_token: Refresh_token })

@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let upgrade_button = document.getElementById("payBtn");
 
     upgrade_button.onclick = async function checkout() {
-        const response = await fetch("http://localhost:8000/checkout", {
+        const response = await fetch("https://webworkai-production.up.railway.app/checkout", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${session_id}`
