@@ -1,50 +1,56 @@
 chrome.action.onClicked.addListener((tab) => {
-  chrome.sidePanel.open({
-    windowId: tab.windowId
-  });
+  chrome.sidePanel.open({ windowId: tab.windowId });
 });
 
+
+let pendingSendResponse = null;
+let pendingRequest = null;
+let pendingToken = null;
+
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.action === "solveProblem") {
-        console.log("token-s")
-        chrome.storage.local.get(["Access_token"],(result)=>{
-            const Access_token = result.Access_token
-            console.log("asd",Access_token)
+  if (request.action === "solveProblem") {
+    chrome.storage.local.get(["Access_token"], (result) => {
+      pendingToken = result.Access_token;
+      pendingRequest = request;
+      pendingSendResponse = sendResponse;
 
-    
-            chrome.tabs.captureVisibleTab(null, { format: "png" }, (screenshotUrl) => {
-                if (chrome.runtime.lastError) {
-                    sendResponse({success: false, error: "Screenshot failed"});
-                    return;
-                }
+      chrome.tabs.captureVisibleTab(null, { format: "png" }, (screenshotUrl) => {
+        if (chrome.runtime.lastError) {
+          sendResponse({ success: false, error: "Screenshot failed" });
+          return;
+        }
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          chrome.tabs.sendMessage(tabs[0].id, { type: "START_SNIP", screenshotUrl });
+        });
+      });
+    });
+  }
+  return true;
+});
 
+// TOP LEVEL - separate listener for when user finishes snipping
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.type === "SNIP_DONE") {
+    const base64Image = msg.dataUrl.split(',')[1]; // use the CROPPED image
 
-                const base64Image = screenshotUrl.split(',')[1];
-
-                fetch("https://webworkai-production.up.railway.app/solve", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${Access_token}`
-                    },
-                    body: JSON.stringify({
-                        problem: request.problem,
-                        box_count: request.box,
-                        screenshot: base64Image
-                    })
-                })
-                .then(function(response) {
-                    return response.json();
-                })
-                .then(function(data) {
-                    console.log(data.answer)
-                    sendResponse({success: true, answer: data.answer});
-                })
-                .catch(function(error) {
-                    sendResponse({success: false, error: error.message});
-                });
-            });
-        })
-    }
-    return true;
+    fetch("https://webworkai-production.up.railway.app/solve", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${pendingToken}`
+      },
+      body: JSON.stringify({
+        problem: pendingRequest.problem,
+        box_count: pendingRequest.box,
+        screenshot: base64Image
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      pendingSendResponse({ success: true, answer: data.answer });
+    })
+    .catch(err => {
+      pendingSendResponse({ success: false, error: err.message });
+    });
+  }
 });
