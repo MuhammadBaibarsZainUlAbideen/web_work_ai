@@ -1,6 +1,6 @@
 body {
     width: 500px;
-    font-family: Arial, sans-serif;
+    font-family: 'Inter', sans-serif;
     padding: 0;
     margin: 0;
 }
@@ -11,6 +11,7 @@ h2 {
     margin: 0 0 15px 0;
     font-size: 16px;
 }
+
 button {
     padding: 10px 15px;
     margin: 5px 5px 5px 0;
@@ -22,6 +23,8 @@ button {
 #solve {
     background: green;
     color: white;
+    border-radius: 8px;
+    
 }
 #approve {
     background: blue;
@@ -67,4 +70,8 @@ button:disabled {
 #gearBtn{
     background: none;
     margin-left: 10px;
+}
+.Title {
+    grid-column: 2;
+    justify-self: center;
 }
