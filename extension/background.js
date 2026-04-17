@@ -51,7 +51,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                     reader.onloadend = () => {
                         const croppedBase64 = reader.result.split(',')[1];
 
-                        fetch("http://127.0.0.1:8000/solve", {
+                        fetch("https://webworkai-production.up.railway.app/solve", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
