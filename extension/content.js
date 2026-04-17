@@ -1,62 +1,95 @@
-chrome.runtime.onMessage.addListener((msg) => {
-    if (msg.type !== "START_SNIP") return;
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "startSnip") {
+        
+        // --- Create overlay ---
+        const overlay = document.createElement("div")
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4);
+            cursor: crosshair;
+            z-index: 999999;
+        `
+        document.body.appendChild(overlay)
 
-    const overlay = document.createElement("div");
-    overlay.style.cssText = `
-        position: fixed; inset: 0; z-index: 999999;
-        cursor: crosshair; background: rgba(0,0,0,0.35);
-    `;
-    document.body.appendChild(overlay);
+        
+        const selectionBox = document.createElement("div")
+        selectionBox.style.cssText = `
+            position: fixed;
+            border: 2px solid #00aaff;
+            background: rgba(0,170,255,0.1);
+            pointer-events: none;
+            z-index: 9999999;
+        `
+        document.body.appendChild(selectionBox)
 
-    let startX, startY, box;
+        let startX, startY, isDrawing = false
 
-    overlay.addEventListener("mousedown", (e) => {
-        startX = e.clientX;
-        startY = e.clientY;
+        
+        overlay.addEventListener("mousedown", (e) => {
+            isDrawing = true
+            startX = e.clientX
+            startY = e.clientY
 
-        box = document.createElement("div");
-        box.style.cssText = `
-        position: fixed; border: 2px solid #fff;
-        background: rgba(255,255,255,0.1); pointer-events: none;
-        `;
-        overlay.appendChild(box);
-    });
+            selectionBox.style.left   = startX + "px"
+            selectionBox.style.top    = startY + "px"
+            selectionBox.style.width  = "0px"
+            selectionBox.style.height = "0px"
+        })
 
-    overlay.addEventListener("mousemove", (e) => {
-        if (!box) return;
-        const x = Math.min(e.clientX, startX);
-        const y = Math.min(e.clientY, startY);
-        const w = Math.abs(e.clientX - startX);
-        const h = Math.abs(e.clientY - startY);
-        Object.assign(box.style, {
-        left: x + "px", top: y + "px",
-        width: w + "px", height: h + "px"
-        });
-    });
+       
+        overlay.addEventListener("mousemove", (e) => {
+            if (!isDrawing) return
 
-    overlay.addEventListener("mouseup", (e) => {
-        const rect = box.getBoundingClientRect();
-        document.body.removeChild(overlay);
-        cropScreenshot(msg.dataUrl, rect); // step 3
-    });
-});
-function cropScreenshot(dataUrl, rect) {
-  const dpr = window.devicePixelRatio || 1; 
-  const img = new Image();
-  img.src = dataUrl;
-  img.onload = () => {
-    const canvas = document.createElement("canvas");
-    canvas.width  = rect.width  * dpr;
-    canvas.height = rect.height * dpr;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(img,
-      rect.x * dpr, rect.y * dpr,         
-      rect.width * dpr, rect.height * dpr, 
-      0, 0,                                
-      rect.width * dpr, rect.height * dpr  
-    );
-    const croppedUrl = canvas.toDataURL("image/png");
-    chrome.runtime.sendMessage({ type: "SNIP_DONE", dataUrl: croppedUrl });
+            const currentX = e.clientX
+            const currentY = e.clientY
 
-  };
-}
+            const x = Math.min(currentX, startX)
+            const y = Math.min(currentY, startY)
+            const width  = Math.abs(currentX - startX)
+            const height = Math.abs(currentY - startY)
+
+            selectionBox.style.left   = x + "px"
+            selectionBox.style.top    = y + "px"
+            selectionBox.style.width  = width + "px"
+            selectionBox.style.height = height + "px"
+        })
+
+        
+        overlay.addEventListener("mouseup", (e) => {
+            isDrawing = false
+
+            const dpr = window.devicePixelRatio || 1  
+
+            const x = parseInt(selectionBox.style.left)
+            const y = parseInt(selectionBox.style.top)
+            const width  = parseInt(selectionBox.style.width)
+            const height = parseInt(selectionBox.style.height)
+
+           
+            overlay.remove()
+            selectionBox.remove()
+
+            sendResponse({
+                coords: {
+                    x:      Math.round(x * dpr),
+                    y:      Math.round(y * dpr),
+                    width:  Math.round(width * dpr),
+                    height: Math.round(height * dpr)
+                }
+            })
+        })
+
+        
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                overlay.remove()
+                selectionBox.remove()
+                sendResponse({ coords: null })  
+            }
+        }, { once: true })
+
+        return true  
+    }
+})

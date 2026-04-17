@@ -84,6 +84,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
 
     if token == "undefined":
         return {"answer":"Login_again"}
+    print(token)
     
     try:
         print("Hjk")
@@ -121,7 +122,9 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
                 - NEVER use unicode symbols like ∑ ∞ · — use LaTeX commands like \\sum \\infty \\cdot
                 - WRONG: ∑_n=1^∞n/n+2
                 - CORRECT: $$\\sum_{n=1}^{\\infty} \\frac{n}{n+2}$$
-                - Keep it clean """
+                - Keep it clean
+                - Write the entire solution in a single paragraph or bullet point without breaking numbers across lines
+                - Numbers must appear only inside math delimiters and only once"""
             },
         
             {
@@ -170,7 +173,7 @@ async def get(data:Geti):
         algorithm="HS256"
     )
     Access_token = jwt.encode(
-        {"key": user_data["id"], "exp": datetime.utcnow() + timedelta(seconds=10)},
+        {"key": user_data["id"], "exp": datetime.utcnow() + timedelta(minutes=10)},
         our_secret_key,
         algorithm="HS256"
     )
@@ -205,7 +208,7 @@ async def validating(request:RefreshTokenRequest):
     else:
         print("yellow2")
         Access_token = jwt.encode(
-            {"key": data[0][1], "exp": datetime.utcnow() + timedelta(seconds=10)},
+            {"key": data[0][1], "exp": datetime.utcnow() + timedelta(minutes=10)},
             our_secret_key,
             algorithm="HS256"
         )

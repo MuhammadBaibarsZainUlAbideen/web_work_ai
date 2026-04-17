@@ -14,16 +14,18 @@ export async function sending_Refresh_token(message){
 
         
 
-        const sending_refresh_token = await fetch("https://webworkai-production.up.railway.app/refresh_token",{
+        const sending_refresh_token = await fetch("http://127.0.0.1:8000/refresh_token",{
             method:"POST",
             headers:{"Content-Type":"application/json"},
             body: JSON.stringify({Refresh_token:Refresh_token})
         })
         console.log("as")
         const json_convertion = await sending_refresh_token.json()
-        console.log("as")
+        console.log(json_convertion)
         if(json_convertion.Data != "No"){
+            console.log("as1")
             chrome.storage.local.set({"Access_token":json_convertion.Data})
+            return;
 
         }else{
             console.log(json_convertion.Data)
@@ -32,6 +34,7 @@ export async function sending_Refresh_token(message){
         }
 
     }
+    return true;
 
 
          

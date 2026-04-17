@@ -1,56 +1,85 @@
 chrome.action.onClicked.addListener((tab) => {
-  chrome.sidePanel.open({ windowId: tab.windowId });
+  chrome.sidePanel.open({
+    windowId: tab.windowId
+  });
 });
-
-
-let pendingSendResponse = null;
-let pendingRequest = null;
-let pendingToken = null;
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request.action === "solveProblem") {
-    chrome.storage.local.get(["Access_token"], (result) => {
-      pendingToken = result.Access_token;
-      pendingRequest = request;
-      pendingSendResponse = sendResponse;
+    if (request.action === "solveProblem") {
+        console.log("token-s", request.tcoordinates)
+        chrome.storage.local.get(["Access_token"], async (result) => {
+            const Access_token = result.Access_token
+            console.log("asd", Access_token)
 
-      chrome.tabs.captureVisibleTab(null, { format: "png" }, (screenshotUrl) => {
-        if (chrome.runtime.lastError) {
-          sendResponse({ success: false, error: "Screenshot failed" });
-          return;
-        }
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          chrome.tabs.sendMessage(tabs[0].id, { type: "START_SNIP", screenshotUrl });
+            chrome.tabs.captureVisibleTab(null, { format: "png" }, async (screenshotUrl) => {
+                if (chrome.runtime.lastError) {
+                    sendResponse({ success: false, error: "Screenshot failed" });
+                    return;
+                }
+
+                try {
+                    const base64Image = screenshotUrl.split(',')[1];
+
+                    // Convert base64 → binary → blob
+                    const byteString = atob(base64Image);
+                    const byteArray = new Uint8Array(byteString.length);
+                    for (let i = 0; i < byteString.length; i++) {
+                        byteArray[i] = byteString.charCodeAt(i);
+                    }
+                    const blob = new Blob([byteArray], { type: "image/png" });
+
+                    // Use createImageBitmap — works in service workers
+                    const bitmap = await createImageBitmap(blob);
+                    const cropRegion = {
+                        x: parseInt(request.tcoordinates.x),
+                        y: parseInt(request.tcoordinates.y),
+                        width: parseInt(request.tcoordinates.width),
+                        height: parseInt(request.tcoordinates.height)
+                    };
+                    // OffscreenCanvas works in service workers
+                    const canvas = new OffscreenCanvas(cropRegion.width, cropRegion.height);
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(
+                        bitmap,
+                        cropRegion.x, cropRegion.y, cropRegion.width, cropRegion.height,
+                        0, 0, cropRegion.width, cropRegion.height
+                    );
+
+                    // Convert back to base64
+                    const croppedBlob = await canvas.convertToBlob({ type: "image/png" });
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const croppedBase64 = reader.result.split(',')[1];
+
+                        fetch("http://127.0.0.1:8000/solve", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${Access_token}`
+                            },
+                            body: JSON.stringify({
+                                problem: request.problem,
+                                box_count: request.box,
+                                screenshot: croppedBase64
+                            })
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            console.log("3453")
+                            console.log(data.answer);
+                            sendResponse({ success: true, answer: data.answer });
+                        })
+                        .catch(error => {
+                            sendResponse({ success: false, error: error.message });
+                        });
+                    };
+                    reader.readAsDataURL(croppedBlob);
+
+                } catch (err) {
+                    sendResponse({ success: false, error: err.message });
+                }
+            });
         });
-      });
-    });
-  }
-  return true;
-});
-
-// TOP LEVEL - separate listener for when user finishes snipping
-chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.type === "SNIP_DONE") {
-    const base64Image = msg.dataUrl.split(',')[1]; // use the CROPPED image
-
-    fetch("https://webworkai-production.up.railway.app/solve", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${pendingToken}`
-      },
-      body: JSON.stringify({
-        problem: pendingRequest.problem,
-        box_count: pendingRequest.box,
-        screenshot: base64Image
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      pendingSendResponse({ success: true, answer: data.answer });
-    })
-    .catch(err => {
-      pendingSendResponse({ success: false, error: err.message });
-    });
-  }
+    }
+    return true;
 });
