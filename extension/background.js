@@ -69,7 +69,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                             console.log(data.answer);
                             sendResponse({ success: true, answer: data.answer });
                         })
-                        .catch(error => {
+                        .catch(error => { 
                             sendResponse({ success: false, error: error.message });
                         });
                     };

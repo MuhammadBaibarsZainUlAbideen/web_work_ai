@@ -3,6 +3,7 @@ import { sending_Refresh_token } from './Refrsh_token.js'
 var solveBtn = document.getElementById("solve");
 var resultDiv = document.getElementById("result");
 var login = document.getElementById("LS");
+let redirect = document.getElementById("upgrade");
 let coordinates = null;
 
 solveBtn.onclick = async function() {

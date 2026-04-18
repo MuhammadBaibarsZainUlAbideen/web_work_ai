@@ -113,18 +113,18 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
 
     response1 = await client.chat.completions.create(
         messages=[
-            {
-                "role": "system",
-                "content": """Solve the following math problem. Format your response using Markdown:
-                - Use **bold** for Steps Headings,important things and final answers
-                - Use bullet points for steps
-                - YOU MUST wrap every math expression in $ or $$
-                - NEVER use unicode symbols like ∑ ∞ · — use LaTeX commands like \\sum \\infty \\cdot
-                - WRONG: ∑_n=1^∞n/n+2
-                - CORRECT: $$\\sum_{n=1}^{\\infty} \\frac{n}{n+2}$$
-                - Keep it clean
-                - Write the entire solution in a single paragraph or bullet point without breaking numbers across lines
-                - Numbers must appear only inside math delimiters and only once"""
+                {
+        "role": "system",
+        "content": """Solve the following math problem step by step. Format your response using Markdown:
+
+        - Use **bold** for step headings and final answers
+        - Use bullet points for steps
+        - Wrap ALL math expressions in $ (inline) or $$ (display/block)
+        - NEVER use unicode math symbols — use LaTeX only:
+        - WRONG: ∑, ∞, ·, ×
+        - CORRECT: \\sum, \\infty, \\cdot, \\times
+        - Each value or expression should appear naturally within the flow of explanation — do NOT repeat or restate a value just to satisfy formatting
+        - Do NOT rewrite numbers in plain text if they are already shown in a math expression"""
             },
         
             {
