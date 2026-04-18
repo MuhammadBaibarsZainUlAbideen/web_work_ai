@@ -116,15 +116,12 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
                 {
         "role": "system",
         "content": """Solve the following math problem step by step. Format your response using Markdown:
-
-        - Use **bold** for step headings and final answers
-        - Use bullet points for steps
-        - Wrap ALL math expressions in $ (inline) or $$ (display/block)
-        - NEVER use unicode math symbols — use LaTeX only:
-        - WRONG: ∑, ∞, ·, ×
-        - CORRECT: \\sum, \\infty, \\cdot, \\times
-        - Each value or expression should appear naturally within the flow of explanation — do NOT repeat or restate a value just to satisfy formatting
-        - Do NOT rewrite numbers in plain text if they are already shown in a math expression"""
+        CRITICAL RULES:
+        - Every number or math expression must appear EXACTLY ONCE
+        - Write it ONLY inside $ delimiters, never outside
+        - WRONG: "3 $3$ cm" or "$3$ $3$ cm" or "3$3$"
+        - CORRECT: "$3$ cm"
+        - Before finishing, check: does any number appear more than once? If yes, fix it."""
             },
         
             {
@@ -151,7 +148,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
     print("sd")
     
     answer = response1.choices[0].message.content
-    print(response1.usage)
+    print(answer)
     
     # answer = converter.latex_to_text(answer)
     await increment_tries(user_id)
