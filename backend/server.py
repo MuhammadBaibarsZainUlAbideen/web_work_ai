@@ -113,15 +113,18 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
 
     response1 = await client.chat.completions.create(
         messages=[
-                {
-        "role": "system",
-        "content": """Solve the following math problem step by step. Format your response using Markdown:
-        CRITICAL RULES:
-        - Every number or math expression must appear EXACTLY ONCE
-        - Write it ONLY inside $ delimiters, never outside
-        - WRONG: "3 $3$ cm" or "$3$ $3$ cm" or "3$3$"
-        - CORRECT: "$3$ cm"
-        - Before finishing, check: does any number appear more than once? If yes, fix it."""
+            {
+                "role": "system",
+                "content": """Solve the following math problem. Format your response using Markdown:
+                - Use **bold** for Steps Headings,important things and final answers
+                - Use bullet points for steps
+                - YOU MUST wrap every math expression in $ or $$
+                - NEVER use unicode symbols like ∑ ∞ · — use LaTeX commands like \\sum \\infty \\cdot
+                - WRONG: ∑_n=1^∞n/n+2
+                - CORRECT: $$\\sum_{n=1}^{\\infty} \\frac{n}{n+2}$$
+                - Keep it clean
+                - Write the entire solution in a single paragraph or bullet point without breaking numbers across lines
+                - Numbers must appear only inside math delimiters and only once"""
             },
         
             {
@@ -148,7 +151,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
     print("sd")
     
     answer = response1.choices[0].message.content
-    print(answer)
+    print(response1.usage)
     
     # answer = converter.latex_to_text(answer)
     await increment_tries(user_id)

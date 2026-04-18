@@ -1,5 +1,6 @@
 import { sending_Refresh_token } from './Refrsh_token.js'
 
+
 var solveBtn = document.getElementById("solve");
 var resultDiv = document.getElementById("result");
 var login = document.getElementById("LS");
@@ -51,13 +52,17 @@ solveBtn.onclick = async function() {
                     } else if (fullAnswer === "False") {
                         resultDiv.innerText = "Pay to Continue"
                     } else {
+                        console.log("RAW:", JSON.stringify(fullAnswer));
                         resultDiv.innerHTML = marked.parse(fullAnswer);
                         console.log(fullAnswer)
+                        console.log("HTML:", resultDiv.innerHTML);
                         renderMathInElement(resultDiv, {
                             delimiters: [
                                 { left: "$$", right: "$$", display: true },
                                 { left: "$", right: "$", display: false }
-                            ]
+                            ],
+                            output: 'html',
+                            throwOnError: false
                         });
                     }
                 }
