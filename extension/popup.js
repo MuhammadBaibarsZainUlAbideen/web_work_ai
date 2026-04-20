@@ -61,15 +61,17 @@ solveBtn.onclick = async function() {
                                 { left: "$$", right: "$$", display: true },
                                 { left: "$", right: "$", display: false }
                             ],
-                            output: 'html',
+                            
                             throwOnError: false
                         });
+                        resultDiv.scrollTop = 0;
                     }
                 }
             );
         });
     });
 };
+
 
 // extension.js
 
