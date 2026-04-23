@@ -37,9 +37,9 @@ def converting(token):
 
 
 @router.post("/checkout")
-def create_checkout(authorization: str = Header(None)):
+async def create_checkout(authorization: str = Header(None)):
     session_id = authorization.replace("Bearer ", "")
-    adding_column()
+    await adding_column()
     print(session_id)
     
     
