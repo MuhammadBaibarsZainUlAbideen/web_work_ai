@@ -99,8 +99,6 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
     expiry_data = await get_payment_expiry(user_id)
     if not expiry_data:
         return {"answer": "no_payment"}
-    
-    
     expiry_str = expiry_data[0]
     expiry = datetime.fromisoformat(expiry_str)
     if expiry < datetime.now(timezone.utc):
