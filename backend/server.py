@@ -163,7 +163,7 @@ async def get(data:Geti):
     global our_secret_key
     user_data = data.Auth
     await Inserting(user_data["id"],user_data["email"],user_data["name"],user_data["given_name"],user_data["family_name"],user_data["picture"])
-    await inserting_payment(user_data["id"],0,0)
+    await inserting_payment(user_data["id"],0,0,"NULL")
 
     Refresh_token = jwt.encode(
         {"user_id": "generatingrefreshtoken", "exp": datetime.utcnow() + timedelta(days=100)},

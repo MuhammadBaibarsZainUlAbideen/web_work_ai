@@ -23,6 +23,15 @@ async def Tables():
     await conn.close()
 
 
+
+async def adding_column():
+    conn = await aiosqlite.connect(file_name)
+    cursor = await conn.cursor()
+    await cursor.execute("""ALTER TABLE Payments ADD COLUMN Expiry TEXT""")
+    await conn.commit()
+    await conn.close()
+
+
 async def Inserting(id,email,name,given_name,family_name,image):
     conn = await aiosqlite.connect(file_name)
     cursor = await conn.cursor()
@@ -55,7 +64,7 @@ async def get_tries(user_id):
     
 
 
-async def inserting_payment(id, amount, status):
+async def inserting_payment(id, amount, status,expiry):
     conn = await aiosqlite.connect(file_name)
     cursor = await conn.cursor()
    
@@ -63,8 +72,8 @@ async def inserting_payment(id, amount, status):
     existing = await cursor.fetchone()
     if not existing:
         await cursor.execute("""INSERT INTO Payments 
-                       (user_id, amount, status)
-                       VALUES (?, ?, ?)""", (id, amount, status))
+                       (user_id, amount, status,Expiry)
+                       VALUES (?, ?, ?,?)""", (id, amount, status,expiry))
         await conn.commit()
         await conn.close()
 
@@ -78,16 +87,22 @@ async def get_payment():
     await conn.close()
     return data
 
-async def updating_payment(user_id):
+async def updating_payment(exp,user_id):
     conn = await aiosqlite.connect(file_name)
     cursor = await conn.cursor()
     await cursor.execute("""UPDATE Payments 
-                       SET status = 1
-                        WHERE user_id =?
-                   """,(user_id,))
+                       SET status = 1,Expiry = ?
+                        WHERE user_id =? and Expiry= 'NULL'
+                   """,(exp,user_id,))
     
     await conn.commit()
     await conn.close()
+# async def updating_expiry_date(exp,user_id):
+#     conn = await aiosqlite.connect(file_name)
+#     cursor = await conn.cursor()
+#     await cursor.execute("""UPDATE Payments SET Expiry = ? WHERE user_id=? and Expiry= 'NULL' """,(exp,user_id))
+#     await conn.commit()
+#     await conn.close()
 async def payment_status(user_id):
     conn = await aiosqlite.connect(file_name)
     cursor = await conn.cursor()

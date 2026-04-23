@@ -3,12 +3,13 @@ from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from fastapi import APIRouter
-from data_base import Get,updating_payment
+from data_base import Get,updating_payment,adding_column,inserting_payment,payment_status
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
 from session import sessions
 import os
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
 
 load_dotenv()
 router = APIRouter()
@@ -38,6 +39,7 @@ def converting(token):
 @router.post("/checkout")
 def create_checkout(authorization: str = Header(None)):
     session_id = authorization.replace("Bearer ", "")
+    adding_column()
     print(session_id)
     
     
@@ -82,8 +84,13 @@ async def webhook(request: Request):
             return {"status": "ok"}
 
         processed_sessions.add(session_id)
+        
+
         email = session["customer_details"]["email"]
-        await updating_payment(user_id)
+
+        expiry_date = datetime.utcnow() + timedelta(days=60)
+        expiry_str = expiry_date.isoformat()
+        await updating_payment(user_id,expiry_str)
         print(f"Paid: {email}")
         await Get()
 
