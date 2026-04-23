@@ -103,7 +103,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
         return {"answer": "no_payment"}
     
     expiry_str = expiry_data[0]
-    if expiry_str == "NULL":
+    if expiry_str == None:
         print("nahah")
         pass
     else:
