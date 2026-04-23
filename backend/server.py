@@ -97,12 +97,22 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
         print("as")
         return {"answer":"Login_again"}
     expiry_data = await get_payment_expiry(user_id)
+    print(expiry_data)
     if not expiry_data:
+        print("a")
         return {"answer": "no_payment"}
+    
     expiry_str = expiry_data[0]
-    expiry = datetime.fromisoformat(expiry_str)
-    if expiry < datetime.now(timezone.utc):
-        return {"answer": "Expired"}
+    if expiry_str == "NULL":
+        print("nahah")
+        pass
+    else:
+        print(expiry_str)
+        expiry = datetime.fromisoformat(expiry_str)
+        print(expiry)
+        if expiry < datetime.now(timezone.utc):
+            print("j")
+            return {"answer": "Expired"}
 
 
 
