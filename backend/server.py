@@ -5,7 +5,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from pylatexenc.latex2text import LatexNodes2Text
-from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status
+from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment_expiry
 from openai import AsyncAzureOpenAI
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
@@ -96,6 +96,18 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
     except:
         print("as")
         return {"answer":"Login_again"}
+    expiry_data = await get_payment_expiry(user_id)
+    if not expiry_data:
+        return {"answer": "no_payment"}
+    
+    
+    expiry_str = expiry_data[0]
+    expiry = datetime.fromisoformat(expiry_str)
+    if expiry < datetime.now(timezone.utc):
+        return {"answer": "Expired"}
+
+
+
 
     user = await getting_user(user_id)
     if not user:

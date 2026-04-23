@@ -9,7 +9,7 @@ from jwt import ExpiredSignatureError, InvalidTokenError
 from session import sessions
 import os
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 load_dotenv()
 router = APIRouter()
@@ -88,9 +88,9 @@ async def webhook(request: Request):
 
         email = session["customer_details"]["email"]
 
-        expiry_date = datetime.utcnow() + timedelta(days=60)
+        expiry_date = datetime.now(timezone.utc) + timedelta(minutes=2)
         expiry_str = expiry_date.isoformat()
-        await updating_payment(user_id,expiry_str)
+        await updating_payment(expiry_str,user_id)
         print(f"Paid: {email}")
         await Get()
 

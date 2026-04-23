@@ -36,6 +36,11 @@ solveBtn.onclick = async function() {
                     }
                     
                     let fullAnswer = apiResponse.answer;
+                    if (fullAnswer === "Expired"){
+                        resultDiv.innerText = "Please Get Premimum Again"
+                        return;
+                    }
+
                     if (fullAnswer === "Login_again" || apiResponse.success === 401) {
                         console.log("pp")
                         const reposne = await sending_Refresh_token(true)

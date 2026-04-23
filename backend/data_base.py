@@ -77,6 +77,15 @@ async def inserting_payment(id, amount, status,expiry):
         await conn.commit()
         await conn.close()
 
+
+async def get_payment_expiry(user_id):
+    conn = await aiosqlite.connect(file_name)
+    cursor = await conn.cursor()
+    await cursor.execute("SELECT Expiry FROM Payments WHERE user_id = ?",(user_id,))
+    expiry_data = await cursor.fetchone()
+    return expiry_data
+
+
 async def get_payment():
     conn = await aiosqlite.connect(file_name)
     cursor = await conn.cursor()
