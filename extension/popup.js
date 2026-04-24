@@ -81,38 +81,35 @@ solveBtn.onclick = async function() {
 // extension.js
 
 redirect.onclick = async () => {
-    chrome.storage.local.get(["Access_token"], async (result) => {
-        let Access_token = result.Access_token;
-        console.log(Access_token)
-        if (!Access_token) {
-            console.log("No access token found!");
+    const result = await chrome.storage.local.get(["Access_token"]);
+    let accessToken = result.Access_token;
+
+    if (!accessToken) {
+        console.log("No access token found!");
+        return;
+    }
+
+    let data = await callCheckout(accessToken);
+
+    if (data.Verify === "false" && data.reason === "token_expired") {
+        accessToken = await refreshAccessToken();
+        if (!accessToken) {
+            console.log("Plz login again");
             return;
         }
-        console.log("1")
 
-        let data = await callCheckout(Access_token)
-        console.log("2" + data)
+        data = await callCheckout(accessToken);
+    }
 
-        if (data.Verify == "false" && data.reason == "token_expired") {
-            console.log("3")
-            Access_token = await refreshAccessToken()
-            console.log("4")
-
-            if (Access_token) {
-                data = await callCheckout(Access_token);
-                console.log(data)
-            } else {
-                console.log("Plz login again")
-                return;
-            }
-        }
-        
+    if (data.plans_url) {
         chrome.tabs.create({ url: data.plans_url });
-    });
+    } else {
+        console.log("Invalid response from server");
+    }
 };
 
 async function callCheckout(token) {
-    const response = await fetch("https://webworkai-production.up.railway.app/create-session", {
+    const response = await fetch("http://127.0.0.1:8000/create-session", {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
     });
@@ -125,7 +122,7 @@ async function refreshAccessToken() {
     const result = await chrome.storage.local.get(["Refresh_token"])
     const Refresh_token = result.Refresh_token
     
-    const response = await fetch("https://webworkai-production.up.railway.app/refresh_token", {
+    const response = await fetch("http://127.0.0.1:8000/refresh_token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ Refresh_token: Refresh_token })

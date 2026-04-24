@@ -69,7 +69,7 @@ async def webhook(request: Request):
     sig = request.headers.get("stripe-signature")
 
     try:
-        event = stripe.Webhook.construct_event(payload, sig,"whsec_IC6zRYfFjxwAvVBUYg5sXn7bbEu6sa5P")
+        event = stripe.Webhook.construct_event(payload, sig,"whsec_dfcefc19ca3e7db7240e8579b99e47303212ec38521a834bcb62c8ef2fc7d416")
     except Exception:
         return {"error": "invalid"}
 
@@ -88,8 +88,9 @@ async def webhook(request: Request):
 
         email = session["customer_details"]["email"]
 
-        expiry_date = datetime.now(timezone.utc) + timedelta(minutes=2)
+        expiry_date = datetime.now(timezone.utc) + timedelta(days=60)
         expiry_str = expiry_date.isoformat()
+        print(expiry_str)
         await updating_payment(expiry_str,user_id)
         print(f"Paid: {email}")
         await Get()

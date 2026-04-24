@@ -1,8 +1,9 @@
 import aiosqlite
 
 import os
-file_name = os.getenv("DB_PATH", "mydatabase1.db")
+# file_name = os.getenv("DB_PATH", "mydatabase1.db")
 
+file_name = "mydatabase1.db"
 
 async def Tables():
     conn = await aiosqlite.connect(file_name)
@@ -31,6 +32,15 @@ async def adding_column():
     await conn.commit()
     await conn.close()
 
+async def get_payment():
+    conn = await aiosqlite.connect(file_name)
+    cursor = await conn.cursor()
+    await cursor.execute("""SELECT * FROM Payments""")
+    data = cursor.fetchall()
+    await conn.commit()
+    await conn.close()
+    return data
+    
 
 async def Inserting(id,email,name,given_name,family_name,image):
     conn = await aiosqlite.connect(file_name)
@@ -101,7 +111,7 @@ async def updating_payment(exp,user_id):
     cursor = await conn.cursor()
     await cursor.execute("""UPDATE Payments 
                        SET status = 1,Expiry = ?
-                        WHERE user_id =? and Expiry= 'NULL'
+                        WHERE user_id =?
                    """,(exp,user_id,))
     
     await conn.commit()

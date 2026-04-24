@@ -5,7 +5,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from pylatexenc.latex2text import LatexNodes2Text
-from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment_expiry
+from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment_expiry,adding_column,get_payment
 from openai import AsyncAzureOpenAI
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
@@ -78,6 +78,11 @@ class RefreshTokenRequest(BaseModel):
 async def solve(problem_data:Problem, authorization:str= Header(None)):
     #deleting_everything()
     global our_secret_key
+    print(await get_payment())
+    print(await Get())
+    #await deleting_everything()
+
+    #await adding_column()
 
 
     token = authorization.replace("Bearer ", "")
@@ -97,7 +102,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
         print("as")
         return {"answer":"Login_again"}
     expiry_data = await get_payment_expiry(user_id)
-    print(expiry_data)
+    print("Current time :",datetime.now(timezone.utc))
     if not expiry_data:
         print("a")
         return {"answer": "no_payment"}
@@ -107,10 +112,10 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
         print("nahah")
         pass
     else:
-        print(expiry_str)
         expiry = datetime.fromisoformat(expiry_str)
         print(expiry)
         if expiry < datetime.now(timezone.utc):
+
             print("j")
             return {"answer": "Expired"}
 
@@ -183,7 +188,7 @@ async def get(data:Geti):
     global our_secret_key
     user_data = data.Auth
     await Inserting(user_data["id"],user_data["email"],user_data["name"],user_data["given_name"],user_data["family_name"],user_data["picture"])
-    await inserting_payment(user_data["id"],0,0,"NULL")
+    await inserting_payment(user_data["id"],0,0,None)
 
     Refresh_token = jwt.encode(
         {"user_id": "generatingrefreshtoken", "exp": datetime.utcnow() + timedelta(days=100)},
@@ -217,6 +222,7 @@ async def validating(request:RefreshTokenRequest):
     print("yellow")
     if(request == None):
         return {"log":"true"}
+    print(request.Refresh_token)
     data = await extracting_data(request.Refresh_token)
     print(data)
     if len(data) == 0:
@@ -259,7 +265,7 @@ async def logout(authorization: str = Header(None)):
 async def admin():
     # deleting_everything()
     data = await Get_users()
-    #await print(Get())
+    await print(Get())
     print(data)
     #await print(get_payment())
     final = [
@@ -274,6 +280,7 @@ async def admin():
 @app.post("/create-session")
 async def create_session(authorization: str = Header(None)):
     token = authorization.replace("Bearer ", "")
+    print("yuio", token)
     try:
         payload = jwt.decode(token, our_secret_key, algorithms=["HS256"])
         user_id = payload["key"]
@@ -288,10 +295,12 @@ async def create_session(authorization: str = Header(None)):
         print(session_id) 
 
         
-        plans_url = f"https://webworkaipayment.netlify.app//stripe.html?session_id={session_id}"
+        plans_url = f"http://127.0.0.1:8001/stripe.html?session_id={session_id}"
+        print("1")
         return {"plans_url": plans_url}
 
     except ExpiredSignatureError:
+        print("2")
         return {"Verify": "false", "reason": "token_expired"}
     except InvalidTokenError:
         return {"Verify": "false", "reason": "invalid_token"}
