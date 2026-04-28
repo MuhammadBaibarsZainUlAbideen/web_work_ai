@@ -7,10 +7,10 @@ subElememt.addEventListener("click",async function(){
         access_token = await refreshAccessToken();
         if (access_token) {
             data = await sub_request(access_token); 
-            window.location.href = data.url;
+            chrome.tabs.create({ url: data.url });
         } 
     }else{
-        window.location.href = data.url;
+        chrome.tabs.create({ url: data.url });
     }
 
 
