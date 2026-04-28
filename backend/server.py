@@ -141,7 +141,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
 
 
 
-    if total_tries[0] >3 and status[0][0] != "active":
+    if total_tries[0] >3 and (status[0][0] != "active" or not status):
         return {"answer":"False"}
     # image = decoding_and_reducing(problem_data.screenshot)
     print("sdf")
