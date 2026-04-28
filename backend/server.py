@@ -130,11 +130,11 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
     status = await payment_status(user_id)
     print(status)
 
-    try:
-        status[0]
-    except:
-        print("123")
-        return {"answer": "False"}
+    # try:
+    #     status[0]
+    # except:
+    #     print("123")
+    #     return {"answer": "False"}
 
 
     # if not status:
