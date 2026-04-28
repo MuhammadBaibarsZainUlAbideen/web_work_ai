@@ -107,6 +107,22 @@ async def payment_status(user_id):
     return data
 
 
+async def get_subscrption(user_id):
+    conn = await aiosqlite.connect(file_name)
+    cursor = await conn.cursor()
+
+    await cursor.execute("""
+        SELECT stripe_customer_id
+        FROM Payments
+        WHERE user_id = ?
+        LIMIT 1
+    """, (user_id,))
+
+    row = await cursor.fetchone()
+    await conn.close()
+    return row
+
+
 # async def adding_column():
 #     conn = await aiosqlite.connect(file_name)
 #     cursor = await conn.cursor()

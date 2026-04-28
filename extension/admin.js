@@ -1,7 +1,7 @@
 async function loadAdminData() {
     try {
         
-        const response = await fetch("http://127.0.0.1:8000/admin");
+        const response = await fetch("https://webworkai-production.up.railway.app/admin");
         const result = await response.json();
 
         const users = result.data;

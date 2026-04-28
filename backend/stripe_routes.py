@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from fastapi import APIRouter
-from data_base import Get,inserting_payment,payment_status,updating_payment_status,is_event_processed, store_stripe_event
+from data_base import Get,inserting_payment,payment_status,updating_payment_status,is_event_processed, store_stripe_event,get_subscrption
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
 from session import sessions
@@ -162,3 +162,25 @@ async def webhook(request: Request):
     return {"status": "ok"}
 
 
+@router.post("/billing-portal")
+async def billing_portal(authorization: str = Header(None)):
+    token = authorization.replace("Bearer ", "")
+    try:
+        payload = jwt.decode(token, our_secret_key, algorithms=["HS256"])
+    except ExpiredSignatureError:
+        return {"logout": "false", "reason": "token_expired"}
+    user_id = payload["key"]
+    row = await get_subscrption(user_id)
+
+    if not row:
+        return {"error": "no_customer_found"}
+
+    customer_id = row[0]
+
+    session = stripe.billing_portal.Session.create(
+        customer=customer_id,
+        return_url="https://your-frontend.com/dashboard"
+    )
+    print(session.url)
+
+    return {"url": session.url}
