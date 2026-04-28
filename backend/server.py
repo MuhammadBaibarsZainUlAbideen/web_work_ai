@@ -130,9 +130,15 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
     status = await payment_status(user_id)
     print(status)
 
-    if not status:
+    try:
+        status[0]
+    except:
         print("123")
         return {"answer": "False"}
+
+
+    # if not status:
+
 
 
     if total_tries[0] >3 and status[0][0] != "active":
