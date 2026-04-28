@@ -69,7 +69,7 @@ async def webhook(request: Request):
     sig = request.headers.get("stripe-signature")
 
     try:
-        event = stripe.Webhook.construct_event(payload, sig,"whsec_dfcefc19ca3e7db7240e8579b99e47303212ec38521a834bcb62c8ef2fc7d416")
+        event = stripe.Webhook.construct_event(payload, sig,"whsec_IC6zRYfFjxwAvVBUYg5sXn7bbEu6sa5P")
     except Exception:
         return {"error": "invalid"}
     data = event["data"]["object"]
@@ -179,7 +179,7 @@ async def billing_portal(authorization: str = Header(None)):
 
     session = stripe.billing_portal.Session.create(
         customer=customer_id,
-        return_url="https://your-frontend.com/dashboard"
+        return_url="https://webworkaipayment.netlify.app//dashboard"
     )
     print(session.url)
 
