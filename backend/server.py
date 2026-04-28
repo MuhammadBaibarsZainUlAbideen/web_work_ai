@@ -5,7 +5,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from pylatexenc.latex2text import LatexNodes2Text
-from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment_expiry,adding_column,get_payment
+from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment
 from openai import AsyncAzureOpenAI
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
@@ -76,10 +76,10 @@ class RefreshTokenRequest(BaseModel):
 
 @app.post("/solve")
 async def solve(problem_data:Problem, authorization:str= Header(None)):
-    #deleting_everything()
+    
     global our_secret_key
     print(await get_payment())
-    print(await Get())
+    print("--->",await Get())
     #await deleting_everything()
 
     #await adding_column()
@@ -98,26 +98,26 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
         user_id = payload["key"]
         print("ujn")
 
-    except:
+    except ExpiredSignatureError:
         print("as")
         return {"answer":"Login_again"}
-    expiry_data = await get_payment_expiry(user_id)
-    print("Current time :",datetime.now(timezone.utc))
-    if not expiry_data:
-        print("a")
-        return {"answer": "no_payment"}
+    # expiry_data = await get_payment_expiry(user_id)
+    # print("Current time :",datetime.now(timezone.utc))
+    # if not expiry_data:
+    #     print("a")
+    #     return {"answer": "no_payment"}
     
-    expiry_str = expiry_data[0]
-    if expiry_str == None:
-        print("nahah")
-        pass
-    else:
-        expiry = datetime.fromisoformat(expiry_str)
-        print(expiry)
-        if expiry < datetime.now(timezone.utc):
+    # expiry_str = expiry_data[0]
+    # if expiry_str == None:
+    #     print("nahah")
+    #     pass
+    # else:
+    #     expiry = datetime.fromisoformat(expiry_str)
+    #     print(expiry)
+    #     if expiry < datetime.now(timezone.utc):
 
-            print("j")
-            return {"answer": "Expired"}
+    #         print("j")
+    #         return {"answer": "Expired"}
 
 
 
@@ -130,8 +130,12 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
     status = await payment_status(user_id)
     print(status)
 
+    if not status:
+        print("123")
+        return {"answer": "False"}
 
-    if total_tries[0] >3 and status[0] == 0:
+
+    if total_tries[0] >3 and status[0][0] != "active":
         return {"answer":"False"}
     # image = decoding_and_reducing(problem_data.screenshot)
     print("sdf")
@@ -188,7 +192,7 @@ async def get(data:Geti):
     global our_secret_key
     user_data = data.Auth
     await Inserting(user_data["id"],user_data["email"],user_data["name"],user_data["given_name"],user_data["family_name"],user_data["picture"])
-    await inserting_payment(user_data["id"],0,0,None)
+    # await inserting_payment(user_data["id"],0,0,None)
 
     Refresh_token = jwt.encode(
         {"user_id": "generatingrefreshtoken", "exp": datetime.utcnow() + timedelta(days=100)},
@@ -214,7 +218,7 @@ async def get(data:Geti):
     
     await refresh_token(user_data["id"],Refresh_token,expiration_date,0)
    
-    return {"Acess_token":Access_token,"Refresh_token":Refresh_token}
+    return {"Access_token":Access_token,"Refresh_token":Refresh_token}
 
 @app.post("/refresh_token")
 async def validating(request:RefreshTokenRequest):
@@ -265,7 +269,7 @@ async def logout(authorization: str = Header(None)):
 async def admin():
     # deleting_everything()
     data = await Get_users()
-    await print(Get())
+    print(await Get())
     print(data)
     #await print(get_payment())
     final = [

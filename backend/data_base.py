@@ -1,5 +1,5 @@
 import aiosqlite
-
+from datetime import datetime, timezone,timedelta
 import os
 # file_name = os.getenv("DB_PATH", "mydatabase1.db")
 
@@ -13,24 +13,106 @@ async def Tables():
     
     await cursor.execute("""CREATE TABLE IF NOT EXISTS Refresh_token
        (token_id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT,refresh_token TEXT, expires_at TEXT, revoked INTEGER, FOREIGN KEY (user_id) REFERENCES Authentication(id) )""")
-    await cursor.execute("""CREATE TABLE IF NOT EXISTS Payments
-                   (payment_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                    user_id TEXT, 
-                    amount REAL, 
-                    status INTEGER, -- 'paid', 'pending', 'refunded'
-                    
-                    FOREIGN KEY (user_id) REFERENCES Authentication(id))""")
+    await cursor.execute("""CREATE TABLE IF NOT EXISTS Payments (
+                            payment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            user_id TEXT,
+                            stripe_customer_id TEXT,
+                            stripe_subscription_id TEXT,
+                            status TEXT,  
+                            created_at TEXT,
+                            FOREIGN KEY (user_id) REFERENCES Authentication(id))""")
+    await cursor.execute("""CREATE TABLE IF NOT EXISTS StripeEvents (
+                                    event_id TEXT PRIMARY KEY,
+                                    created_at TEXT
+                                );""")
     await conn.commit()
     await conn.close()
 
-
-
-async def adding_column():
+    
+async def is_event_processed(event_id: str):
     conn = await aiosqlite.connect(file_name)
     cursor = await conn.cursor()
-    await cursor.execute("""ALTER TABLE Payments ADD COLUMN Expiry TEXT""")
+
+    await cursor.execute(
+        "SELECT event_id FROM StripeEvents WHERE event_id = ?",
+        (event_id,)
+    )
+
+    result = await cursor.fetchone()
+
+    await conn.close()
+
+    return result is not None
+async def store_stripe_event(event_id: str):
+    conn = await aiosqlite.connect(file_name)
+    cursor = await conn.cursor()
+
+    await cursor.execute(
+        "INSERT OR IGNORE INTO StripeEvents (event_id, created_at) VALUES (?, ?)",
+        (event_id, datetime.now(timezone.utc).isoformat())
+    )
+
     await conn.commit()
     await conn.close()
+
+
+async def inserting_payment(user_id, customer_id, subscription_id, status):
+    conn = await aiosqlite.connect(file_name)
+    cursor = await conn.cursor()
+
+    await cursor.execute("""
+        SELECT payment_id FROM Payments WHERE user_id = ?
+    """, (user_id,))
+
+    existing = await cursor.fetchone()
+
+    if existing:
+        await cursor.execute("""
+            UPDATE Payments
+            SET stripe_customer_id = ?,
+                stripe_subscription_id = ?,
+                status = ?,
+                created_at = ?
+            WHERE user_id = ?
+        """, (customer_id, subscription_id, status,
+              datetime.now(timezone.utc).isoformat(), user_id))
+    else:
+        await cursor.execute("""
+            INSERT INTO Payments (user_id, stripe_customer_id, stripe_subscription_id, status, created_at)
+            VALUES (?, ?, ?, ?, ?)
+        """, (user_id, customer_id, subscription_id, status,
+              datetime.now(timezone.utc).isoformat()))
+
+    await conn.commit()
+    await conn.close()
+
+
+async def updating_payment_status(subscription_id, status):
+    conn = await aiosqlite.connect(file_name)
+    cursor = await conn.cursor()
+    await cursor.execute("""
+        UPDATE Payments
+        SET status = ?
+        WHERE stripe_subscription_id = ?
+    """, (status, subscription_id))
+    await conn.commit()
+    await conn.close()
+
+async def payment_status(user_id):
+    conn = await aiosqlite.connect(file_name)
+    cursor = await conn.cursor()
+    await cursor.execute("""SELECT Status FROM Payments WHERE user_id=?""",(user_id,))
+    data = await cursor.fetchall()
+    await conn.close()
+    return data
+
+
+# async def adding_column():
+#     conn = await aiosqlite.connect(file_name)
+#     cursor = await conn.cursor()
+#     await cursor.execute("""ALTER TABLE Payments ADD COLUMN Expiry TEXT""")
+#     await conn.commit()
+#     await conn.close()
 
 async def get_payment():
     conn = await aiosqlite.connect(file_name)
@@ -74,61 +156,55 @@ async def get_tries(user_id):
     
 
 
-async def inserting_payment(id, amount, status,expiry):
-    conn = await aiosqlite.connect(file_name)
-    cursor = await conn.cursor()
+# async def inserting_payment(id, amount, status,expiry):
+#     conn = await aiosqlite.connect(file_name)
+#     cursor = await conn.cursor()
    
-    await cursor.execute("SELECT payment_id FROM Payments WHERE user_id = ?", (id,))
-    existing = await cursor.fetchone()
-    if not existing:
-        await cursor.execute("""INSERT INTO Payments 
-                       (user_id, amount, status,Expiry)
-                       VALUES (?, ?, ?,?)""", (id, amount, status,expiry))
-        await conn.commit()
-        await conn.close()
+#     await cursor.execute("SELECT payment_id FROM Payments WHERE user_id = ?", (id,))
+#     existing = await cursor.fetchone()
+#     if not existing:
+#         await cursor.execute("""INSERT INTO Payments 
+#                        (user_id, amount, status,Expiry)
+#                        VALUES (?, ?, ?,?)""", (id, amount, status,expiry))
+#         await conn.commit()
+#         await conn.close()
 
 
-async def get_payment_expiry(user_id):
-    conn = await aiosqlite.connect(file_name)
-    cursor = await conn.cursor()
-    await cursor.execute("SELECT Expiry FROM Payments WHERE user_id = ?",(user_id,))
-    expiry_data = await cursor.fetchone()
-    return expiry_data
+# async def get_payment_expiry(user_id):
+#     conn = await aiosqlite.connect(file_name)
+#     cursor = await conn.cursor()
+#     await cursor.execute("SELECT Expiry FROM Payments WHERE user_id = ?",(user_id,))
+#     expiry_data = await cursor.fetchone()
+#     return expiry_data
 
 
-async def get_payment():
-    conn = await aiosqlite.connect(file_name)
-    cursor = await conn.cursor()
+# async def get_payment():
+#     conn = await aiosqlite.connect(file_name)
+#     cursor = await conn.cursor()
 
-    await cursor.execute("""SELECT * FROM Payments""")
-    data = await cursor.fetchall()   
+#     await cursor.execute("""SELECT * FROM Payments""")
+#     data = await cursor.fetchall()   
 
-    await conn.close()
-    return data
+#     await conn.close()
+#     return data
 
-async def updating_payment(exp,user_id):
-    conn = await aiosqlite.connect(file_name)
-    cursor = await conn.cursor()
-    await cursor.execute("""UPDATE Payments 
-                       SET status = 1,Expiry = ?
-                        WHERE user_id =?
-                   """,(exp,user_id,))
+# async def updating_payment(exp,user_id):
+#     conn = await aiosqlite.connect(file_name)
+#     cursor = await conn.cursor()
+#     await cursor.execute("""UPDATE Payments 
+#                        SET status = 1,Expiry = ?
+#                         WHERE user_id =?
+#                    """,(exp,user_id,))
     
-    await conn.commit()
-    await conn.close()
+#     await conn.commit()
+#     await conn.close()
 # async def updating_expiry_date(exp,user_id):
 #     conn = await aiosqlite.connect(file_name)
 #     cursor = await conn.cursor()
 #     await cursor.execute("""UPDATE Payments SET Expiry = ? WHERE user_id=? and Expiry= 'NULL' """,(exp,user_id))
 #     await conn.commit()
 #     await conn.close()
-async def payment_status(user_id):
-    conn = await aiosqlite.connect(file_name)
-    cursor = await conn.cursor()
-    await cursor.execute("""SELECT Status FROM Payments WHERE user_id=?""",(user_id,))
-    data = await cursor.fetchone()
-    await conn.close()
-    return data
+
 
 async def refresh_token(user_id, refresh_token, expiry, revoked):
     conn = await aiosqlite.connect(file_name)
@@ -173,6 +249,7 @@ async def deleting_everything():
     await cursor.execute("""DELETE FROM Refresh_token""")
     await cursor.execute("""DELETE FROM Authentication""")
     await cursor.execute("""DELETE FROM Payments""")
+    await cursor.execute("""DELETE FROM StripeEvents""")
     await conn.commit()
     await conn.close()
 
@@ -188,12 +265,12 @@ async def getting_user(id):
 async def Get():
     conn = await aiosqlite.connect(file_name)
     cursor = await conn.cursor()
-    await cursor.execute("SELECT * FROM Refresh_token")
+    await cursor.execute("SELECT * FROM StripeEvents")
     data = await cursor.fetchall()
     for rows in data:
         print(rows)
     await conn.close()
-    
+    return data
 
 async def Get_users():
     conn = await aiosqlite.connect(file_name)

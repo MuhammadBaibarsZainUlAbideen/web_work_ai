@@ -4,15 +4,18 @@ export async function sending_Refresh_token(message){
     if(message){
         console.log("as")
         const result = await chrome.storage.local.get(["Refresh_token"])
+        console.log("Refrsh_token ->", result)
         const Refresh_token = result.Refresh_token
+        console.log(Refresh_token)
         if(!Refresh_token){
+             console.log("2qa")
 
             return "No"
         }
 
 
 
-        
+        console.log("2qa")
 
         const sending_refresh_token = await fetch("http://127.0.0.1:8000/refresh_token",{
             method:"POST",

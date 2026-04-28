@@ -4,7 +4,7 @@ var approveBtn = document.getElementById("approve");
 var resultDiv = document.getElementById("result");
 
 async function storingLocal(token){
-    const Access_token = token['Acess_token']
+    const Access_token = token['Access_token']
     const Refresh_token = token['Refresh_token']
     console.log(Access_token)
     console.log(Refresh_token)

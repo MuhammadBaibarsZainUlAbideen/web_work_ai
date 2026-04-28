@@ -22,28 +22,37 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
                     // Convert base64 → binary → blob
                     const byteString = atob(base64Image);
-                    const byteArray = new Uint8Array(byteString.length);
+                   const byteArray = new Uint8Array(byteString.length);
                     for (let i = 0; i < byteString.length; i++) {
                         byteArray[i] = byteString.charCodeAt(i);
-                    }
-                    const blob = new Blob([byteArray], { type: "image/png" });
+                    } 
+                    let blob;
+                    let canvas;
+                    try{
+                        blob = new Blob([byteArray], { type: "image/png" });
 
-                    // Use createImageBitmap — works in service workers
-                    const bitmap = await createImageBitmap(blob);
-                    const cropRegion = {
-                        x: parseInt(request.tcoordinates.x),
-                        y: parseInt(request.tcoordinates.y),
-                        width: parseInt(request.tcoordinates.width),
-                        height: parseInt(request.tcoordinates.height)
-                    };
-                    // OffscreenCanvas works in service workers
-                    const canvas = new OffscreenCanvas(cropRegion.width, cropRegion.height);
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(
-                        bitmap,
-                        cropRegion.x, cropRegion.y, cropRegion.width, cropRegion.height,
-                        0, 0, cropRegion.width, cropRegion.height
-                    );
+                    
+                    
+
+                    
+                        const bitmap = await createImageBitmap(blob);
+                        const cropRegion = {
+                            x: parseInt(request.tcoordinates.x),
+                            y: parseInt(request.tcoordinates.y),
+                            width: parseInt(request.tcoordinates.width),
+                            height: parseInt(request.tcoordinates.height)
+                        };
+                        // OffscreenCanvas works in service workers
+                        canvas = new OffscreenCanvas(cropRegion.width, cropRegion.height);
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(
+                            bitmap,
+                            cropRegion.x, cropRegion.y, cropRegion.width, cropRegion.height,
+                            0, 0, cropRegion.width, cropRegion.height
+                        );
+                    }catch(error){
+                        console.log(error)
+                    }
 
                     // Convert back to base64
                     const croppedBlob = await canvas.convertToBlob({ type: "image/png" });

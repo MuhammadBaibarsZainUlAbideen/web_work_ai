@@ -13,7 +13,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "WebWork AI Solver"
+    "default_title": "Simple Solver"
   },
   "side_panel": {
     "default_path":"popup.html"
