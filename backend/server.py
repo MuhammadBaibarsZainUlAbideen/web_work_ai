@@ -209,7 +209,7 @@ async def get(data:Geti):
         algorithm="HS256"
     )
     Access_token = jwt.encode(
-        {"key": user_data["id"], "exp": datetime.utcnow() + timedelta(minutes=10)},
+        {"key": user_data["id"], "exp": datetime.utcnow() + timedelta(seconds=10)},
         our_secret_key,
         algorithm="HS256"
     )
@@ -245,7 +245,7 @@ async def validating(request:RefreshTokenRequest):
     else:
         print("yellow2")
         Access_token = jwt.encode(
-            {"key": data[0][1], "exp": datetime.utcnow() + timedelta(minutes=10)},
+            {"key": data[0][1], "exp": datetime.utcnow() + timedelta(seconds=10)},
             our_secret_key,
             algorithm="HS256"
         )
