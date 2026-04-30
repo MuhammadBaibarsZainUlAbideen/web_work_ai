@@ -49,11 +49,32 @@ solveBtn.onclick = async function() {
                             login.style.display = "block";
                             resultDiv.innerText = "Please Login again"
                         } else {
-                            solveBtn.onclick()
-                            solveBtn.disabled = false
-                            approveBtn.disabled = false
-                            return;
+                            chrome.runtime.sendMessage(
+                                { action: "solveProblem", tcoordinates: coordinates },
+                                async function(apiResponse) {
+                                    
+                                    if (!apiResponse) {
+                                        resultDiv.innerText = "ERROR: No API response";
+                                        solveBtn.disabled = false;
+                                        return;
+                                    }
+                                    
+                                    if (apiResponse.success === false) {
+                                        resultDiv.innerText = "ERROR: " + apiResponse.error;
+                                        solveBtn.disabled = false;
+                                        return;
+                                    }
+                                    fullAnswer = apiResponse.answer;
+                                }
+                                
+                            )
+                        
+                            // solveBtn.onclick()
+                            // solveBtn.disabled = false
+                            // approveBtn.disabled = false
+                            // return;
                         }
+                        
                     } else if (fullAnswer === "False") {
                         resultDiv.innerText = "Pay to Continue"
                     } else {
