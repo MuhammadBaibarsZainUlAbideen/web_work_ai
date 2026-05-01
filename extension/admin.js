@@ -1,7 +1,7 @@
 async function loadAdminData() {
     try {
         
-        const response = await fetch("https://webworkaipayment.netlify.app//admin");
+        const response = await fetch("https://webworkai-production.up.railway.app/admin");
         const result = await response.json();
 
         const users = result.data;

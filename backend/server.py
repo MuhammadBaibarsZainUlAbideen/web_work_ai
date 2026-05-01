@@ -153,7 +153,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
         messages=[
             {
                 "role": "system",
-                "content": """Solve the following math problem. Format your response using Markdown:
+                "content": """Solve the following math problem, or any subject text question given to you. Format your response using Markdown:
                 - Use **bold** for Steps Headings,important things and final answers
                 - Use bullet points for steps
                 - YOU MUST wrap every math expression in $ or $$
