@@ -1,9 +1,9 @@
 import aiosqlite
 from datetime import datetime, timezone,timedelta
 import os
-# file_name = os.getenv("DB_PATH", "mydatabase1.db")
+file_name = os.getenv("DB_PATH", "mydatabase1.db")
 
-file_name = "mydatabase1.db"
+# file_name = "mydatabase1.db"
 
 async def Tables():
     conn = await aiosqlite.connect(file_name)
