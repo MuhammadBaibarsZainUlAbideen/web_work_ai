@@ -6,14 +6,15 @@ var resultDiv = document.getElementById("result");
 var login = document.getElementById("LS");
 let redirect = document.getElementById("upgrade");
 let coordinates = null;
-
+let fullAnswer = null
 solveBtn.onclick = async function() {
-    resultDiv.innerText = "Please Wait..."
+    resultDiv.innerText = "Please Select the desired area..."
     
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, { action: "startSnip" }, async (response) => {
             if (!response || response.coords === null) {
-                resultDiv.innerText = "Failed to capture coordinates"
+                resultDiv.innerText = "Someting Went Wrong, Refreshing your page, Try again"
+                chrome.tabs.reload(tabs[0].id);
                 return;
             }
             
@@ -24,20 +25,20 @@ solveBtn.onclick = async function() {
                 async function(apiResponse) {
                     
                     if (!apiResponse) {
-                        resultDiv.innerText = "ERROR: No API response";
+                        resultDiv.innerText = "ERROR: Someting Went Wrong, Contact Support";
                         solveBtn.disabled = false;
                         return;
                     }
                     
                     if (apiResponse.success === false) {
-                        resultDiv.innerText = "ERROR: " + apiResponse.error;
+                        resultDiv.innerText = "ERROR: Someting Went Wrong, Contact Support";
                         solveBtn.disabled = false;
                         return;
                     }
                     
-                    let fullAnswer = apiResponse.answer;
-                    if (fullAnswer === "Expired"){
-                        resultDiv.innerText = "Please Get Premimum Again"
+                    fullAnswer = apiResponse.answer;
+                    if (fullAnswer === "False"){
+                        resultDiv.innerText = "Pay to Continue"
                         return;
                     }
 
@@ -65,6 +66,24 @@ solveBtn.onclick = async function() {
                                         return;
                                     }
                                     fullAnswer = apiResponse.answer;
+                                    if (fullAnswer === "False") {
+                                        resultDiv.innerText = "Pay to Continue"
+                                    }else {
+                                            console.log("RAW:", JSON.stringify(fullAnswer));
+                                            resultDiv.innerHTML = marked.parse(fullAnswer);
+                                            console.log(fullAnswer)
+                                            console.log("HTML:", resultDiv.innerHTML);
+                                            renderMathInElement(resultDiv, {
+                                                delimiters: [
+                                                    { left: "$$", right: "$$", display: true },
+                                                    { left: "$", right: "$", display: false }
+                                                ],
+                                                
+                                                throwOnError: false
+                                            });
+                                            resultDiv.scrollTop = 0;
+                                        }   
+                                    return;
                                 }
                                 
                             )
@@ -92,6 +111,7 @@ solveBtn.onclick = async function() {
                         });
                         resultDiv.scrollTop = 0;
                     }
+                    return;
                 }
             );
         });

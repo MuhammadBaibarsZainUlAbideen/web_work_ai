@@ -1,8 +1,10 @@
+var login1 = document.getElementById("LS");
+
 async function refreshAccessToken() {
     const result = await chrome.storage.local.get(["Refresh_token"]);
     const refresh_token = result.Refresh_token;
 
-    const response = await fetch("https://webworkai-production.up.railway.app/solve/refresh_token", {
+    const response = await fetch("https://webworkai-production.up.railway.app/refresh_token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ Refresh_token: refresh_token })
@@ -53,6 +55,19 @@ document.getElementById("Logout").addEventListener('click', async function () {
 
     if (data.logout === "true") {
         chrome.storage.local.remove(["Access_token", "Refresh_token"]);
+        showToast("Logged out successfully");
         console.log("Logged out successfully.");
+        login1.style.display = "block";
     }
 });
+
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.innerText = message;
+
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 2000);
+}

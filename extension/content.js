@@ -17,8 +17,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const selectionBox = document.createElement("div")
         selectionBox.style.cssText = `
             position: fixed;
-            border: 2px solid #00aaff;
-            background: rgba(0,170,255,0.1);
+            border: 2px solid #ffffff;
+            background: rgba(0, 170, 255, 0.25);
+            box-shadow: 0 0 0 1px rgba(0, 170, 255, 0.6),
+                        0 0 10px rgba(0, 170, 255, 0.5);
             pointer-events: none;
             z-index: 9999999;
         `
