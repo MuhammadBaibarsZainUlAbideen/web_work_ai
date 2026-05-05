@@ -23,15 +23,26 @@
             
             <button id="gearBtn"><i class="fas fa-gear"></i></button>
         </div>
+        <div class="buttons">
         
-        <button id="solve">Solve Now</button>
-        <button id="LS" style="display:none">LoginIn/SignUp</button>
-        <!-- <button id="Logout" >Logout</button> -->
-        <button id="upgrade" i class="fas fa-lock-open">Go Premimum</button>
-        <!-- <button id="sub">Manage Subscrption</button> -->
+                <button id="solve">Solve Now</button>
+                <button id="LS" style="display:none">LoginIn/SignUp</button>
+                <!-- <button id="Logout" >Logout</button> -->
+                <button id="upgrade" i class="fas fa-lock-open">Go Premimum</button>
+                <!-- <button id="sub">Manage Subscrption</button> -->
+        </div>
         
 
         <div id="result"></div>
+
+
+        <div id="chatBox" class="chat-box"></div>
+
+        <div class="chat-input-area">
+            <input id="chatInput" type="text" placeholder="Ask something..." />
+            <button id="sendBtn">Send</button>
+        </div>
+
         
         
     </div>
@@ -51,11 +62,14 @@
 
 
     <script type="module" src="popup.js"></script>
+    <script type="module" src="send_message.js"></script>
     <script src="auto-render.min.js"></script>
     <script src="Auth.js"></script>
     <script src="logout.js"></script>
     <script src="manage_subscrption.js"></script>
     <script src="dropdown.js"></script>
+    
+     
 
 
 </body>

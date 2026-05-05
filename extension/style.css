@@ -3,82 +3,133 @@ body {
     font-family: 'Inter', sans-serif;
     padding: 0;
     margin: 0;
-}
-.container {
-    padding: 15px;
-}
-h2 {
-    margin: 0 0 15px 0;
-    font-size: 16px;
+    height: 600px; /* important for extension popup layout */
 }
 
-button {
-    padding: 10px 15px;
-    margin: 5px 5px 5px 0;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
+.container {
+    padding: 15px;
+    height: 100%;
+    display: flex;
+    flex-direction: column; /* main fix */
 }
-#solve {
-    background: green;
-    color: white;
-    border-radius: 8px;
-    
+
+/* TOP BAR */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
-#approve {
-    background: blue;
-    color: white;
-}
-#LS {
-    background: violet;
-    color: white;
-}
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
+
+/* BUTTONS */
+/* .buttons {
+    display: flex;
+    flex-wrap: wrap;
+} */
+
+/* RESULT AREA */
 #result {
     background: linear-gradient(135deg, var(--bg-light) 0%, #faf5ff 100%);
     padding: 20px;
     border: 2px solid var(--border-color);
     border-left: 5px solid var(--primary);
     border-radius: 10px;
-    min-height: 0px;
     max-height: 450px;
     overflow-y: auto;
     margin-top: 20px;
     font-size: 20px;
-    height: auto;
-    word-wrap: break-word;
     color: var(--text-dark);
     line-height: 1.7;
     box-shadow: var(--shadow-sm);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
-    scroll-behavior: smooth;
-    overflow-anchor: none;
-    contain: content;
-
 }
 
-.contianer{
+/* CHAT BOX */
+.chat-box {
+    flex: 1;                 /* takes remaining space */
+    overflow-y: auto;
     display: flex;
+    flex-direction: column;
+    /* margin-top: 10px; */
 }
-.top-bar{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
 
+/* CHAT INPUT AREA (FIXED) */
+.chat-input-area {
+    display: flex;
+    gap: 5px;
+    padding: 8px;
+    flex-shrink: 0;
+    margin-top: auto; /* pushes input to bottom */
 }
-#gearBtn{
+
+/* INPUT */
+#chatInput {
+    flex: 1;
+    padding: 8px;
+}
+
+/* SEND BUTTON */
+#sendBtn {
+    padding: 8px 12px;
+}
+
+/* MESSAGES */
+.message {
+    margin: 8px 0;
+    padding: 8px;
+    border-radius: 6px;
+    max-width: 90%;
+}
+
+.user {
+    background: #d1e7ff;
+    align-self: flex-end;
+    text-align: right;
+    font-size: 16px;
+}
+
+.ai {
+    background: #eee;
+    align-self: flex-start;
+    font-size: 16px;
+}
+button {
+    padding: 10px 15px;
+    margin: 5px 5px 5px 0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* specific buttons */
+#solve {
+    background: green;
+    color: white;
+    border-radius: 8px;
+}
+
+#LS {
+    background: violet;
+    color: white;
+}
+
+#upgrade {
+    background: #ff9800;
+    color: white;
+}
+
+#gearBtn {
     background: none;
-    margin-left: 10px;
 }
-.Title {
-    grid-column: 2;
-    justify-self: center;
+
+/* disabled state */
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
+
+/* SETTINGS DROPDOWN */
 .settings-dropdown {
     display: none;
     position: absolute;
@@ -105,14 +156,12 @@ button:disabled {
     background: #f2f2f2;
 }
 
-/* Make sure gear button is positioned properly */
-#gearBtn {
-    position: relative;
-}
 #Logout {
     color: red;
     font-weight: 600;
 }
+
+/* TOAST */
 .toast {
     position: fixed;
     bottom: 20px;
@@ -123,7 +172,6 @@ button:disabled {
     padding: 10px 16px;
     border-radius: 10px;
     font-size: 13px;
-    font-family: 'Inter', sans-serif;
     opacity: 0;
     pointer-events: none;
     transition: all 0.3s ease;

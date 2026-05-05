@@ -1,5 +1,5 @@
 import { sending_Refresh_token } from './Refrsh_token.js'
-
+import { addMessage } from './send_message.js';
 
 var solveBtn = document.getElementById("solve");
 var resultDiv = document.getElementById("result");
@@ -8,7 +8,7 @@ let redirect = document.getElementById("upgrade");
 let coordinates = null;
 let fullAnswer = null
 solveBtn.onclick = async function() {
-    resultDiv.innerText = "Please Select the desired area..."
+    resultDiv.innerText = ""
     
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, { action: "startSnip" }, async (response) => {
@@ -70,45 +70,23 @@ solveBtn.onclick = async function() {
                                         resultDiv.innerText = "Pay to Continue"
                                     }else {
                                             console.log("RAW:", JSON.stringify(fullAnswer));
-                                            resultDiv.innerHTML = marked.parse(fullAnswer);
-                                            console.log(fullAnswer)
-                                            console.log("HTML:", resultDiv.innerHTML);
-                                            renderMathInElement(resultDiv, {
-                                                delimiters: [
-                                                    { left: "$$", right: "$$", display: true },
-                                                    { left: "$", right: "$", display: false }
-                                                ],
-                                                
-                                                throwOnError: false
-                                            });
+                                            await addMessage("ai",fullAnswer)
                                             resultDiv.scrollTop = 0;
                                         }   
                                     return;
                                 }
                                 
                             )
-                        
-                            // solveBtn.onclick()
-                            // solveBtn.disabled = false
-                            // approveBtn.disabled = false
-                            // return;
+
                         }
                         
                     } else if (fullAnswer === "False") {
                         resultDiv.innerText = "Pay to Continue"
                     } else {
                         console.log("RAW:", JSON.stringify(fullAnswer));
-                        resultDiv.innerHTML = marked.parse(fullAnswer);
                         console.log(fullAnswer)
-                        console.log("HTML:", resultDiv.innerHTML);
-                        renderMathInElement(resultDiv, {
-                            delimiters: [
-                                { left: "$$", right: "$$", display: true },
-                                { left: "$", right: "$", display: false }
-                            ],
-                            
-                            throwOnError: false
-                        });
+                        await addMessage("ai",fullAnswer)
+
                         resultDiv.scrollTop = 0;
                     }
                     return;
@@ -150,7 +128,7 @@ redirect.onclick = async () => {
 };
 
 async function callCheckout(token) {
-    const response = await fetch("https://webworkai-production.up.railway.app/create-session", {
+    const response = await fetch("http://127.0.0.1:8000/create-session", {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
     });
@@ -163,7 +141,7 @@ async function refreshAccessToken() {
     const result = await chrome.storage.local.get(["Refresh_token"])
     const Refresh_token = result.Refresh_token
     
-    const response = await fetch("https://webworkai-production.up.railway.app/refresh_token", {
+    const response = await fetch("http://127.0.0.1:8000/refresh_token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ Refresh_token: Refresh_token })

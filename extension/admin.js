@@ -30,7 +30,7 @@ async function loadAdminData() {
            
             const paymentCell = document.createElement("td");
             paymentCell.textContent = user.payment_status === "active" ? "Paid" : "Unpaid";
-            paymentCell.className = user.payment_status === 1 ? "active" : "inactive";
+            paymentCell.className = user.payment_status === "active" ? "active" : "inactive";
             row.appendChild(paymentCell);
 
          

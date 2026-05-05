@@ -60,16 +60,15 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                     reader.onloadend = () => {
                         const croppedBase64 = reader.result.split(',')[1];
 
-                        fetch("https://webworkai-production.up.railway.app/solve", {
+                        fetch("http://127.0.0.1:8000/solve", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
                                 "Authorization": `Bearer ${Access_token}`
                             },
                             body: JSON.stringify({
-                                problem: request.problem,
-                                box_count: request.box,
-                                screenshot: croppedBase64
+                                type:"image",
+                                message: croppedBase64
                             })
                         })
                         .then(r => r.json())
@@ -88,6 +87,41 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                     sendResponse({ success: false, error: err.message });
                 }
             });
+        });
+    }
+    if (request.action === "sendMessage") {
+        chrome.storage.local.get(["Access_token"], async (result) => {
+            const Access_token = result.Access_token;
+            console.log("asd", Access_token);
+
+            try {
+
+                fetch("http://127.0.0.1:8000/solve", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${Access_token}`
+                    },
+                    body: JSON.stringify({
+                        type: "text",
+                        message: request.message[0],
+                        history: request.message[1]
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    console.log("3453");
+                    console.log(data.answer);
+                    sendResponse({ success: true, answer: data.answer });
+                })
+                .catch(error => { 
+                    sendResponse({ success: false, error: error.message });
+                });
+
+            } catch (err) {
+                sendResponse({ success: false, error: err.message });
+            }
+
         });
     }
     return true;

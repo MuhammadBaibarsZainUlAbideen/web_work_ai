@@ -56,7 +56,9 @@ app.add_middleware(
 
 
 class Problem(BaseModel):
-    screenshot: str
+    message: str
+    type:str
+    history:list
 class Geti(BaseModel):
     Auth: dict
 class RefreshTokenRequest(BaseModel):
@@ -148,37 +150,37 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
 
     # image = decoding_and_reducing(problem_data.screenshot)
     print("sdf")
+    user_content = []
+    if problem_data.type == "image":
+        user_content = [
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/png;base64,{problem_data.message}",
+                    "detail": "low"
+                }
+            }
+        ]
+    else:
+        user_content = problem_data.message + problem_data.history
 
     response1 = await client.chat.completions.create(
-        messages=[
-            {
-                "role": "system",
-                "content": """Solve the following math problem, or any subject text question given to you. Format your response using Markdown:
-                - Use **bold** for Steps Headings,important things and final answers
-                - Use bullet points for steps
-                - YOU MUST wrap every math expression in $ or $$
-                - NEVER use unicode symbols like ∑ ∞ · — use LaTeX commands like \\sum \\infty \\cdot
-                - WRONG: ∑_n=1^∞n/n+2
-                - CORRECT: $$\\sum_{n=1}^{\\infty} \\frac{n}{n+2}$$
-                - Keep it clean"""
-            },
-        
-            {
-                "role": "user",
-                "content": [    
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/png;base64,{problem_data.screenshot}",
-                            "detail": "low"
-                        }
-                    },
-                    # {
-                    #     "type": "text",
-                    #     "text": f" {problem_data.problem} "
-                    # }
-                ]
-            }
+        messages = [
+                {
+                    "role": "system",
+                    "content": """Solve the following math problem, or any subject text question given to you. Format your response using Markdown:
+            - Use **bold** for Steps Headings,important things and final answers
+            - Use bullet points for steps
+            - YOU MUST wrap every math expression in $ or $$
+            - NEVER use unicode symbols like ∑ ∞ · — use LaTeX commands like \\sum \\infty \\cdot
+            - WRONG: ∑_n=1^∞n/n+2
+            - CORRECT: $$\\sum_{n=1}^{\\infty} \\frac{n}{n+2}$$
+            - Keep it clean"""
+                },
+                {
+                    "role": "user",
+                    "content": user_content
+                }
         ],
         max_completion_tokens=600,
         temperature=0,
