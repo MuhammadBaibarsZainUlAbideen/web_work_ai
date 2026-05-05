@@ -78,11 +78,12 @@ class RefreshTokenRequest(BaseModel):
 
 @app.post("/solve")
 async def solve(problem_data:Problem, authorization:str= Header(None)):
+    print(*problem_data.history)
     
     global our_secret_key
-    print(await get_payment())
-    print("--->",await Get())
-    #await deleting_everything()
+    # print(await get_payment())
+    # print("--->",await Get())
+    # #await deleting_everything()
 
     #await adding_column()
 
@@ -162,7 +163,10 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
             }
         ]
     else:
-        user_content = problem_data.message + problem_data.history
+        print("1")
+        user_content = problem_data.message
+        print("2")
+        print(user_content)
 
     response1 = await client.chat.completions.create(
         messages = [
@@ -177,6 +181,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
             - CORRECT: $$\\sum_{n=1}^{\\infty} \\frac{n}{n+2}$$
             - Keep it clean"""
                 },
+                *problem_data.history,
                 {
                     "role": "user",
                     "content": user_content
@@ -186,6 +191,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
         temperature=0,
         model=deployment
     )
+    print("3")
     print("sd")
     
     answer = response1.choices[0].message.content

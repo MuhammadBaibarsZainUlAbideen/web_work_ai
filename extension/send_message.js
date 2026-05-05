@@ -85,7 +85,7 @@ async function getAIResponse(input) {
 
         apiResponse = await new Promise((resolve) => {
             chrome.runtime.sendMessage(
-                { action: "sendMessage", message: input },
+                { action: "sendMessage", message: [input,chatHistory] },
                 resolve
             );
         });
