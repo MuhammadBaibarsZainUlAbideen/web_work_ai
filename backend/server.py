@@ -1,4 +1,4 @@
-from fastapi import FastAPI,Header
+from fastapi import FastAPI,Header,BackgroundTasks
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from openai import OpenAI
@@ -75,9 +75,79 @@ class RefreshTokenRequest(BaseModel):
 #     new_base64 = base64.b64encode(buffer.read()).decode()
 #     return new_base64
 
+import json
+
+async def extract_and_store_crumbs(user_id, problem_data, answer):
+    
+    try:
+        response = await client.chat.completions.create(
+            model=deployment,
+            temperature=0,
+            messages=[
+                {
+                    "role": "system",
+                    "content": """
+You are a learning assistant.
+
+Extract ONLY important learning concepts from the solution.
+
+Rules:
+- Ignore filler text
+- Keep only concepts, definitions, formulas, mistakes
+- If you think user is asking a genral question like solve this integration question or an other question and is not aksing somehting pin point like ln(0) somehting like this then ignore it 
+- Return JSON ONLY
+- No explanations outside JSON
+
+Format:
+[
+  {
+    "concept": "...",
+    "fact": "...",
+    "topic": "...",
+    "type": "definition | rule | mistake",
+    "confidence": 0-1
+  }
+]
+"""
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+Question:
+{problem_data.message}
+
+Answer:
+{answer}
+"""
+                }
+            ]
+        )
+
+        crumbs = response.choices[0].message.content
+        print(crumbs)
+
+        # Parse JSON safely
+        try:
+            crumbs_json = json.loads(crumbs)
+        except:
+            return  # fail silently (important for MVP stability)
+
+        # store crumbs (replace with your DB function)
+        for crumb in crumbs_json:
+            await store_crumb(user_id, crumb)
+
+    except Exception as e:
+        print("Crumb extraction failed:", e)
+
+async def store_crumb(user_id, crumb):
+    print("Saving crumb:", user_id, crumb)
+
+    # replace with your DB logic
+    # await db.insert("crumbs", {...})
+    pass
 
 @app.post("/solve")
-async def solve(problem_data:Problem, authorization:str= Header(None)):
+async def solve(problem_data:Problem, authorization:str= Header(None),background_tasks: BackgroundTasks = None):
     print(*problem_data.history)
     
     global our_secret_key
@@ -172,14 +242,13 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
         messages = [
                 {
                     "role": "system",
-                    "content": """Solve the following math problem, or any subject text question given to you. Format your response using Markdown:
+                    "content": f"""Solve the following math problem, or any subject text question given to you. Format your response using Markdown:
             - Use **bold** for Steps Headings,important things and final answers
             - Use bullet points for steps
+            - If an image  is sent in your repsone you must mention i nthe heading Image
             - YOU MUST wrap every math expression in $ or $$
             - NEVER use unicode symbols like ∑ ∞ · — use LaTeX commands like \\sum \\infty \\cdot
-            - WRONG: ∑_n=1^∞n/n+2
-            - CORRECT: $$\\sum_{n=1}^{\\infty} \\frac{n}{n+2}$$
-            - Keep it clean"""
+            - WRONG: ∑_n=1^∞n/n+2"""
                 },
                 *problem_data.history,
                 {
@@ -195,6 +264,12 @@ async def solve(problem_data:Problem, authorization:str= Header(None)):
     print("sd")
     
     answer = response1.choices[0].message.content
+    background_tasks.add_task(
+        extract_and_store_crumbs,
+        user_id,
+        problem_data,
+        answer
+    )
     print(response1.usage)
     
     # answer = converter.latex_to_text(answer)

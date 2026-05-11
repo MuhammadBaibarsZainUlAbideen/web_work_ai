@@ -1,5 +1,6 @@
 import { sending_Refresh_token } from './Refrsh_token.js'
 import { addMessage } from './send_message.js';
+import { chatHistory } from './send_message.js';
 
 var solveBtn = document.getElementById("solve");
 var resultDiv = document.getElementById("result");
@@ -21,7 +22,7 @@ solveBtn.onclick = async function() {
             coordinates = response.coords;
             
             chrome.runtime.sendMessage(
-                { action: "solveProblem", tcoordinates: coordinates },
+                { action: "solveProblem", tcoordinates: [coordinates,chatHistory] },
                 async function(apiResponse) {
                     
                     if (!apiResponse) {
@@ -51,7 +52,7 @@ solveBtn.onclick = async function() {
                             resultDiv.innerText = "Please Login again"
                         } else {
                             chrome.runtime.sendMessage(
-                                { action: "solveProblem", tcoordinates: coordinates },
+                                { action: "solveProblem", tcoordinates: [coordinates,chatHistory] },
                                 async function(apiResponse) {
                                     
                                     if (!apiResponse) {
@@ -66,10 +67,12 @@ solveBtn.onclick = async function() {
                                         return;
                                     }
                                     fullAnswer = apiResponse.answer;
+                                    
                                     if (fullAnswer === "False") {
                                         resultDiv.innerText = "Pay to Continue"
                                     }else {
                                             console.log("RAW:", JSON.stringify(fullAnswer));
+                                            chatHistory.push({ role: "assistant", content: fullAnswer });
                                             await addMessage("ai",fullAnswer)
                                             resultDiv.scrollTop = 0;
                                         }   
@@ -85,6 +88,7 @@ solveBtn.onclick = async function() {
                     } else {
                         console.log("RAW:", JSON.stringify(fullAnswer));
                         console.log(fullAnswer)
+                        chatHistory.push({ role: "assistant", content: fullAnswer });
                         await addMessage("ai",fullAnswer)
 
                         resultDiv.scrollTop = 0;

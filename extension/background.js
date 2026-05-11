@@ -6,7 +6,7 @@ chrome.action.onClicked.addListener((tab) => {
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === "solveProblem") {
-        console.log("token-s", request.tcoordinates)
+        console.log("token-s", request.tcoordinates[0])
         chrome.storage.local.get(["Access_token"], async (result) => {
             const Access_token = result.Access_token
             console.log("asd", Access_token)
@@ -37,10 +37,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                     
                         const bitmap = await createImageBitmap(blob);
                         const cropRegion = {
-                            x: parseInt(request.tcoordinates.x),
-                            y: parseInt(request.tcoordinates.y),
-                            width: parseInt(request.tcoordinates.width),
-                            height: parseInt(request.tcoordinates.height)
+                            x: parseInt(request.tcoordinates[0].x),
+                            y: parseInt(request.tcoordinates[0].y),
+                            width: parseInt(request.tcoordinates[0].width),
+                            height: parseInt(request.tcoordinates[0].height)
                         };
                         // OffscreenCanvas works in service workers
                         canvas = new OffscreenCanvas(cropRegion.width, cropRegion.height);
@@ -59,6 +59,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                     const reader = new FileReader();
                     reader.onloadend = () => {
                         const croppedBase64 = reader.result.split(',')[1];
+                        console.log("----> "+request.tcoordinates[1])
 
                         fetch("http://127.0.0.1:8000/solve", {
                             method: "POST",
@@ -68,7 +69,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                             },
                             body: JSON.stringify({
                                 type:"image",
-                                message: croppedBase64
+                                message: croppedBase64,
+                                history: request.tcoordinates[1]
                             })
                         })
                         .then(r => r.json())

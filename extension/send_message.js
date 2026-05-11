@@ -9,7 +9,7 @@ import { sending_Refresh_token } from './Refrsh_token.js'
 
 
 
-let chatHistory = [];
+export let chatHistory = [];
 export async function addMessage(role, text) {
     const msg = document.createElement("div");
     msg.classList.add("message", role);
