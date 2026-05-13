@@ -5,7 +5,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from pylatexenc.latex2text import LatexNodes2Text
-from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment,stroing_embedings,stroing_question,printing_crumbs_embeddings
+from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment,stroing_embedings,stroing_question,printing_crumbs_embeddings,printing_crumbs
 from openai import AsyncAzureOpenAI
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
@@ -19,6 +19,8 @@ from session import sessions
 from contextlib import asynccontextmanager
 from building_embeding_text import build_embedding_text,embed
 import numpy as np
+from helper_function import is_duplicate,cosine_similarity,to_blob,stroing_question_and_embedding
+import json
 our_secret_key = os.getenv("our_secret_key")
 
 
@@ -77,24 +79,6 @@ class RefreshTokenRequest(BaseModel):
 #     new_base64 = base64.b64encode(buffer.read()).decode()
 #     return new_base64
 
-import json
-
-def to_blob(vector):
-    return np.array(vector, dtype=np.float32).tobytes()
-
-async def stroing_question_and_embedding(user_id,Question, fact, topic, sub_topic, confidence,concept_embeding,fact_embeding):
-    random_id = str(uuid.uuid4())
-    try:
-        await stroing_question(random_id, user_id, Question, fact, topic, sub_topic, confidence)
-        await stroing_embedings(random_id, to_blob(concept_embeding), to_blob(fact_embeding))
-    except Exception as e:
-        print("Error storing data:", e)
-        raise
-
-
-
-
-
 async def extract_and_store_crumbs(user_id, problem_data, answer):
     
     try:
@@ -149,15 +133,20 @@ Answer:
         except Exception as e:
             print("JSON parse failed:", e)
             return
-        if crumbs[0]["topic"] != "Ignore":
+        if crumbs[0]["topic"] == "Ignore":
+            return
             
-            concept_text, fact_text = await build_embedding_text(crumbs[0])
-            concept_embedding = await embed(concept_text)
-            fact_embedding = await embed(fact_text)
-            #Stroing in DB
-            await stroing_question_and_embedding(user_id,crumbs[0]["Question"],crumbs[0]["fact"],crumbs[0]["topic"],crumbs[0]["Sub-Topic"],crumbs[0]["confidence"],concept_embedding,fact_embedding)
-            data = await printing_crumbs_embeddings()
-            print(data)
+        Question_text, fact_text = await build_embedding_text(crumbs[0])
+        Question_embedding = await embed(Question_text)
+        fact_embedding = await embed(fact_text)
+        duplicate = await is_duplicate(user_id, Question_embedding)
+        if duplicate:
+            print("DUPLICATE FOUND → SKIPPING STORAGE")
+            return
+        #Stroing in DB
+        await stroing_question_and_embedding(user_id,crumbs[0]["Question"],crumbs[0]["fact"],crumbs[0]["topic"],crumbs[0]["Sub-Topic"],crumbs[0]["confidence"],Question_embedding,fact_embedding)
+        # data = await printing_crumbs_embeddings()
+        # print(data)
     except Exception as e:
         print("Crumb extraction failed:", e)
 
@@ -165,6 +154,7 @@ Answer:
 @app.post("/solve")
 async def solve(problem_data:Problem, authorization:str= Header(None),background_tasks: BackgroundTasks = None):
     print(*problem_data.history)
+
     
     global our_secret_key
     # print(await get_payment())
@@ -190,6 +180,9 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     except ExpiredSignatureError:
         print("as")
         return {"answer":"Login_again"}
+    data = await printing_crumbs(user_id)
+    print(data)
+    return data
     # expiry_data = await get_payment_expiry(user_id)
     # print("Current time :",datetime.now(timezone.utc))
     # if not expiry_data:

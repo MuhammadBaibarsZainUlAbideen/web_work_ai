@@ -1,9 +1,12 @@
 import aiosqlite
 from datetime import datetime, timezone,timedelta
 import os
+import numpy as np
 file_name = os.getenv("DB_PATH", "mydatabase1.db")
 
 # file_name = "mydatabase1.db"
+def from_blob(blob):
+    return np.frombuffer(blob, dtype=np.float32)
 
 async def Tables():
     conn = await aiosqlite.connect(file_name)
@@ -47,16 +50,43 @@ async def Tables():
 
     
 #Stroing Embeddings
-async def printing_crumbs_embeddings():
+async def printing_crumbs(user_id):
+    conn = await aiosqlite.connect(file_name)
+    cursor = await conn.cursor()
+    await cursor.execute("""SELECT id,user_id,question,fact,sub_topic,confidence
+                                    FROM crumbs
+                                    WHERE user_id = ? """,(user_id,))
+    rows = await cursor.fetchall()   
+    await conn.close()
+    return rows
+
+async def printing_crumbs_embeddings(user_id):
     conn = await aiosqlite.connect(file_name)
     cursor = await conn.cursor()
     await cursor.execute("""SELECT crumbs.id,crumbs.user_id, crumbs.question, crumbs.fact,crumbs.sub_topic,crumbs.confidence,
                                     embeddings.crumb_id,embeddings.question_embedding,embeddings.fact_embedding
                                     FROM crumbs
-                                    LEFT JOIN embeddings ON crumbs.id=embeddings.crumb_id""")
-    data = await cursor.fetchall()   
+                                    LEFT JOIN embeddings ON crumbs.id=embeddings.crumb_id
+                                    WHERE crumbs.user_id = ? """,(user_id,))
+    rows = await cursor.fetchall()   
     await conn.close()
-    return data
+    results = []
+
+    for row in rows:
+        results.append({
+            "id": row[0],
+            "user_id": row[1],
+            "question": row[2],
+            "fact": row[3],
+            "sub_topic": row[4],
+            "confidence": row[5],
+            "crumb_id": row[6],
+
+            # convert embeddings back to numpy arrays
+            "question_embedding": from_blob(row[7]) if row[7] else None,
+            "fact_embedding": from_blob(row[8]) if row[8] else None,
+        })
+    return results
 async def stroing_question(id, user_id, question, fact, topic, sub_topic, confidence):
     conn = await aiosqlite.connect(file_name)
     cursor = await conn.cursor()
