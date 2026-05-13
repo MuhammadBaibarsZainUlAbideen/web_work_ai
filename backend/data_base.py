@@ -25,10 +25,56 @@ async def Tables():
                                     event_id TEXT PRIMARY KEY,
                                     created_at TEXT
                                 );""")
+    await cursor.execute("""CREATE TABLE IF NOT EXISTS crumbs (
+                                id TEXT PRIMARY KEY,
+                                user_id TEXT,
+                                question TEXT,
+                                fact TEXT,
+                                topic TEXT,
+                                sub_topic TEXT,
+                                confidence REAL
+                            );""")
+    await cursor.execute("""CREATE TABLE IF NOT EXISTS embeddings (
+                            crumb_id TEXT PRIMARY KEY ,
+                            question_embedding BLOB,
+                            fact_embedding BLOB,
+                            FOREIGN KEY (crumb_id) REFERENCES crumbs(id)
+                        );""")
+    
+    
     await conn.commit()
     await conn.close()
 
     
+#Stroing Embeddings
+async def printing_crumbs_embeddings():
+    conn = await aiosqlite.connect(file_name)
+    cursor = await conn.cursor()
+    await cursor.execute("""SELECT crumbs.id,crumbs.user_id, crumbs.question, crumbs.fact,crumbs.sub_topic,crumbs.confidence,
+                                    embeddings.crumb_id,embeddings.question_embedding,embeddings.fact_embedding
+                                    FROM crumbs
+                                    LEFT JOIN embeddings ON crumbs.id=embeddings.crumb_id""")
+    data = await cursor.fetchall()   
+    await conn.close()
+    return data
+async def stroing_question(id, user_id, question, fact, topic, sub_topic, confidence):
+    conn = await aiosqlite.connect(file_name)
+    cursor = await conn.cursor()
+    await cursor.execute("""INSERT OR IGNORE INTO crumbs (id, user_id, question, fact, topic, sub_topic, confidence)
+                         VALUES (?,?,?,?,?,?,?)""",(id,user_id,question,fact,topic,sub_topic,confidence))
+    await conn.commit()
+    await conn.close()
+async def stroing_embedings(crumb_id, question_embedding, fact_embedding):
+    conn = await aiosqlite.connect(file_name)
+    cursor = await conn.cursor()
+    await cursor.execute("""
+    INSERT OR IGNORE INTO embeddings (crumb_id, question_embedding, fact_embedding)
+    VALUES (?, ?, ?)
+    """, (crumb_id, question_embedding, fact_embedding))
+    await conn.commit()
+    await conn.close()
+
+
 async def is_event_processed(event_id: str):
     conn = await aiosqlite.connect(file_name)
     cursor = await conn.cursor()

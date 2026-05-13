@@ -5,7 +5,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from pylatexenc.latex2text import LatexNodes2Text
-from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment
+from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment,stroing_embedings,stroing_question,printing_crumbs_embeddings
 from openai import AsyncAzureOpenAI
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
@@ -17,6 +17,8 @@ from stripe_routes import router as stripe_router
 import uuid
 from session import sessions
 from contextlib import asynccontextmanager
+from building_embeding_text import build_embedding_text,embed
+import numpy as np
 our_secret_key = os.getenv("our_secret_key")
 
 
@@ -77,6 +79,22 @@ class RefreshTokenRequest(BaseModel):
 
 import json
 
+def to_blob(vector):
+    return np.array(vector, dtype=np.float32).tobytes()
+
+async def stroing_question_and_embedding(user_id,Question, fact, topic, sub_topic, confidence,concept_embeding,fact_embeding):
+    random_id = str(uuid.uuid4())
+    try:
+        await stroing_question(random_id, user_id, Question, fact, topic, sub_topic, confidence)
+        await stroing_embedings(random_id, to_blob(concept_embeding), to_blob(fact_embeding))
+    except Exception as e:
+        print("Error storing data:", e)
+        raise
+
+
+
+
+
 async def extract_and_store_crumbs(user_id, problem_data, answer):
     
     try:
@@ -93,18 +111,19 @@ Extract ONLY important learning concepts from the solution.
 
 Rules:
 - Ignore filler text
-- Keep only concepts, definitions, formulas, mistakes
-- If you think user is asking a genral question like solve this integration question or an other question and is not aksing somehting pin point like ln(0) somehting like this then ignore it 
+- Keep only Question(as it is what user asks, only correct spellings), definitions, formulas, mistakes
+- If the given question and anser has nothing to do which yu think is Maths,Physics, political Scicne than in Topic you must write Ignore
 - Return JSON ONLY
 - No explanations outside JSON
+- And your answer must only inlcude one JSON releted to what user asks.
 
 Format:
 [
   {
-    "concept": "...",
+    "Question": "...",
     "fact": "...",
-    "topic": "...",
-    "type": "definition | rule | mistake",
+    "topic": "Maths | Physics | Political Science | Ignore",
+    "Sub-Topic": "Could be a subtopic under maths or other subject like Trgnomentry,logrithms etc",
     "confidence": 0-1
   }
 ]
@@ -123,28 +142,25 @@ Answer:
             ]
         )
 
-        crumbs = response.choices[0].message.content
-        print(crumbs)
-
-        # Parse JSON safely
+        crumbs_raw = response.choices[0].message.content
+        print(crumbs_raw)
         try:
-            crumbs_json = json.loads(crumbs)
-        except:
-            return  # fail silently (important for MVP stability)
-
-        # store crumbs (replace with your DB function)
-        for crumb in crumbs_json:
-            await store_crumb(user_id, crumb)
-
+            crumbs = json.loads(crumbs_raw)
+        except Exception as e:
+            print("JSON parse failed:", e)
+            return
+        if crumbs[0]["topic"] != "Ignore":
+            
+            concept_text, fact_text = await build_embedding_text(crumbs[0])
+            concept_embedding = await embed(concept_text)
+            fact_embedding = await embed(fact_text)
+            #Stroing in DB
+            await stroing_question_and_embedding(user_id,crumbs[0]["Question"],crumbs[0]["fact"],crumbs[0]["topic"],crumbs[0]["Sub-Topic"],crumbs[0]["confidence"],concept_embedding,fact_embedding)
+            data = await printing_crumbs_embeddings()
+            print(data)
     except Exception as e:
         print("Crumb extraction failed:", e)
 
-async def store_crumb(user_id, crumb):
-    print("Saving crumb:", user_id, crumb)
-
-    # replace with your DB logic
-    # await db.insert("crumbs", {...})
-    pass
 
 @app.post("/solve")
 async def solve(problem_data:Problem, authorization:str= Header(None),background_tasks: BackgroundTasks = None):
