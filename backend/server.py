@@ -80,6 +80,9 @@ class RefreshTokenRequest(BaseModel):
 #     return new_base64
 
 async def extract_and_store_crumbs(user_id, problem_data, answer):
+    if problem_data.type == "image":
+        print("Not storing the image in crumbs")
+        return
     
     try:
         response = await client.chat.completions.create(
@@ -180,9 +183,9 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     except ExpiredSignatureError:
         print("as")
         return {"answer":"Login_again"}
-    data = await printing_crumbs(user_id)
-    print(data)
-    return data
+    # data = await printing_crumbs(user_id)
+    # print(data)
+    # return data
     # expiry_data = await get_payment_expiry(user_id)
     # print("Current time :",datetime.now(timezone.utc))
     # if not expiry_data:
