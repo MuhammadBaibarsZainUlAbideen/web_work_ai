@@ -59,11 +59,10 @@ async def printing_crumbs(user_id):
     rows = await cursor.fetchall()   
     await conn.close()
     return rows
-
-async def printing_crumbs_embeddings(user_id):
+async def printing_crumbs_embedding_froentend(user_id):
     conn = await aiosqlite.connect(file_name)
     cursor = await conn.cursor()
-    await cursor.execute("""SELECT crumbs.id,crumbs.user_id, crumbs.question, crumbs.fact,crumbs.sub_topic,crumbs.confidence,
+    await cursor.execute("""SELECT crumbs.id,crumbs.user_id, crumbs.question, crumbs.fact,crumbs.topic,crumbs.sub_topic,crumbs.confidence,
                                     embeddings.crumb_id,embeddings.question_embedding,embeddings.fact_embedding
                                     FROM crumbs
                                     LEFT JOIN embeddings ON crumbs.id=embeddings.crumb_id
@@ -78,13 +77,45 @@ async def printing_crumbs_embeddings(user_id):
             "user_id": row[1],
             "question": row[2],
             "fact": row[3],
-            "sub_topic": row[4],
-            "confidence": row[5],
-            "crumb_id": row[6],
+            "topic": row[4],
+            "sub_topic": row[5],
+            "confidence": row[6],
+            "crumb_id": row[7],
 
             # convert embeddings back to numpy arrays
-            "question_embedding": from_blob(row[7]) if row[7] else None,
-            "fact_embedding": from_blob(row[8]) if row[8] else None,
+            "question_embedding": from_blob(row[8]).tolist() if row[8] else None,
+            "fact_embedding": from_blob(row[9]).tolist() if row[9] else None,
+        })
+    return results
+
+
+
+async def printing_crumbs_embeddings(user_id):
+    conn = await aiosqlite.connect(file_name)
+    cursor = await conn.cursor()
+    await cursor.execute("""SELECT crumbs.id,crumbs.user_id, crumbs.question, crumbs.fact,crumbs.topic,crumbs.sub_topic,crumbs.confidence,
+                                    embeddings.crumb_id,embeddings.question_embedding,embeddings.fact_embedding
+                                    FROM crumbs
+                                    LEFT JOIN embeddings ON crumbs.id=embeddings.crumb_id
+                                    WHERE crumbs.user_id = ? """,(user_id,))
+    rows = await cursor.fetchall()   
+    await conn.close()
+    results = []
+
+    for row in rows:
+        results.append({
+            "id": row[0],
+            "user_id": row[1],
+            "question": row[2],
+            "fact": row[3],
+            "topic": row[4],
+            "sub_topic": row[5],
+            "confidence": row[6],
+            "crumb_id": row[7],
+
+            # convert embeddings back to numpy arrays
+            "question_embedding": from_blob(row[8]) if row[8] else None,
+            "fact_embedding": from_blob(row[9]) if row[9] else None,
         })
     return results
 async def stroing_question(id, user_id, question, fact, topic, sub_topic, confidence):

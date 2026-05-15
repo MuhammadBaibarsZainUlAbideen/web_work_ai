@@ -28,7 +28,7 @@ export async function sending_Refresh_token(message){
         if(json_convertion.Data != "No"){
             console.log("as1")
             chrome.storage.local.set({"Access_token":json_convertion.Data})
-            return;
+            return json_convertion.Data;
 
         }else{
             console.log(json_convertion.Data)

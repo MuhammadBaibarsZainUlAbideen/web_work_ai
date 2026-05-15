@@ -18,10 +18,17 @@
         <div class="top-bar">
             <div class="Title">
                 <h2>Simple Solver</h2>
-
             </div>
-            
-            <button id="gearBtn"><i class="fas fa-gear"></i></button>
+
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button id="memoryBtn">
+                    <i class="fas fa-brain"></i>
+                </button>
+
+                <button id="gearBtn">
+                    <i class="fas fa-gear"></i>
+                </button>
+            </div>
         </div>
         <div class="buttons">
         
@@ -39,7 +46,7 @@
         <div id="chatBox" class="chat-box"></div>
 
         <div class="chat-input-area">
-            <input id="chatInput" type="text" placeholder="Ask something..." />
+            <textarea id="chatInput" placeholder="Type a message..."></textarea>
             <button id="sendBtn">Send</button>
         </div>
 
@@ -57,17 +64,34 @@
         </div>
 
     </div>
+    <div id="memoryOverlay" class="memory-overlay hidden">
+        <div class="memory-panel">
+
+        <div class="memory-header">
+            <button id="backBtn">← Back</button>
+            <h3 id="memoryTitle">Topics</h3>
+            <button id="closeOverlay">✕</button>
+        </div>
+
+        <div id="memoryContent" class="memory-content">
+            <!-- dynamic cells -->
+        </div>
+
+        </div>
+    </div>
 
     
 
 
     <script type="module" src="popup.js"></script>
     <script type="module" src="send_message.js"></script>
+    <script type="module" src="dropdown.js"></script>
+    <script type="module" src="getStoredCrumbs.js"></script>
     <script src="auto-render.min.js"></script>
     <script src="Auth.js"></script>
     <script src="logout.js"></script>
     <script src="manage_subscrption.js"></script>
-    <script src="dropdown.js"></script>
+    
     
      
 

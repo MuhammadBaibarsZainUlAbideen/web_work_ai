@@ -5,7 +5,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from pylatexenc.latex2text import LatexNodes2Text
-from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment,stroing_embedings,stroing_question,printing_crumbs_embeddings,printing_crumbs
+from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment,stroing_embedings,stroing_question,printing_crumbs_embeddings,printing_crumbs,printing_crumbs_embedding_froentend
 from openai import AsyncAzureOpenAI
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
@@ -110,7 +110,7 @@ Format:
     "Question": "...",
     "fact": "...",
     "topic": "Maths | Physics | Political Science | Ignore",
-    "Sub-Topic": "Could be a subtopic under maths or other subject like Trgnomentry,logrithms etc",
+    "sub_topic": "Trignomentry | logrithms | Series | Integration | Differentiation | Ignore",
     "confidence": 0-1
   }
 ]
@@ -136,7 +136,7 @@ Answer:
         except Exception as e:
             print("JSON parse failed:", e)
             return
-        if crumbs[0]["topic"] == "Ignore":
+        if crumbs[0]["topic"].lower() or crumbs[0]["sub_topic"].lower() == "ignore":
             return
             
         Question_text, fact_text = await build_embedding_text(crumbs[0])
@@ -147,7 +147,7 @@ Answer:
             print("DUPLICATE FOUND → SKIPPING STORAGE")
             return
         #Stroing in DB
-        await stroing_question_and_embedding(user_id,crumbs[0]["Question"],crumbs[0]["fact"],crumbs[0]["topic"],crumbs[0]["Sub-Topic"],crumbs[0]["confidence"],Question_embedding,fact_embedding)
+        await stroing_question_and_embedding(user_id,crumbs[0]["Question"],crumbs[0]["fact"],crumbs[0]["topic"],crumbs[0]["sub_topic"],crumbs[0]["confidence"],Question_embedding,fact_embedding)
         # data = await printing_crumbs_embeddings()
         # print(data)
     except Exception as e:
@@ -289,6 +289,25 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
 
     return {"answer":answer}
 
+@app.post("/crumbs")
+async def get(authorization: str = Header(None)):
+    global our_secret_key
+    token = authorization.replace("Bearer ", "")
+    print(token)
+    try:
+        payload = jwt.decode(token, our_secret_key, algorithms=["HS256"])
+        user_id = payload["key"]
+        data = await printing_crumbs_embedding_froentend(user_id)
+        print(data)
+        return {"Crumbs": data, "Status":"True"}
+    
+    except ExpiredSignatureError:
+        return {"logout": "false", "reason": "token_expired"}
+    
+    except InvalidTokenError:
+        return {"logout": "false", "reason": "invalid_token"}
+
+
 
 
 @app.post("/get")
@@ -326,6 +345,7 @@ async def get(data:Geti):
 
 @app.post("/refresh_token")
 async def validating(request:RefreshTokenRequest):
+
 
     print("yellow")
     if(request == None):
