@@ -39,5 +39,5 @@ async def embed(text: str):
         model="text-embedding-3-small",
         input=text
     )
-    print(response.data[0].embedding)
+    # print(response.data[0].embedding)
     return response.data[0].embedding

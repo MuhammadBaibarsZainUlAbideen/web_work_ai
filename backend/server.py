@@ -5,7 +5,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from pylatexenc.latex2text import LatexNodes2Text
-from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment,stroing_embedings,stroing_question,printing_crumbs_embeddings,printing_crumbs,printing_crumbs_embedding_froentend
+from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment,stroing_embedings,stroing_question,printing_crumbs_embeddings,printing_crumbs,printing_crumbs_embedding_froentend,get_topics
 from openai import AsyncAzureOpenAI
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
@@ -21,6 +21,8 @@ from building_embeding_text import build_embedding_text,embed
 import numpy as np
 from helper_function import is_duplicate,cosine_similarity,to_blob,stroing_question_and_embedding
 import json
+import time
+
 our_secret_key = os.getenv("our_secret_key")
 
 
@@ -83,7 +85,9 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
     if problem_data.type == "image":
         print("Not storing the image in crumbs")
         return
-    
+    data = await get_topics(user_id)
+    final_subtopics = ", ".join(item[0] for item in data)
+    print(final_subtopics)
     try:
         response = await client.chat.completions.create(
             model=deployment,
@@ -91,28 +95,30 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
             messages=[
                 {
                     "role": "system",
-                    "content": """
+                    "content": f"""
 You are a learning assistant.
 
 Extract ONLY important learning concepts from the solution.
 
 Rules:
 - Ignore filler text
-- Keep only Question(as it is what user asks, only correct spellings), definitions, formulas, mistakes
-- If the given question and anser has nothing to do which yu think is Maths,Physics, political Scicne than in Topic you must write Ignore
+- Keep only Questions(only correct spellings), definitions, formulas, and mistakes
+- If the question and answer are unrelated to Maths, Physics, or Political Science, set topic to "Ignore"
+- First check whether the Sub-Topic matches to one of the Available subtopics
+- Only create a new Sub-Topic if none match
 - Return JSON ONLY
 - No explanations outside JSON
-- And your answer must only inlcude one JSON releted to what user asks.
+- Return only ONE JSON Block
 
 Format:
 [
-  {
+  {{
     "Question": "...",
     "fact": "...",
     "topic": "Maths | Physics | Political Science | Ignore",
-    "sub_topic": "Trignomentry | logrithms | Series | Integration | Differentiation | Ignore",
+    "Sub-Topic": "{final_subtopics}",
     "confidence": 0-1
-  }
+  }}
 ]
 """
                 },
@@ -136,18 +142,19 @@ Answer:
         except Exception as e:
             print("JSON parse failed:", e)
             return
-        if crumbs[0]["topic"].lower() or crumbs[0]["sub_topic"].lower() == "ignore":
+
+        if crumbs[0]["topic"].lower()  == "ignore" or crumbs[0]["Sub-Topic"].lower() == "ignore":
             return
             
         Question_text, fact_text = await build_embedding_text(crumbs[0])
         Question_embedding = await embed(Question_text)
         fact_embedding = await embed(fact_text)
-        duplicate = await is_duplicate(user_id, Question_embedding)
+        duplicate = await is_duplicate(user_id, Question_embedding,fact_embedding)
         if duplicate:
             print("DUPLICATE FOUND → SKIPPING STORAGE")
             return
         #Stroing in DB
-        await stroing_question_and_embedding(user_id,crumbs[0]["Question"],crumbs[0]["fact"],crumbs[0]["topic"],crumbs[0]["sub_topic"],crumbs[0]["confidence"],Question_embedding,fact_embedding)
+        await stroing_question_and_embedding(user_id,crumbs[0]["Question"],crumbs[0]["fact"],crumbs[0]["topic"],crumbs[0]["Sub-Topic"],crumbs[0]["confidence"],Question_embedding,fact_embedding)
         # data = await printing_crumbs_embeddings()
         # print(data)
     except Exception as e:
@@ -156,7 +163,10 @@ Answer:
 
 @app.post("/solve")
 async def solve(problem_data:Problem, authorization:str= Header(None),background_tasks: BackgroundTasks = None):
+    start = time.time()
     print(*problem_data.history)
+    # await deleting_everything()
+    # return
 
     
     global our_secret_key
@@ -276,6 +286,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     print("sd")
     
     answer = response1.choices[0].message.content
+    print(f"Total time before background task: {time.time() - start} seconds")
     background_tasks.add_task(
         extract_and_store_crumbs,
         user_id,
@@ -286,6 +297,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     
     # answer = converter.latex_to_text(answer)
     await increment_tries(user_id)
+    print(f"Total time after background task: {time.time() - start} seconds")
 
     return {"answer":answer}
 

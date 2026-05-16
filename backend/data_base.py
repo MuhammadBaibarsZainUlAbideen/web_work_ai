@@ -48,7 +48,19 @@ async def Tables():
     await conn.commit()
     await conn.close()
 
-    
+
+
+#Getting_topics
+async def get_topics(user_id):
+    conn = await aiosqlite.connect(file_name)
+    cursor = await conn.cursor()
+    await cursor.execute("""SELECT  sub_topic
+                                    FROM crumbs
+                                    WHERE user_id = ? """,(user_id,))
+    rows = await cursor.fetchall()   
+    await conn.close()
+    return rows
+
 #Stroing Embeddings
 async def printing_crumbs(user_id):
     conn = await aiosqlite.connect(file_name)
@@ -369,10 +381,13 @@ async def extracting_data(token):
 async def deleting_everything():
     conn = await aiosqlite.connect(file_name)
     cursor = await conn.cursor()
-    await cursor.execute("""DELETE FROM Refresh_token""")
-    await cursor.execute("""DELETE FROM Authentication""")
-    await cursor.execute("""DELETE FROM Payments""")
-    await cursor.execute("""DELETE FROM StripeEvents""")
+    # await cursor.execute("""DELETE FROM Refresh_token""")
+    # await cursor.execute("""DELETE FROM Authentication""")
+    # await cursor.execute("""DELETE FROM Payments""")
+    # await cursor.execute("""DELETE FROM StripeEvents""")
+    await cursor.execute("""DELETE FROM crumbs""")
+    await cursor.execute("""DELETE FROM embeddings""")
+
     await conn.commit()
     await conn.close()
 

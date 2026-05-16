@@ -18,7 +18,7 @@ def cosine_similarity(a, b):
 
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
-async def is_duplicate(user_id, new_embedding, threshold=0.80):
+async def is_duplicate(user_id, new_question_embedding, new_fact_embedding, threshold=0.81):
     rows = await printing_crumbs_embeddings(user_id)  
     print(rows)
     # should return: crumb_id, embedding
@@ -26,12 +26,18 @@ async def is_duplicate(user_id, new_embedding, threshold=0.80):
     best_score = 0
 
     for row in rows:
-        existing_emb = row["question_embedding"]
-        print("-->",existing_emb)
-        print("--->",new_embedding)
+        existing_question_emb = row["question_embedding"]
+        existing_fact_emb = row["fact_embedding"]
+        # print("-->",existing_emb)
+        # print("--->",new_embedding)
         print("1")
-        new_embedding = np.array(new_embedding, dtype=np.float32)
-        score = cosine_similarity(new_embedding, existing_emb)
+        new_question_embedding = np.array(new_question_embedding, dtype=np.float32)
+        new_fact_embedding = np.array(new_fact_embedding, dtype=np.float32)
+        score_question = cosine_similarity(new_question_embedding, existing_question_emb)
+        score_fact = cosine_similarity(new_fact_embedding, existing_fact_emb)
+        score = (score_fact + score_question) / 2
+
+
         print("2")
 
         if score > best_score:
