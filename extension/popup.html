@@ -54,28 +54,51 @@
         
     </div>
         <div id="settingsDropdown" class="settings-dropdown">
+        
+       
+            <div class="settings-item" id="sub">
+                Manage Subscription
+            </div>
 
-        <div class="settings-item" id="sub">
-            Manage Subscription
-        </div>
+            <div class="settings-item" id="Logout">
+                Logout
+            </div>
+            <div class="settings-item" id="termsOfService">
+                Terms of Service
+            </div>
+            <div id="termsOverlay" class="termsOverlay hidden">
+                <div class="termsOverlay-content">
+                    <div class="termsOverlay-header">
+                        <h3>Terms of Service</h3>
+                        <button id="closeMemoryOverlay" class="termsOverlay-close">&times;</button>
+                    </div>
+                    <div class="termsOverlay-body">
+                        <!-- Paste your Terms of Service text here -->
+                        <p><strong>1. Acceptance of Terms</strong><br>By using this extension, you agree to these terms.</p>
+                        <p><strong>2. AI Services</strong><br>This extension sends your questions to Azure OpenAI. Do not submit sensitive information.</p>
+                        <p><strong>3. Limitation of Liability</strong><br>We are not responsible for any inaccuracies in AI-generated answers.</p>
+                        <p><strong>4. Changes to Terms</strong><br>We may update these terms at any time.</p>
+                        <p><strong>5. Contact</strong><br>Email support at your@email.com</p>
+                        <!-- Add full terms as needed -->
+                    </div>
 
-        <div class="settings-item" id="Logout">
-            Logout
-        </div>
+                </div>
+   
+            </div>
 
     </div>
     <div id="memoryOverlay" class="memory-overlay hidden">
         <div class="memory-panel">
 
-        <div class="memory-header">
-            <button id="backBtn">← Back</button>
-            <h3 id="memoryTitle">Topics</h3>
-            <button id="closeOverlay">✕</button>
-        </div>
+            <div class="memory-header">
+                <button id="backBtn">← Back</button>
+                <h3 id="memoryTitle">Topics</h3>
+                <button id="closeOverlay">✕</button>
+            </div>
 
-        <div id="memoryContent" class="memory-content">
-            <!-- dynamic cells -->
-        </div>
+            <div id="memoryContent" class="memory-content">
+                <!-- dynamic cells -->
+            </div>
 
         </div>
     </div>
@@ -91,6 +114,7 @@
     <script src="Auth.js"></script>
     <script src="logout.js"></script>
     <script src="manage_subscrption.js"></script>
+    <script src="Terms_of_services.js"></script>
     
     
      

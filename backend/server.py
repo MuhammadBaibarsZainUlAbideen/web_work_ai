@@ -108,7 +108,9 @@ Rules:
 - Only create a new Sub-Topic if none match
 - Return JSON ONLY
 - No explanations outside JSON
-- Return only ONE JSON Block
+- Return exactly ONE object inside the JSON array
+- Never return multiple objects
+- If multiple facts exist, combine them into a single concise fact
 
 Format:
 [
