@@ -1,7 +1,5 @@
 # Environment variables - NEVER commit these
-.env
-*.env
-.env.*
+ EXIS
 
 # Python
 __pycache__/

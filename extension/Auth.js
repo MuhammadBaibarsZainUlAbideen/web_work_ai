@@ -1,14 +1,19 @@
-let element = document.getElementById("LS");
+// let element = document.getElementById("LS");
 var solveBtn = document.getElementById("solve");
 var approveBtn = document.getElementById("approve");
 var resultDiv = document.getElementById("result");
+const loginBtn = document.getElementById("LS");
+const termsBtn = document.getElementById("termsOfService");
+const overlay = document.getElementById("termsOverlay");
+const acceptBtn = document.getElementById("acceptTermsBtn");
+
 
 async function storingLocal(token){
     const Access_token = token['Access_token']
     const Refresh_token = token['Refresh_token']
     console.log(Access_token)
     console.log(Refresh_token)
-    element.style.display = "none"
+    loginBtn.style.display = "none"
 
     try{
         await chrome.storage.local.set({"Access_token":Access_token,"Refresh_token":Refresh_token})
@@ -46,49 +51,100 @@ async function gettingToken(token){
 
 const CLIENT_ID = "761181264175-1qmk12gfnsbo8k58dk4mmvbt6c8ujurt.apps.googleusercontent.com";
 
-element.addEventListener('click', () => {
+
+
+loginBtn.addEventListener("click", () => {
+    overlay.classList.remove("hidden");
+});
+
+
+
+termsBtn.addEventListener("click", () => {
+    overlay.classList.remove("hidden");
+});
+
+
+
+acceptBtn.addEventListener("click", () => {
+
+    overlay.classList.add("hidden");
+
+    startOAuth();
+
+});
+
+
+
+function startOAuth() {
+
     const redirectURL = chrome.identity.getRedirectURL();
+
     console.log("Redirect URL:", redirectURL);
-    
-    const authURL = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+
+    const authURL = new URL(
+        "https://accounts.google.com/o/oauth2/v2/auth"
+    );
+
     authURL.searchParams.append("client_id", CLIENT_ID);
     authURL.searchParams.append("redirect_uri", redirectURL);
     authURL.searchParams.append("response_type", "token");
     authURL.searchParams.append("scope", "openid email profile");
     authURL.searchParams.append("prompt", "consent");
     authURL.searchParams.append("access_type", "online");
-    
-    
+
     chrome.identity.launchWebAuthFlow({
         url: authURL.toString(),
         interactive: true
+
     }, (redirectUrl) => {
+
         if (chrome.runtime.lastError) {
-            console.error("Auth error:", chrome.runtime.lastError);
-            resultDiv.textContent = "Login failed: " + chrome.runtime.lastError.message;
+
+            console.error(
+                "Auth error:",
+                chrome.runtime.lastError
+            );
+
+            resultDiv.textContent =
+                "Login failed: " +
+                chrome.runtime.lastError.message;
+
             return;
         }
-        
+
         console.log("Redirect URL received:", redirectUrl);
-        
 
         const fragment = redirectUrl.split('#')[1];
+
         if (!fragment) {
+
             console.error("No fragment in redirect URL");
-            resultDiv.textContent = "Login failed: No token received";
+
+            resultDiv.textContent =
+                "Login failed: No token received";
+
             return;
         }
-        
+
         const params = new URLSearchParams(fragment);
+
         const token = params.get('access_token');
-        
+
         if (token) {
+
             console.log("Token obtained successfully");
-            resultDiv.textContent = "Login successful! You are good to start solving problems";
+
+            resultDiv.textContent =
+                "Login successful! You are good to start solving problems";
+
             gettingToken(token);
+
         } else {
+
             console.error("No access token found");
-            resultDiv.textContent = "Login failed: No access token";
+
+            resultDiv.textContent =
+                "Login failed: No access token";
         }
     });
-});
+}

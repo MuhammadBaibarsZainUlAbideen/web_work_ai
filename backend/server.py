@@ -5,7 +5,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from pylatexenc.latex2text import LatexNodes2Text
-from data_base import Tables, Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment,stroing_embedings,stroing_question,printing_crumbs_embeddings,printing_crumbs,printing_crumbs_embedding_froentend,get_topics
+from data_base_copy import  init_db,close_db,Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment,stroing_embedings,stroing_question,printing_crumbs_embeddings,printing_crumbs,printing_crumbs_embedding_froentend,get_topics
 from openai import AsyncAzureOpenAI
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
@@ -22,6 +22,7 @@ import numpy as np
 from helper_function import is_duplicate,cosine_similarity,to_blob,stroing_question_and_embedding
 import json
 import time
+import asyncio
 
 our_secret_key = os.getenv("our_secret_key")
 
@@ -29,8 +30,8 @@ our_secret_key = os.getenv("our_secret_key")
 
 load_dotenv()
 endpoint = "https://foundry-ai-prd-eus2-01.cognitiveservices.azure.com/"
-model_name = "gpt-5.4-mini"
-deployment = "gpt-5.4-mini"
+model_name = "gpt-4o-mini"
+deployment = "gpt-4o-mini"
 subscription_key = os.getenv("subscription_key")
 api_version = "2024-12-01-preview"
 client = AsyncAzureOpenAI(
@@ -45,8 +46,9 @@ client = AsyncAzureOpenAI(
 converter = LatexNodes2Text()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await Tables()
+    await init_db()
     yield
+    await close_db()
 
 app = FastAPI(lifespan=lifespan)
 
@@ -88,79 +90,86 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
     data = await get_topics(user_id)
     final_subtopics = ", ".join(item[0] for item in data)
     print(final_subtopics)
-    try:
-        response = await client.chat.completions.create(
-            model=deployment,
-            temperature=0,
-            messages=[
-                {
-                    "role": "system",
-                    "content": f"""
-You are a learning assistant.
-
-Extract ONLY important learning concepts from the solution.
-
-Rules:
-- Ignore filler text
-- Keep only Questions(only correct spellings), definitions, formulas, and mistakes
-- If the question and answer are unrelated to Maths, Physics, or Political Science, set topic to "Ignore"
-- First check whether the Sub-Topic matches to one of the Available subtopics
-- Only create a new Sub-Topic if none match
-- Return JSON ONLY
-- No explanations outside JSON
-- Return exactly ONE object inside the JSON array
-- Never return multiple objects
-- If multiple facts exist, combine them into a single concise fact
-
-Format:
-[
-  {{
-    "Question": "...",
-    "fact": "...",
-    "topic": "Maths | Physics | Political Science | Ignore",
-    "Sub-Topic": "{final_subtopics}",
-    "confidence": 0-1
-  }}
-]
-"""
-                },
-                {
-                    "role": "user",
-                    "content": f"""
-Question:
-{problem_data.message}
-
-Answer:
-{answer}
-"""
-                }
-            ]
-        )
-
-        crumbs_raw = response.choices[0].message.content
-        print(crumbs_raw)
+    
+    for attempt in range(3):
         try:
-            crumbs = json.loads(crumbs_raw)
-        except Exception as e:
-            print("JSON parse failed:", e)
-            return
+            response = await client.chat.completions.create(
+                model=deployment,
+                temperature=0,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": f"""
+    You are a learning assistant.
 
-        if crumbs[0]["topic"].lower()  == "ignore" or crumbs[0]["Sub-Topic"].lower() == "ignore":
+    Extract ONLY important learning concepts from the solution.
+
+    Rules:
+    - Ignore filler text
+    - Never use backslashes
+    - Keep only Questions(only correct spellings), definitions, formulas, and mistakes
+    - If the question and answer are unrelated to Maths, Physics, or Political Science, set topic to "Ignore"
+    - First check whether the Sub-Topic matches to one of the Available subtopics
+    - Only create a new Sub-Topic if none match
+    - Return JSON ONLY
+    - No explanations outside JSON
+    - Return exactly ONE object inside the JSON array
+    - Never return multiple objects
+    - If multiple facts exist, combine them into a single concise fact
+
+    Format:
+    [
+      {{
+        "Question": "...",
+        "fact": "...",
+        "topic": "Maths | Physics | Political Science | Ignore",
+        "Sub-Topic": "{final_subtopics}",
+        "confidence": 0-1
+      }}
+    ]
+    """
+                    },
+                    {
+                        "role": "user",
+                        "content": f"""
+    Question:
+    {problem_data.message}
+
+    Answer:
+    {answer}
+    """
+                    }
+                ]
+            )
+
+            crumbs_raw = response.choices[0].message.content
+            print(crumbs_raw)
+            try:
+                crumbs = json.loads(crumbs_raw)
+            except Exception as e:
+                print("JSON parse failed:", e)
+                return
+
+            if crumbs[0]["topic"].lower()  == "ignore" or crumbs[0]["Sub-Topic"].lower() == "ignore":
+                return
+                
+            Question_text, fact_text = await build_embedding_text(crumbs[0])
+            Question_embedding = await embed(Question_text)
+            fact_embedding = await embed(fact_text)
+            duplicate = await is_duplicate(user_id, Question_embedding,fact_embedding)
+            if duplicate:
+                print("DUPLICATE FOUND → SKIPPING STORAGE")
+                return
+            #Stroing in DB
+            await stroing_question_and_embedding(user_id,crumbs[0]["Question"],crumbs[0]["fact"],crumbs[0]["topic"],crumbs[0]["Sub-Topic"],crumbs[0]["confidence"],Question_embedding,fact_embedding)
+            # Success, exit retry loop
             return
-            
-        Question_text, fact_text = await build_embedding_text(crumbs[0])
-        Question_embedding = await embed(Question_text)
-        fact_embedding = await embed(fact_text)
-        duplicate = await is_duplicate(user_id, Question_embedding,fact_embedding)
-        if duplicate:
-            print("DUPLICATE FOUND → SKIPPING STORAGE")
-            return
-        #Stroing in DB
-        await stroing_question_and_embedding(user_id,crumbs[0]["Question"],crumbs[0]["fact"],crumbs[0]["topic"],crumbs[0]["Sub-Topic"],crumbs[0]["confidence"],Question_embedding,fact_embedding)
-        # data = await printing_crumbs_embeddings()
-        # print(data)
-    except Exception as e:
-        print("Crumb extraction failed:", e)
+        except Exception as e:
+            print(f"Crumb extraction attempt {attempt + 1} failed:", e)
+            if attempt < 2:
+                await asyncio.sleep(2)
+            else:
+                print("Max retries reached for crumb extraction.")
 
 
 @app.post("/solve")
@@ -272,7 +281,9 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
             - If an image  is sent in your repsone you must mention i nthe heading Image
             - YOU MUST wrap every math expression in $ or $$
             - NEVER use unicode symbols like ∑ ∞ · — use LaTeX commands like \\sum \\infty \\cdot
-            - WRONG: ∑_n=1^∞n/n+2"""
+            - WRONG: ∑_n=1^∞n/n+2
+            - Get_users() is the  function to get the users"""
+            
                 },
                 *problem_data.history,
                 {
@@ -288,7 +299,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     print("sd")
     
     answer = response1.choices[0].message.content
-    print(f"Total time before background task: {time.time() - start} seconds")
+    # print(f"Total time before background task: {time.time() - start} seconds")
     background_tasks.add_task(
         extract_and_store_crumbs,
         user_id,
@@ -446,6 +457,3 @@ async def create_session(authorization: str = Header(None)):
         return {"Verify": "false", "reason": "token_expired"}
     except InvalidTokenError:
         return {"Verify": "false", "reason": "invalid_token"}
-
-
-

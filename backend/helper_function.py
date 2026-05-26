@@ -18,7 +18,7 @@ def cosine_similarity(a, b):
 
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
-async def is_duplicate(user_id, new_question_embedding, new_fact_embedding, threshold=0.81):
+async def is_duplicate(user_id, new_question_embedding, new_fact_embedding, threshold=0.85):
     rows = await printing_crumbs_embeddings(user_id)  
     print(rows)
     # should return: crumb_id, embedding
