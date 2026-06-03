@@ -5,7 +5,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from pylatexenc.latex2text import LatexNodes2Text
-from data_base_copy import  init_db,close_db,Inserting, Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment,stroing_embedings,stroing_question,printing_crumbs_embeddings,printing_crumbs,printing_crumbs_embedding_froentend,get_topics
+from data_base import  init_db,Inserting,Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment,stroing_embedings,stroing_question,printing_crumbs_embeddings,printing_crumbs,printing_crumbs_embedding_froentend,get_topics, Editing_crumbs
 from openai import AsyncAzureOpenAI
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
@@ -20,6 +20,7 @@ from contextlib import asynccontextmanager
 from building_embeding_text import build_embedding_text,embed
 import numpy as np
 from helper_function import is_duplicate,cosine_similarity,to_blob,stroing_question_and_embedding
+from redis_verification import check_rate_limit, get_cached_answer, set_cached_answer
 import json
 import time
 import asyncio
@@ -47,8 +48,8 @@ converter = LatexNodes2Text()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    # await ensure_tables_exist()
     yield
-    await close_db()
 
 app = FastAPI(lifespan=lifespan)
 
@@ -71,17 +72,9 @@ class Geti(BaseModel):
     Auth: dict
 class RefreshTokenRequest(BaseModel):
     Refresh_token: str
+class EditedCrumbs(BaseModel):
+    message:dict
 
-# def decoding_and_reducing(image_bas64):
-#     image_data = base64.b64decode(image_bas64)
-#     img = Image.open(BytesIO(image_data))
-#     img = img.convert('L') 
-#     img = img.resize((256, 192))
-#     buffer = BytesIO()
-#     img.save(buffer, format='JPEG', quality=25, optimize=True)
-#     buffer.seek(0)
-#     new_base64 = base64.b64encode(buffer.read()).decode()
-#     return new_base64
 
 async def extract_and_store_crumbs(user_id, problem_data, answer):
     if problem_data.type == "image":
@@ -123,7 +116,7 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
         "Question": "...",
         "fact": "...",
         "topic": "Maths | Physics | Political Science | Ignore",
-        "Sub-Topic": "{final_subtopics}",
+        "Sub-Topic": "May be one of: {final_subtopics} or a new one which you think from the question if none match",
         "confidence": 0-1
       }}
     ]
@@ -150,7 +143,7 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
                 print("JSON parse failed:", e)
                 return
 
-            if crumbs[0]["topic"].lower()  == "ignore" or crumbs[0]["Sub-Topic"].lower() == "ignore":
+            if crumbs[0]["topic"].lower()  == "ignore" :
                 return
                 
             Question_text, fact_text = await build_embedding_text(crumbs[0])
@@ -174,7 +167,6 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
 
 @app.post("/solve")
 async def solve(problem_data:Problem, authorization:str= Header(None),background_tasks: BackgroundTasks = None):
-    start = time.time()
     print(*problem_data.history)
     # await deleting_everything()
     # return
@@ -204,54 +196,35 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     except ExpiredSignatureError:
         print("as")
         return {"answer":"Login_again"}
-    # data = await printing_crumbs(user_id)
-    # print(data)
-    # return data
-    # expiry_data = await get_payment_expiry(user_id)
-    # print("Current time :",datetime.now(timezone.utc))
-    # if not expiry_data:
-    #     print("a")
-    #     return {"answer": "no_payment"}
     
-    # expiry_str = expiry_data[0]
-    # if expiry_str == None:
-    #     print("nahah")
-    #     pass
-    # else:
-    #     expiry = datetime.fromisoformat(expiry_str)
-    #     print(expiry)
-    #     if expiry < datetime.now(timezone.utc):
-
-    #         print("j")
-    #         return {"answer": "Expired"}
-
-
-
+    if not await check_rate_limit(user_id):
+        print("rate limit reached")
+        return {"answer": "Too many requests. Please wait a minute."}
+    if problem_data.type != "image":
+        cached = await get_cached_answer(problem_data.message)
+        if cached:
+            print("answer:", cached["answer"])
+            return {"answer": cached["answer"]}
 
     user = await getting_user(user_id)
     if not user:
+        print("1")
         return {"answer": "Login_again"}  
     
     total_tries = await get_tries(user_id)
     status = await payment_status(user_id)
     print(status)
 
-    # try:
-    #     status[0]
-    # except:
-    #     print("123")
-    #     return {"answer": "False"}
 
 
-    # if not status:
-
-
-
-    if total_tries[0] >3 and not status:
+    if total_tries >3 and not status:
+        print("11")
         return {"answer":"False"}
-    if total_tries[0] >3 and status[0][0] != "active":
+        print("11")
+    if total_tries >3 and status[0][0] != "active":
+        print("111")
         return {"answer":"False"}
-
+    print("1111")
     # image = decoding_and_reducing(problem_data.screenshot)
     print("sdf")
     user_content = []
@@ -270,6 +243,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
         user_content = problem_data.message
         print("2")
         print(user_content)
+    
 
     response1 = await client.chat.completions.create(
         messages = [
@@ -310,7 +284,9 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     
     # answer = converter.latex_to_text(answer)
     await increment_tries(user_id)
-    print(f"Total time after background task: {time.time() - start} seconds")
+    if problem_data.type != "image":
+        await set_cached_answer(problem_data.message, answer)
+
 
     return {"answer":answer}
 
@@ -429,6 +405,48 @@ async def admin():
     return {"data": final}
 
 
+@app.post("/edittopic")
+async def create_session(data:EditedCrumbs,authorization: str = Header(None)):
+    token = authorization.replace("Bearer ", "")
+    print("yuio", token)
+    try:
+        payload = jwt.decode(token, our_secret_key, algorithms=["HS256"])
+        user_id = payload["key"]
+        user = await getting_user(user_id)
+        if not user:
+            return {"Verify": "false"}
+    except ExpiredSignatureError:
+        print("2")
+        return {"Verify": "false", "reason": "token_expired"}
+    except InvalidTokenError:
+        return {"Verify": "false", "reason": "invalid_token"}
+    print(data)
+    if data.message["type"] == "topic" and data.message["action"] == "edit":
+        await Editing_crumbs("topic",data.message["action"], user_id, data.message["prevTopic"], data.message["topic"])
+        print("good")
+    if data.message["type"] == "topic" and data.message["action"] == "delete":
+        await Editing_crumbs("topic",data.message["action"], user_id, data.message["prevTopic"], data.message["topic"])
+    if data.message["type"] == "subtopic" and data.message["action"] == "edit":
+        await Editing_crumbs("subtopic", data.message["action"], user_id, data.message["prevTopic"], data.message["subtopic"], data.message["newSubtopic"])
+
+    if data.message["type"] == "subtopic" and data.message["action"] == "delete":
+        await Editing_crumbs("subtopic", data.message["action"], user_id, data.message["prevTopic"], data.message["subtopic"])
+        
+    if data.message["type"] == "fact" and data.message["action"] == "edit":
+        print(data)
+        await Editing_crumbs("fact",data.message["action"],user_id,data.message["prevTopic"],data.message["subtopic"],None,data.message["oldQuestion"],data.message["oldFact"],data.message["newQuestion"],data.message["newFact"])
+
+
+
+
+    
+
+
+    
+
+
+
+
 
 @app.post("/create-session")
 async def create_session(authorization: str = Header(None)):
@@ -448,7 +466,7 @@ async def create_session(authorization: str = Header(None)):
         print(session_id) 
 
         
-        plans_url = f"https://webworkaipayment.netlify.app//stripe.html?session_id={session_id}"
+        plans_url = f"http://localhost:8001/stripe.html?session_id={session_id}"
         print("1")
         return {"plans_url": plans_url}
 

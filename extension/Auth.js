@@ -6,7 +6,7 @@ const loginBtn = document.getElementById("LS");
 const termsBtn = document.getElementById("termsOfService");
 const overlay = document.getElementById("termsOverlay");
 const acceptBtn = document.getElementById("acceptTermsBtn");
-
+let termsSource = null;
 
 async function storingLocal(token){
     const Access_token = token['Access_token']
@@ -55,21 +55,25 @@ const CLIENT_ID = "761181264175-1qmk12gfnsbo8k58dk4mmvbt6c8ujurt.apps.googleuser
 
 loginBtn.addEventListener("click", () => {
     overlay.classList.remove("hidden");
+    termsSource = "login"
 });
 
 
 
-termsBtn.addEventListener("click", () => {
-    overlay.classList.remove("hidden");
-});
+// termsBtn.addEventListener("click", () => {
+//     overlay.classList.remove("hidden");
+// });
 
 
 
 acceptBtn.addEventListener("click", () => {
 
     overlay.classList.add("hidden");
+    if (termsSource === "login"){
+        startOAuth();
+    }
 
-    startOAuth();
+    
 
 });
 

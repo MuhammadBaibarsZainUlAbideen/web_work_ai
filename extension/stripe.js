@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", async () => {
+    console.log('Testing 1,2,43')
     const params = new URLSearchParams(window.location.search);
     const session_id = params.get("session_id");
+    console.log(session_id);
 
     console.log("session_id:", session_id);
 
@@ -12,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let upgrade_button = document.getElementById("payBtn");
 
     upgrade_button.onclick = async function checkout() {
-        const response = await fetch("https://webworkai-production.up.railway.app/checkout", {
+        const response = await fetch("http://127.0.0.1:8000/checkout", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${session_id}`
@@ -31,5 +33,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             window.location.href = data.url;
         }
     };
+    return true;
 });
 

@@ -17,7 +17,7 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 
 PRICE_ID = os.getenv("PRICE_ID")
-STRIPE_PUBLISHABLE_KEY = "pk_test_51SRgl49GbHif2Fu7bxaNVCq8kRAbeyujPU2695cxatzAznRZkeRCNPrT1BkeS85Pes4zO8Kv4F2ZMK9QCrpC4WIx00eerYs4gL"
+STRIPE_PUBLISHABLE_KEY = "pk_test_51TR1gD0OMb8UaZikwCqxrlQ1401jRlLtKGByeXpWOEJ3uH12Q9E6WayYilZ87oE9gDxh05BjegFcqimEDXeHHmLf000iCcBYdC"
 our_secret_key = os.getenv("our_secret_key")
 
 
@@ -69,7 +69,7 @@ async def webhook(request: Request):
     sig = request.headers.get("stripe-signature")
 
     try:
-        event = stripe.Webhook.construct_event(payload, sig,"whsec_IC6zRYfFjxwAvVBUYg5sXn7bbEu6sa5P")
+        event = stripe.Webhook.construct_event(payload, sig,"whsec_dfcefc19ca3e7db7240e8579b99e47303212ec38521a834bcb62c8ef2fc7d416")
     except Exception:
         return {"error": "invalid"}
     data = event["data"]["object"]

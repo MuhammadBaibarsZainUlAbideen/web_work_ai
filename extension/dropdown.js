@@ -1,10 +1,12 @@
 import {getStoredCrumbs} from "./getStoredCrumbs.js"
+import { editCrumbs } from "./editcrumbs.js";
 const gearBtn = document.getElementById("gearBtn");
 const dropdown = document.getElementById("settingsDropdown");
 let memoryData = [];
 let currentLevel = "topic";
 let selectedTopic = "";
 let selectedSubTopic = "";
+let editMode = false;
 
 // toggle dropdown
 gearBtn.onclick = () => {
@@ -20,6 +22,16 @@ document.addEventListener("click", (e) => {
     if (!gearBtn.contains(e.target) && !dropdown.contains(e.target)) {
         dropdown.style.display = "none";
     }
+});
+
+
+
+
+document.getElementById("editModeBtn").addEventListener("click", () => {
+    editMode = !editMode;
+    if (currentLevel === "topic") renderTopics();
+    else if (currentLevel === "subtopic") renderSubTopics();
+    else if (currentLevel === "facts") renderFacts();
 });
 
 document.getElementById("memoryBtn").addEventListener("click", async() => {
@@ -48,19 +60,55 @@ async function renderTopics() {
 
     const container = document.getElementById("memoryContent");
     container.innerHTML = "";
-
-    topics.forEach(topic => {
+    topics.forEach((topic) => {
         const div = document.createElement("div");
         div.className = "memory-cell";
         div.innerText = topic;
-
-        div.onclick = async () => {
-            selectedTopic = topic;
-            await renderSubTopics();
-        };
-
+        
+        if (!editMode) {
+            div.onclick = async () => {
+                selectedTopic = topic;
+                await renderSubTopics();
+            };
+        }
+        
+        if (editMode) {
+            const editBtn = document.createElement("button");
+            editBtn.innerText = "✏️";
+            editBtn.onclick = (async (e) => {
+                e.stopPropagation();
+                const newName = prompt("Edit topic:", topic);
+                if (newName) {
+                    memoryData.forEach ((item) => {
+                        if (item.topic === topic) item.topic = newName;
+                        
+                    });
+                    renderTopics();
+                    await editCrumbs({"type":"topic","action":"edit","prevTopic": topic,"topic":newName})
+                    
+                    
+                    
+                }
+            });
+            
+            const delBtn = document.createElement("button");
+            delBtn.innerText = "🗑️";
+            delBtn.onclick = async (e) => {
+                e.stopPropagation();
+                if (confirm(`Delete "${topic}"?`)) {
+                    memoryData = memoryData.filter(item => item.topic !== topic);
+                    await editCrumbs({"type":"topic","action":"delete","prevTopic": topic,"topic":"skip"})
+                    renderTopics();
+                }
+            };
+            
+            div.appendChild(editBtn);
+            div.appendChild(delBtn);
+        }
+        
         container.appendChild(div);
     });
+
 }
 async function renderSubTopics() {
     currentLevel = "subtopic";
@@ -80,10 +128,42 @@ async function renderSubTopics() {
         div.className = "memory-cell";
         div.innerText = sub;
 
-        div.onclick = async () => {
-            selectedSubTopic = sub;
-            await renderFacts();
-        };
+        if (!editMode) {
+            div.onclick = async () => {
+                selectedSubTopic = sub;
+                await renderFacts();
+            };
+        }
+
+        if (editMode) {
+            const editBtn = document.createElement("button");
+            editBtn.innerText = "✏️";
+            editBtn.onclick = async (e) => {
+                e.stopPropagation();
+                const newName = prompt("Edit subtopic:", sub);
+                if (newName) {
+                    memoryData.forEach((item) => {
+                        if (item.topic === selectedTopic && item.sub_topic === sub) item.sub_topic = newName;
+                    });
+                    renderSubTopics();
+                    await editCrumbs({"type":"subtopic","action":"edit","prevTopic": selectedTopic,"subtopic": sub, "newSubtopic": newName})
+                }
+            };
+            
+            const delBtn = document.createElement("button");
+            delBtn.innerText = "🗑️";
+            delBtn.onclick = async (e) => {
+                e.stopPropagation();
+                if (confirm(`Delete "${sub}"?`)) {
+                    memoryData = memoryData.filter(item => !(item.topic === selectedTopic && item.sub_topic === sub));
+                    await editCrumbs({"type":"subtopic","action":"delete","prevTopic": selectedTopic,"subtopic": sub})
+                    renderSubTopics();
+                }
+            };
+            
+            div.appendChild(editBtn);
+            div.appendChild(delBtn);
+        }
 
         container.appendChild(div);
     });
@@ -103,11 +183,52 @@ async function renderFacts() {
     facts.forEach(f => {
         const div = document.createElement("div");
         div.className = "memory-cell sub-topic-cell";
+        if (!editMode) {
+            div.innerHTML = `
+                <b>${f.question}</b><br>
+                <small>${f.fact}</small>
+            `;
+        }
+        if (editMode){
+            div.innerHTML = `
+                <b>${f.question}</b><br>
+                <small>${f.fact}</small>
+            `;
+            const editBtn = document.createElement("button");
+            editBtn.innerText = "✏️";
+            editBtn.onclick = async (e) =>{
+                e.stopPropagation();
+                const newQuestion = prompt("Edit question:", f.question);
+                const newFact = prompt("Edit fact:", f.fact);
+            
+            if (newQuestion || newFact){
+                const originalIndex = memoryData.findIndex(x => 
+                        x.topic === selectedTopic && 
+                        x.sub_topic === selectedSubTopic &&
+                        x.question === f.question &&
+                        x.fact === f.fact
+                );
 
-        div.innerHTML = `
-            <b>${f.question}</b><br>
-            <small>${f.fact}</small>
-        `;
+                await editCrumbs({
+                        "type": "fact",
+                        "action": "edit",
+                        "prevTopic": selectedTopic,
+                        "subtopic": selectedSubTopic,
+                        "oldQuestion": f.question,
+                        "oldFact": f.fact,
+                        "newQuestion": newQuestion,
+                        "newFact": newFact
+                    });
+                if (originalIndex !== -1) {
+                        memoryData[originalIndex].question = newQuestion;
+                        memoryData[originalIndex].fact = newFact;
+                }
+                renderFacts();
+            }}
+            div.appendChild(editBtn)
+        }
+        
+
 
         container.appendChild(div);
     });
