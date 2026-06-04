@@ -53,6 +53,7 @@ async function openMemory(data) {
     await renderTopics();
 }
 async function renderTopics() {
+    currentLevel = "topic";
     document.getElementById("memoryTitle").innerText = "Topics";
 
     const topics = [...new Set(memoryData.map(x => x.topic))];
@@ -67,6 +68,7 @@ async function renderTopics() {
         
         if (!editMode) {
             div.onclick = async () => {
+                console.log("TOPIC CLICKED");
                 selectedTopic = topic;
                 await renderSubTopics();
             };
@@ -87,6 +89,8 @@ async function renderTopics() {
                     renderTopics();
                     await editCrumbs({"type":"topic","action":"edit","prevTopic": topic,"topic":newName})
                     
+
+                    
                     
                     
                 }
@@ -99,8 +103,9 @@ async function renderTopics() {
                 e.stopPropagation();
                 if (confirm(`Delete "${topic}"?`)) {
                     memoryData = memoryData.filter(item => item.topic !== topic);
-                    await editCrumbs({"type":"topic","action":"delete","prevTopic": topic,"topic":"skip"})
                     renderTopics();
+                    await editCrumbs({"type":"topic","action":"delete","prevTopic": topic,"topic":"skip"})
+                    
                 }
             };
             const btnContainer = document.createElement("div");
@@ -164,8 +169,9 @@ async function renderSubTopics() {
                 e.stopPropagation();
                 if (confirm(`Delete "${sub}"?`)) {
                     memoryData = memoryData.filter(item => !(item.topic === selectedTopic && item.sub_topic === sub));
-                    await editCrumbs({"type":"subtopic","action":"delete","prevTopic": selectedTopic,"subtopic": sub})
                     renderSubTopics();
+                    await editCrumbs({"type":"subtopic","action":"delete","prevTopic": selectedTopic,"subtopic": sub})
+                    
                 }
             };
             const btnContainer = document.createElement("div");
@@ -194,7 +200,7 @@ async function renderFacts() {
 
     facts.forEach(f => {
         const div = document.createElement("div");
-        div.className = editMode ?"memory-cell edit-mode sub-topic-cell":"memory-cell sub-topic-cell";
+        div.className = editMode ?"memory-cell edit-mode":"memory-cell sub-topic-cell";
         if (!editMode) {
             div.innerHTML = `
                 <b>${f.question}</b><br>
@@ -221,22 +227,26 @@ async function renderFacts() {
                         x.question === f.question &&
                         x.fact === f.fact
                 );
-
-                await editCrumbs({
-                        "type": "fact",
-                        "action": "edit",
-                        "prevTopic": selectedTopic,
-                        "subtopic": selectedSubTopic,
-                        "oldQuestion": f.question,
-                        "oldFact": f.fact,
-                        "newQuestion": newQuestion,
-                        "newFact": newFact
-                    });
                 if (originalIndex !== -1) {
-                        memoryData[originalIndex].question = newQuestion;
-                        memoryData[originalIndex].fact = newFact;
+                    let old_question = memoryData[originalIndex].question
+                    let old_fact = memoryData[originalIndex].fact
+                    memoryData[originalIndex].question = newQuestion;
+                    memoryData[originalIndex].fact = newFact;
+                
+                    renderFacts();
+
+                    await editCrumbs({
+                            "type": "fact",
+                            "action": "edit",
+                            "prevTopic": selectedTopic,
+                            "subtopic": selectedSubTopic,
+                            "oldQuestion": old_question,
+                            "oldFact": old_fact,
+                            "newQuestion": newQuestion,
+                            "newFact": newFact
+                        });
                 }
-                renderFacts();
+
             }}
             const deleteBtn = document.createElement("button");
             deleteBtn.innerText = "🗑️";

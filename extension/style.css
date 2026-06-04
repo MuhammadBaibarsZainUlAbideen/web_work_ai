@@ -396,18 +396,3 @@ button:disabled {
 
 
 
-.topic-edit-input {
-    width: 100%;
-    box-sizing: border-box;
-    background: #334155;
-    color: white;
-    border: 1px solid #475569;
-    border-radius: 6px;
-    padding: 6px 8px;
-    font-size: 14px;
-    outline: none;
-}
-
-.topic-edit-input:focus {
-    border-color: #60a5fa;
-}

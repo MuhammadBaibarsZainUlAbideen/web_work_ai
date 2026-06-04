@@ -427,17 +427,17 @@ async def create_session(data:EditedCrumbs,authorization: str = Header(None)):
     if data.message["type"] == "topic" and data.message["action"] == "delete":
         await Editing_crumbs("topic",data.message["action"], user_id, data.message["prevTopic"], data.message["topic"])
     if data.message["type"] == "subtopic" and data.message["action"] == "edit":
-        await Editing_crumbs("subtopic", data.message["action"], user_id, data.message["prevTopic"], data.message["subtopic"], data.message["newSubtopic"])
+        await Editing_crumbs("subtopic", data.message["action"], user_id, data.message["prevTopic"],None, data.message["subtopic"], data.message["newSubtopic"])
 
     if data.message["type"] == "subtopic" and data.message["action"] == "delete":
-        await Editing_crumbs("subtopic", data.message["action"], user_id, data.message["prevTopic"], data.message["subtopic"])
+        await Editing_crumbs("subtopic", data.message["action"], user_id, data.message["prevTopic"],None, data.message["subtopic"])
         
     if data.message["type"] == "fact" and data.message["action"] == "edit":
         print(data)
-        await Editing_crumbs("fact",data.message["action"],user_id,data.message["prevTopic"],data.message["subtopic"],None,data.message["oldQuestion"],data.message["oldFact"],data.message["newQuestion"],data.message["newFact"])
+        await Editing_crumbs("fact",data.message["action"],user_id,data.message["prevTopic"],None,data.message["subtopic"],None,data.message["oldQuestion"],data.message["oldFact"],data.message["newQuestion"],data.message["newFact"])
     if data.message["type"] == "fact" and data.message["action"] == "delete":
         print(data)
-        await Editing_crumbs("fact", data.message["action"], user_id,data.message["prevTopic"],data.message["subtopic"],None,data.message["question"], data.message["fact"],None,None)
+        await Editing_crumbs("fact", data.message["action"], user_id,data.message["prevTopic"],None,data.message["subtopic"],None,data.message["question"], data.message["fact"],None,None)
 
 
 

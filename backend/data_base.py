@@ -105,7 +105,7 @@ async def printing_crumbs(user_id):
 
 
 #Editing Crumbs
-async def Editing_crumbs(type, action, user_id, previous_topic, subtopic=None, new_subtopic=None, old_question=None,old_fact=None, new_question=None, new_fact=None):
+async def Editing_crumbs(type, action, user_id, previous_topic, topic, subtopic=None, new_subtopic=None, old_question=None,old_fact=None, new_question=None, new_fact=None):
     print(f"old_questiion {old_question}:::: old_fact {old_fact}::::new_question {new_question}")
     async with pool.acquire() as conn:
         if type == "topic" and action == "edit":
@@ -113,7 +113,7 @@ async def Editing_crumbs(type, action, user_id, previous_topic, subtopic=None, n
                 UPDATE crumbs
                 SET topic = $3
                 WHERE user_id = $1 AND topic = $2
-            """, user_id, previous_topic, new_subtopic)  # new_subtopic here is actually new topic name
+            """, user_id, previous_topic, topic)  # new_subtopic here is actually new topic name
             
         elif type == "topic" and action == "delete":
             await conn.execute("""
