@@ -63,18 +63,28 @@ async function sendEditCrumbs(access_token, editedCrumbs){
         };
     }
     else if (editedCrumbs.type === "fact") {
-        message = {
-            "type": editedCrumbs.type,
-            "action": editedCrumbs.action,
-            "prevTopic": editedCrumbs.prevTopic,
-            "subtopic": editedCrumbs.subtopic,
-            "oldQuestion": editedCrumbs.oldQuestion,
-            "oldFact": editedCrumbs.oldFact,
-            "newQuestion": editedCrumbs.newQuestion,
-            "newFact": editedCrumbs.newFact
-        };
-        console.log(message)
+        if (editedCrumbs.action === "edit") {
+            message = {
+                "type": editedCrumbs.type,
+                "action": editedCrumbs.action,
+                "prevTopic": editedCrumbs.prevTopic,
+                "subtopic": editedCrumbs.subtopic,
+                "oldQuestion": editedCrumbs.oldQuestion,
+                "oldFact": editedCrumbs.oldFact,
+                "newQuestion": editedCrumbs.newQuestion,
+                "newFact": editedCrumbs.newFact
+            };
+        } else if (editedCrumbs.action === "delete") {
+            message = {
+                "type": editedCrumbs.type,
+                "action": editedCrumbs.action,
+                "prevTopic": editedCrumbs.prevTopic,
+                "subtopic": editedCrumbs.subtopic,
+                "question": editedCrumbs.question,
+                "fact": editedCrumbs.fact
+            };
         }
+    }
 
     
     let data = await fetch("http://127.0.0.1:8000/edittopic",{

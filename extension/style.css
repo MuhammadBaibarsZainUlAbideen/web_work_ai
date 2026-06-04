@@ -247,15 +247,16 @@ button:disabled {
 }
 
 .memory-cell {
+    position: relative;
     background: #1e293b;
     padding: 10px;
     border-radius: 10px;
     cursor: pointer;
-    /* transition: 0.2s; */
     transition: all 0.2s ease;
-
 }
-
+.edit-mode {
+    padding-top: 35px;
+}
 .memory-cell:hover {
     /* transform: scale(1.05);
     background: #334155; */
@@ -267,13 +268,16 @@ button:disabled {
     display: none;
 }
 .sub-topic-cell {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* transition: transform 0.2s ease, box-shadow 0.2s ease; */
+    position: relative;
+    z-index: 1;
 }
 
 .sub-topic-cell:hover {
     transform: scale(1.35);
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    cursor: pointer;
+    z-index: 100;
+
 }
 
 /* .memory-overlay.hidden {
@@ -351,4 +355,59 @@ button:disabled {
 
 .termsOverlay-body p {
     margin: 0 0 12px 0;
+}
+
+
+
+.cell-buttons {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: flex;
+    gap: 4px;
+}
+
+.cell-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    margin: 0;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.2s;
+    opacity: 0.6;
+}
+
+.cell-btn:hover {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.edit-btn:hover {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.delete-btn:hover {
+    background: #ffebee;
+    color: #d32f2f;
+}
+
+
+
+.topic-edit-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: #334155;
+    color: white;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 14px;
+    outline: none;
+}
+
+.topic-edit-input:focus {
+    border-color: #60a5fa;
 }

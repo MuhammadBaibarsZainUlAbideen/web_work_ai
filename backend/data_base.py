@@ -152,6 +152,15 @@ async def Editing_crumbs(type, action, user_id, previous_topic, subtopic=None, n
                 WHERE user_id = $1 AND topic = $2 AND sub_topic = $3 
                 AND TRIM(question) = TRIM($4) AND TRIM(fact) = TRIM($7)
             """, user_id, previous_topic, subtopic, old_question, new_question, new_fact, old_fact)
+        elif type == "fact" and action == "delete":
+            await conn.execute("""
+                DELETE FROM crumbs
+                WHERE user_id = $1 AND topic = $2 AND sub_topic = $3 
+                AND TRIM(question) = TRIM($4) AND TRIM(fact) = TRIM($5)
+            """, user_id, previous_topic, subtopic, old_question, old_fact)
+            
+            print("Fact deleted successfully")
+            
         
 async def printing_crumbs_embedding_froentend(user_id):
     async with pool.acquire() as conn:

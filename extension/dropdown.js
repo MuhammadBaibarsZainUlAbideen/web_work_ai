@@ -62,7 +62,7 @@ async function renderTopics() {
     container.innerHTML = "";
     topics.forEach((topic) => {
         const div = document.createElement("div");
-        div.className = "memory-cell";
+        div.className = editMode ? "memory-cell edit-mode" : "memory-cell";;
         div.innerText = topic;
         
         if (!editMode) {
@@ -75,6 +75,7 @@ async function renderTopics() {
         if (editMode) {
             const editBtn = document.createElement("button");
             editBtn.innerText = "✏️";
+            editBtn.className = "cell-btn edit-btn";
             editBtn.onclick = (async (e) => {
                 e.stopPropagation();
                 const newName = prompt("Edit topic:", topic);
@@ -93,6 +94,7 @@ async function renderTopics() {
             
             const delBtn = document.createElement("button");
             delBtn.innerText = "🗑️";
+            delBtn.className = "cell-btn delete-btn";
             delBtn.onclick = async (e) => {
                 e.stopPropagation();
                 if (confirm(`Delete "${topic}"?`)) {
@@ -101,9 +103,13 @@ async function renderTopics() {
                     renderTopics();
                 }
             };
-            
-            div.appendChild(editBtn);
-            div.appendChild(delBtn);
+            const btnContainer = document.createElement("div");
+            btnContainer.className = "cell-buttons";
+
+            btnContainer.appendChild(editBtn);
+            btnContainer.appendChild(delBtn);
+
+            div.appendChild(btnContainer);
         }
         
         container.appendChild(div);
@@ -125,7 +131,7 @@ async function renderSubTopics() {
 
     subtopics.forEach(sub => {
         const div = document.createElement("div");
-        div.className = "memory-cell";
+        div.className = editMode ? "memory-cell edit-mode" : "memory-cell";;
         div.innerText = sub;
 
         if (!editMode) {
@@ -138,6 +144,7 @@ async function renderSubTopics() {
         if (editMode) {
             const editBtn = document.createElement("button");
             editBtn.innerText = "✏️";
+            editBtn.className = "cell-btn edit-btn";
             editBtn.onclick = async (e) => {
                 e.stopPropagation();
                 const newName = prompt("Edit subtopic:", sub);
@@ -152,6 +159,7 @@ async function renderSubTopics() {
             
             const delBtn = document.createElement("button");
             delBtn.innerText = "🗑️";
+            delBtn.className = "cell-btn delete-btn";
             delBtn.onclick = async (e) => {
                 e.stopPropagation();
                 if (confirm(`Delete "${sub}"?`)) {
@@ -160,9 +168,13 @@ async function renderSubTopics() {
                     renderSubTopics();
                 }
             };
-            
-            div.appendChild(editBtn);
-            div.appendChild(delBtn);
+            const btnContainer = document.createElement("div");
+            btnContainer.className = "cell-buttons";
+
+            btnContainer.appendChild(editBtn);
+            btnContainer.appendChild(delBtn);
+
+            div.appendChild(btnContainer);
         }
 
         container.appendChild(div);
@@ -182,7 +194,7 @@ async function renderFacts() {
 
     facts.forEach(f => {
         const div = document.createElement("div");
-        div.className = "memory-cell sub-topic-cell";
+        div.className = editMode ?"memory-cell edit-mode sub-topic-cell":"memory-cell sub-topic-cell";
         if (!editMode) {
             div.innerHTML = `
                 <b>${f.question}</b><br>
@@ -196,6 +208,7 @@ async function renderFacts() {
             `;
             const editBtn = document.createElement("button");
             editBtn.innerText = "✏️";
+            editBtn.className = "cell-btn edit-btn";
             editBtn.onclick = async (e) =>{
                 e.stopPropagation();
                 const newQuestion = prompt("Edit question:", f.question);
@@ -225,7 +238,33 @@ async function renderFacts() {
                 }
                 renderFacts();
             }}
-            div.appendChild(editBtn)
+            const deleteBtn = document.createElement("button");
+            deleteBtn.innerText = "🗑️";
+            deleteBtn.className = "cell-btn delete-btn";
+            deleteBtn.onclick = async (e) => {
+                e.stopPropagation();
+                if (confirm("Delete this fact?")) {
+                    memoryData = memoryData.filter(x => 
+                        x.question !== f.question || x.fact !== f.fact
+                    );
+                    renderFacts();
+                    await editCrumbs({
+                        "type": "fact",
+                        "action": "delete",
+                        "prevTopic": selectedTopic,
+                        "subtopic": selectedSubTopic,
+                        "question": f.question,
+                        "fact": f.fact
+                    });
+                }
+            };
+            const btnContainer = document.createElement("div");
+            btnContainer.className = "cell-buttons";
+
+            btnContainer.appendChild(editBtn);
+            btnContainer.appendChild(deleteBtn);
+
+            div.appendChild(btnContainer);
         }
         
 
