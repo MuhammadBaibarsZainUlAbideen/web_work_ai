@@ -1,5 +1,4 @@
 import asyncpg
-import asyncio
 from datetime import datetime, timezone, timedelta
 import os
 import numpy as np
@@ -106,7 +105,7 @@ async def printing_crumbs(user_id):
 
 #Editing Crumbs
 async def Editing_crumbs(type, action, user_id, previous_topic, topic, subtopic=None, new_subtopic=None, old_question=None,old_fact=None, new_question=None, new_fact=None):
-    print(f"old_questiion {old_question}:::: old_fact {old_fact}::::new_question {new_question}")
+    # print(f"old_questiion {old_question}:::: old_fact {old_fact}::::new_question {new_question}")
     async with pool.acquire() as conn:
         if type == "topic" and action == "edit":
             await conn.execute("""
@@ -160,6 +159,22 @@ async def Editing_crumbs(type, action, user_id, previous_topic, topic, subtopic=
             """, user_id, previous_topic, subtopic, old_question, old_fact)
             
             print("Fact deleted successfully")
+        elif type == "subtopic" and action == "move_to_topic":
+            await conn.execute("""
+                UPDATE crumbs
+                SET topic = $3
+                WHERE user_id = $1 AND topic = $2 AND sub_topic = $4
+            """, user_id, previous_topic, topic, subtopic)
+            print(f"Subtopic {subtopic} moved from topic {previous_topic} to {topic}")
+        elif type == "fact" and action == "move_to_subtopic":
+            await conn.execute("""
+                UPDATE crumbs
+                SET sub_topic = $4
+                WHERE user_id = $1 AND topic = $2 AND sub_topic = $3 
+                AND TRIM(question) = TRIM($5) AND TRIM(fact) = TRIM($6)
+            """, user_id, previous_topic, subtopic, new_subtopic, 
+               old_question, old_fact)
+            
             
         
 async def printing_crumbs_embedding_froentend(user_id):

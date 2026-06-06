@@ -438,8 +438,10 @@ async def create_session(data:EditedCrumbs,authorization: str = Header(None)):
     if data.message["type"] == "fact" and data.message["action"] == "delete":
         print(data)
         await Editing_crumbs("fact", data.message["action"], user_id,data.message["prevTopic"],None,data.message["subtopic"],None,data.message["question"], data.message["fact"],None,None)
-
-
+    if data.message["type"] == "subtopic" and data.message["action"] == "move_to_topic":
+        await Editing_crumbs("subtopic", data.message["action"], user_id,data.message["prevTopic"], data.message["newTopic"],data.message["subtopic"])
+    elif data.message["type"] == "fact" and data.message["action"] == "move_to_subtopic":
+        await Editing_crumbs("fact", data.message["action"], user_id,data.message["prevTopic"], None,data.message["oldSubtopic"], data.message["newSubtopic"],data.message["question"], data.message["fact"])
 
     
 

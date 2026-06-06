@@ -25,3 +25,5 @@ Thumbs.db
 
 # Chrome extension build artifacts
 extension/node_modules/
+
+.env

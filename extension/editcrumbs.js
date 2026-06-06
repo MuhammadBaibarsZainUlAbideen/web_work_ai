@@ -53,13 +53,21 @@ async function sendEditCrumbs(access_token, editedCrumbs){
             "prevTopic": editedCrumbs.prevTopic,
             "topic": editedCrumbs.topic
         };
-    } else if (editedCrumbs.type === "subtopic") {
+    } else if (editedCrumbs.type === "subtopic" && ((editedCrumbs.action === "edit") || (editedCrumbs.action === "delete"))) {
         message = {
             "type": editedCrumbs.type,
             "action": editedCrumbs.action,
             "prevTopic": editedCrumbs.prevTopic,
             "subtopic": editedCrumbs.subtopic,
             "newSubtopic": editedCrumbs.newSubtopic
+        };
+    }else if (editedCrumbs.type === "subtopic" && editedCrumbs.action === "move_to_topic") {
+        message = {
+            "type": editedCrumbs.type,
+            "action": editedCrumbs.action,
+            "prevTopic": editedCrumbs.prevTopic,
+            "subtopic": editedCrumbs.subtopic,
+            "newTopic": editedCrumbs.newTopic
         };
     }
     else if (editedCrumbs.type === "fact") {
@@ -80,6 +88,16 @@ async function sendEditCrumbs(access_token, editedCrumbs){
                 "action": editedCrumbs.action,
                 "prevTopic": editedCrumbs.prevTopic,
                 "subtopic": editedCrumbs.subtopic,
+                "question": editedCrumbs.question,
+                "fact": editedCrumbs.fact
+            };
+        }else if (editedCrumbs.action === "move_to_subtopic") {
+            message = {
+                "type": editedCrumbs.type,
+                "action": editedCrumbs.action,
+                "prevTopic": editedCrumbs.prevTopic,
+                "oldSubtopic": editedCrumbs.oldSubtopic,
+                "newSubtopic": editedCrumbs.newSubtopic,
                 "question": editedCrumbs.question,
                 "fact": editedCrumbs.fact
             };
