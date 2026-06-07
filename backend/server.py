@@ -24,12 +24,12 @@ from redis_verification import check_rate_limit, get_cached_answer, set_cached_a
 import json
 import time
 import asyncio
-
+load_dotenv()
 our_secret_key = os.getenv("our_secret_key")
 
 
 
-load_dotenv()
+
 endpoint = "https://foundry-ai-prd-eus2-01.cognitiveservices.azure.com/"
 model_name = "gpt-4o-mini"
 deployment = "gpt-4o-mini"

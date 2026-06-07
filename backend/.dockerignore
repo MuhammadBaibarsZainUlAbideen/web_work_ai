@@ -1,6 +1,0 @@
-.env
-__pycache__
-*.pyc
-venv/
-mydatabase1.db
-*.png
