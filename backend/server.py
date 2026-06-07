@@ -24,6 +24,7 @@ from redis_verification import check_rate_limit, get_cached_answer, set_cached_a
 import json
 import time
 import asyncio
+
 load_dotenv()
 our_secret_key = os.getenv("our_secret_key")
 
@@ -48,7 +49,6 @@ converter = LatexNodes2Text()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-    # await ensure_tables_exist()
     yield
 
 app = FastAPI(lifespan=lifespan)
