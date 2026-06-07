@@ -69,7 +69,7 @@ async def webhook(request: Request):
     sig = request.headers.get("stripe-signature")
 
     try:
-        event = stripe.Webhook.construct_event(payload, sig,"whsec_dfcefc19ca3e7db7240e8579b99e47303212ec38521a834bcb62c8ef2fc7d416")
+        event = stripe.Webhook.construct_event(payload, sig,"whsec_eca279899ff024408bd2b290a4f91a32776debf5d0ed8d7ecd4e596b46f1f550")
     except Exception:
         return {"error": "invalid"}
     data = event["data"]["object"]
