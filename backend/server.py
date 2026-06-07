@@ -153,7 +153,7 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
             if duplicate:
                 print("DUPLICATE FOUND → SKIPPING STORAGE")
                 return
-            #Stroing in DB
+            
             await stroing_question_and_embedding(user_id,crumbs[0]["Question"],crumbs[0]["fact"],crumbs[0]["topic"],crumbs[0]["Sub-Topic"],crumbs[0]["confidence"],Question_embedding,fact_embedding)
             # Success, exit retry loop
             return
