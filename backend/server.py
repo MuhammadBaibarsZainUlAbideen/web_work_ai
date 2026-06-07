@@ -155,7 +155,7 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
                 return
             
             await stroing_question_and_embedding(user_id,crumbs[0]["Question"],crumbs[0]["fact"],crumbs[0]["topic"],crumbs[0]["Sub-Topic"],crumbs[0]["confidence"],Question_embedding,fact_embedding)
-            # Success, exit retry loop
+           
             return
         except Exception as e:
             print(f"Crumb extraction attempt {attempt + 1} failed:", e)
