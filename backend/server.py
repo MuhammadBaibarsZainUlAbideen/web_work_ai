@@ -174,7 +174,6 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     
     global our_secret_key
     # print(await get_payment())
-    # print("--->",await Get())
     # #await deleting_everything()
 
     #await adding_column()
