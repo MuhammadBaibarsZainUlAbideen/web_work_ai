@@ -5,7 +5,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from pylatexenc.latex2text import LatexNodes2Text
-from data_base import  init_db,Inserting,Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment,stroing_embedings,stroing_question,printing_crumbs_embeddings,printing_crumbs,printing_crumbs_embedding_froentend,get_topics, Editing_crumbs
+from  backend.data_base import  init_db,Inserting,Get,refresh_token,extracting_data,getting_user,updating_refresh_token,deleting_everything,Get_users,inserting_payment,increment_tries,get_tries,get_payment,payment_status,get_payment,stroing_embedings,stroing_question,printing_crumbs_embeddings,printing_crumbs,printing_crumbs_embedding_froentend,get_topics, Editing_crumbs
 from openai import AsyncAzureOpenAI
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
@@ -13,14 +13,14 @@ from datetime import datetime, timezone,timedelta
 import base64
 from io import BytesIO
 from PIL import Image
-from stripe_routes import router as stripe_router
+from backend.stripe_routes import router as stripe_router
 import uuid
-from session import sessions
+from backend.session import sessions
 from contextlib import asynccontextmanager
-from building_embeding_text import build_embedding_text,embed
+from backend.building_embeding_text import build_embedding_text,embed
 import numpy as np
-from helper_function import is_duplicate,cosine_similarity,to_blob,stroing_question_and_embedding
-from redis_verification import check_rate_limit, get_cached_answer, set_cached_answer
+from backend.helper_function import is_duplicate,cosine_similarity,to_blob,stroing_question_and_embedding
+from backend.redis_verification import check_rate_limit, get_cached_answer, set_cached_answer
 import json
 import time
 import asyncio
