@@ -1,5 +1,5 @@
 import numpy as np
-from data_base import stroing_embedings,stroing_question,printing_crumbs_embeddings
+from backend.data_base import stroing_embedings,stroing_question,printing_crumbs_embeddings
 import uuid
 def to_blob(vector):
     return np.array(vector, dtype=np.float32).tobytes()
