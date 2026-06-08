@@ -392,7 +392,6 @@ async def logout(authorization: str = Header(None)):
 
 @app.get("/admin")
 async def admin():
-    # deleting_everything()
     data = await Get_users()
     print(await Get())
     print(data)
