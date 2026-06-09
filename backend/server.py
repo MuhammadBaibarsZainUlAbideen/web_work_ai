@@ -20,7 +20,7 @@ from contextlib import asynccontextmanager
 from backend.building_embeding_text import build_embedding_text,embed
 import numpy as np
 from backend.helper_function import is_duplicate,cosine_similarity,to_blob,stroing_question_and_embedding
-from backend.redis_verification import check_rate_limit, get_cached_answer, set_cached_answer
+from backend.redis_verification import check_rate_limit, get_cached_answer, set_cached_answer,check_paid_rate_limit
 import json
 import time
 import asyncio
@@ -196,14 +196,14 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
         print("as")
         return {"answer":"Login_again"}
     
-    if not await check_rate_limit(user_id):
-        print("rate limit reached")
-        return {"answer": "Too many requests. Please wait a minute."}
-    if problem_data.type != "image":
-        cached = await get_cached_answer(problem_data.message)
-        if cached:
-            print("answer:", cached["answer"])
-            return {"answer": cached["answer"]}
+    # if not await check_rate_limit(user_id):
+    #     print("rate limit reached")
+    #     return {"answer": "Too many requests. Please wait a minute."}
+    # if problem_data.type != "image":
+    #     cached = await get_cached_answer(problem_data.message)
+    #     if cached:
+    #         print("answer:", cached["answer"])
+    #         return {"answer": cached["answer"]}
 
     user = await getting_user(user_id)
     if not user:
@@ -215,17 +215,14 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     print(status)
 
 
-
-    if total_tries >3 and not status:
-        print("11")
+    # Pay Wall
+    if not status and total_tries > 500:
         return {"answer":"False"}
-        print("11")
-    if total_tries >3 and status[0][0] != "active":
-        print("111")
-        return {"answer":"False"}
-    print("1111")
-    # image = decoding_and_reducing(problem_data.screenshot)
-    print("sdf")
+    if not status and not await check_rate_limit(user_id):
+        return {"answer": "Too many requests. Please wait a minute.Or get the premimum"}
+    if not await check_paid_rate_limit(user_id):
+        return {"answer": "I know You have paid version but calm down"}
+    
     user_content = []
     if problem_data.type == "image":
         user_content = [
@@ -283,8 +280,8 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     
     # answer = converter.latex_to_text(answer)
     await increment_tries(user_id)
-    if problem_data.type != "image":
-        await set_cached_answer(problem_data.message, answer)
+    # if problem_data.type != "image":
+    #     await set_cached_answer(problem_data.message, answer)
 
 
     return {"answer":answer}
