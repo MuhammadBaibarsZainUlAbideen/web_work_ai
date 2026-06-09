@@ -465,7 +465,7 @@ async def create_session(authorization: str = Header(None)):
         print(session_id) 
 
         
-        plans_url = f"http://localhost:8001/stripe.html?session_id={session_id}"
+        plans_url = f"https://webworkaipayment.netlify.app/stripe.html?session_id={session_id}"
         print("1")
         return {"plans_url": plans_url}
 
