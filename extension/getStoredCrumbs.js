@@ -43,7 +43,7 @@ export async function getStoredCrumbs(){
 
 async function getCrumbs(access_token){
     console.log('11')
-    let data =  await fetch("http://127.0.0.1:8000/crumbs",{
+    let data =  await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/crumbs",{
         method:"POST",
         headers: {
             "Content-Type": "application/json",

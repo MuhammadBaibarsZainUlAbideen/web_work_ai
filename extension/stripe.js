@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let upgrade_button = document.getElementById("payBtn");
 
     upgrade_button.onclick = async function checkout() {
-        const response = await fetch("http://127.0.0.1:8000/checkout", {
+        const response = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/checkout", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${session_id}`

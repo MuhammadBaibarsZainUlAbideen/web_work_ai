@@ -105,7 +105,7 @@ async function sendEditCrumbs(access_token, editedCrumbs){
     }
 
     
-    let data = await fetch("http://127.0.0.1:8000/edittopic",{
+    let data = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/edittopic",{
         method: "POST",
         headers: {
             "Content-Type": "application/json",

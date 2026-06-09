@@ -61,7 +61,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                         const croppedBase64 = reader.result.split(',')[1];
                         console.log("----> "+request.tcoordinates[1])
 
-                        fetch("http://127.0.0.1:8000/solve", {
+                        fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/solve", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
@@ -98,7 +98,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
             try {
 
-                fetch("http://127.0.0.1:8000/solve", {
+                fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/solve", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

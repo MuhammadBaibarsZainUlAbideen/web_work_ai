@@ -1,7 +1,7 @@
 async function loadAdminData() {
     try {
         
-        const response = await fetch("https://webworkai-production.up.railway.app/admin");
+        const response = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/admin");
         const result = await response.json();
 
         const users = result.data;
