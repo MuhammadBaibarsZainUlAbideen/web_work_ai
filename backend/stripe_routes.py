@@ -69,7 +69,7 @@ async def webhook(request: Request):
     sig = request.headers.get("stripe-signature")
 
     try:
-        event = stripe.Webhook.construct_event(payload, sig,"whsec_eca279899ff024408bd2b290a4f91a32776debf5d0ed8d7ecd4e596b46f1f550")
+        event = stripe.Webhook.construct_event(payload, sig,"whsec_IESIUBKQuGs8nkq5zQUXbNcympZ4QfzB")
     except Exception:
         return {"error": "invalid"}
     data = event["data"]["object"]
@@ -113,7 +113,7 @@ async def webhook(request: Request):
 
     elif event["type"] == "invoice.payment_failed":
         subscription_id = data["subscription"]
-
+ 
         await updating_payment_status(subscription_id, "past_due")
 
         print("Payment failed")
