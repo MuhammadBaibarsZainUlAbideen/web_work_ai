@@ -152,10 +152,14 @@ button:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
   color: var(--clr-warning);
   border: 1px solid rgba(240, 136, 62, 0.35);
   padding: 7px 12px;
+  
 }
 #upgrade:hover {
   background: rgba(240, 136, 62, 0.1);
   opacity: 1;
+}
+.display{
+    display: none;  
 }
 
 /* Icon-only top bar buttons */

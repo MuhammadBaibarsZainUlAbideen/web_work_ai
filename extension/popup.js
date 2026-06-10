@@ -1,6 +1,7 @@
 import { sending_Refresh_token } from './Refrsh_token.js'
 import { addMessage } from './send_message.js';
 import { chatHistory } from './send_message.js';
+import { goPremimumOverly} from './goPremimum_overly.js'
 
 var solveBtn = document.getElementById("solve");
 var resultDiv = document.getElementById("result");
@@ -38,6 +39,11 @@ solveBtn.onclick = async function() {
                     }
                     
                     fullAnswer = apiResponse.answer;
+                    overly = apiResponse.overly;
+                    if(overly){
+                        await goPremimumOverly();
+
+                    }
                     if (fullAnswer === "False"){
                         resultDiv.innerText = "Pay to Continue"
                         return;
@@ -67,6 +73,11 @@ solveBtn.onclick = async function() {
                                         return;
                                     }
                                     fullAnswer = apiResponse.answer;
+                                    overly = apiResponse.overly;
+                                    if(overly){
+                                        await goPremimumOverly();
+
+                                    }
                                     
                                     if (fullAnswer === "False") {
                                         resultDiv.innerText = "Pay to Continue"
