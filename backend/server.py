@@ -217,9 +217,9 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
 
     # Pay Wall
     if not status and total_tries > 500:
-        return {"answer":"False"}
+        return {"answer":"False", "overly":"True"}
     if not status and not await check_rate_limit(user_id):
-        return {"answer": "Too many requests. Please wait a minute.Or get the premimum"}
+        return {"answer": "Too many requests. Please wait a minute.Or get the premimum","overly":"True"}
     if not await check_paid_rate_limit(user_id):
         return {"answer": "I know You have paid version but calm down"}
     
@@ -263,13 +263,14 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
         ],
         max_completion_tokens=600,
         temperature=0,
-        model=deployment
+        model=deployment,
+        stream=True
     )
     print("3")
     print("sd")
     
     answer = response1.choices[0].message.content
-    # print(f"Total time before background task: {time.time() - start} seconds")
+
     background_tasks.add_task(
         extract_and_store_crumbs,
         user_id,
@@ -278,10 +279,8 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     )
     print(response1.usage)
     
-    # answer = converter.latex_to_text(answer)
     await increment_tries(user_id)
-    # if problem_data.type != "image":
-    #     await set_cached_answer(problem_data.message, answer)
+
 
 
     return {"answer":answer}

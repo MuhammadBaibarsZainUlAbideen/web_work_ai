@@ -28,7 +28,7 @@ export async function addMessage(role, text) {
 
     chatBox.scrollTop = chatBox.scrollHeight;
 }
-sendBtn.addEventListener("click", async () => {
+async function handleSend(){
     const text = chatInput.value.trim();
     console.log(text)
     if (!text) return;
@@ -37,6 +37,9 @@ sendBtn.addEventListener("click", async () => {
     addMessage("user", text);
 
     chatHistory.push({ role: "user", content: text });
+    if (chatHistory.length > 10) {
+        chatHistory = chatHistory.slice(-10);
+    }
 
     chatInput.value = "";
 
@@ -46,8 +49,11 @@ sendBtn.addEventListener("click", async () => {
     addMessage("ai", aiReply);
 
     chatHistory.push({ role: "assistant", content: aiReply });
+    if (chatHistory.length > 10) {
+        chatHistory = chatHistory.slice(-10);
+    }
 
-});
+};
 async function getAIResponse(input) {
     console.log("yo123")
 
@@ -106,3 +112,13 @@ async function getAIResponse(input) {
 
     return fullAnswer;
 }
+
+
+sendBtn.addEventListener("click", handleSend);
+
+chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+    }
+});
