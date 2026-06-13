@@ -1,5 +1,7 @@
 console.log("popup.js loaded");
 import { sending_Refresh_token } from './Refrsh_token.js'
+import { goPremimumOverly } from './goPremimum_overly.js'
+
 const chatBox = document.getElementById("chatBox");
 const chatInput = document.getElementById("chatInput");
 const sendBtn = document.getElementById("sendBtn");
@@ -11,6 +13,7 @@ var login = document.getElementById("LS");
 
 
 export let chatHistory = [];
+
 export async function addMessage(role, text) {
     const msg = document.createElement("div");
     msg.classList.add("message", role);
@@ -64,10 +67,10 @@ async function handleSend(){
 
 
     const aiReply = await getAIResponse(text);
-
-    addMessage("ai", aiReply);
-
-    chatHistory.push({ role: "assistant", content: aiReply });
+    if (aiReply !== null) {
+        addMessage("ai", aiReply);
+        chatHistory.push({ role: "assistant", content: aiReply });
+    }
     if (chatHistory.length > 10) {
         chatHistory = chatHistory.slice(-10);
     }
@@ -92,6 +95,11 @@ async function getAIResponse(input) {
     }
 
     let fullAnswer = apiResponse.answer;
+    let overly = apiResponse.overly;
+    if (overly == "True") {
+        await goPremimumOverly();
+        return null;
+    }
 
     if (fullAnswer === "False") {
         resultDiv.innerText = "Pay to Continue";
@@ -119,6 +127,10 @@ async function getAIResponse(input) {
             resultDiv.innerText = "ERROR after retry";
             solveBtn.disabled = false;
             return;
+        }
+        if (apiResponse.overly == "True") {
+            await goPremimumOverly();
+            return null;
         }
 
         fullAnswer = apiResponse.answer;

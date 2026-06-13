@@ -231,7 +231,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
                 "type": "image_url",
                 "image_url": {
                     "url": f"data:image/png;base64,{problem_data.message}",
-                    "detail": "high"
+                    "detail": "low"
                 }
             }
         ]
@@ -272,6 +272,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     print(cost)
     
     answer = response1.choices[0].message.content
+    print(response1.usage)
 
     background_tasks.add_task(
         extract_and_store_crumbs,
@@ -321,7 +322,7 @@ async def get(data:Geti):
         algorithm="HS256"
     )
     Access_token = jwt.encode(
-        {"key": user_data["id"], "exp": datetime.utcnow() + timedelta(seconds=10)},
+        {"key": user_data["id"], "exp": datetime.utcnow() + timedelta(minutes=10)},
         our_secret_key,
         algorithm="HS256"
     )
@@ -358,7 +359,7 @@ async def validating(request:RefreshTokenRequest):
     else:
         print("yellow2")
         Access_token = jwt.encode(
-            {"key": data[0][1], "exp": datetime.utcnow() + timedelta(seconds=10)},
+            {"key": data[0][1], "exp": datetime.utcnow() + timedelta(minutes=10)},
             our_secret_key,
             algorithm="HS256"
         )
