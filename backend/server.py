@@ -24,6 +24,7 @@ from backend.redis_verification import check_rate_limit, get_cached_answer, set_
 import json
 import time
 import asyncio
+from openai_cost_calculator import estimate_cost
 
 load_dotenv()
 our_secret_key = os.getenv("our_secret_key")
@@ -230,7 +231,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
                 "type": "image_url",
                 "image_url": {
                     "url": f"data:image/png;base64,{problem_data.message}",
-                    "detail": "low"
+                    "detail": "high"
                 }
             }
         ]
@@ -248,7 +249,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
                     "content": f"""Solve the following math problem, or any subject text question given to you. Format your response using Markdown:
             - Use **bold** for Steps Headings,important things and final answers
             - Use bullet points for steps
-            - If an image  is sent in your repsone you must mention i nthe heading Image
+            - If an image  is sent in your repsone in the starting you could mention Image
             - YOU MUST wrap every math expression in $ or $$
             - NEVER use unicode symbols like ∑ ∞ · — use LaTeX commands like \\sum \\infty \\cdot
             - WRONG: ∑_n=1^∞n/n+2
@@ -264,10 +265,11 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
         max_completion_tokens=600,
         temperature=0,
         model=deployment,
-        stream=True
     )
     print("3")
     print("sd")
+    cost = estimate_cost(response1)
+    print(cost)
     
     answer = response1.choices[0].message.content
 

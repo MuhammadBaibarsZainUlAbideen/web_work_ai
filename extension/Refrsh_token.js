@@ -17,7 +17,7 @@ export async function sending_Refresh_token(message){
 
         console.log("2qa")
 
-        const sending_refresh_token = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/refresh_token",{
+        const sending_refresh_token = await fetch("http://127.0.0.1:8000/refresh_token",{
             method:"POST",
             headers:{"Content-Type":"application/json"},
             body: JSON.stringify({Refresh_token:Refresh_token})

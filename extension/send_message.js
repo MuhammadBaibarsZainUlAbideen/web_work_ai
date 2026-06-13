@@ -1,11 +1,12 @@
 console.log("popup.js loaded");
+import { sending_Refresh_token } from './Refrsh_token.js'
 const chatBox = document.getElementById("chatBox");
 const chatInput = document.getElementById("chatInput");
 const sendBtn = document.getElementById("sendBtn");
 var solveBtn = document.getElementById("solve");
 var resultDiv = document.getElementById("result");
 var login = document.getElementById("LS");
-import { sending_Refresh_token } from './Refrsh_token.js'
+
 
 
 
@@ -25,6 +26,24 @@ export async function addMessage(role, text) {
         ],
         throwOnError: false
     });
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+export async function addImage(role, imageBase64) {
+    const msg = document.createElement("div");
+    msg.classList.add("message", role);
+
+    const img = document.createElement("img");
+    img.src = 'data:image/png;base64,' + imageBase64;
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = '300px';
+    img.style.borderRadius = '8px';
+    img.style.marginTop = '8px';
+    
+    msg.appendChild(img);
+
+    const chatBox = document.getElementById("chatBox");
+    chatBox.appendChild(msg);
 
     chatBox.scrollTop = chatBox.scrollHeight;
 }

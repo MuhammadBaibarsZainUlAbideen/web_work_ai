@@ -2,6 +2,8 @@ import { sending_Refresh_token } from './Refrsh_token.js'
 import { addMessage } from './send_message.js';
 import { chatHistory } from './send_message.js';
 import { goPremimumOverly} from './goPremimum_overly.js'
+import { addImage } from "./send_message.js";
+
 
 var solveBtn = document.getElementById("solve");
 var resultDiv = document.getElementById("result");
@@ -9,8 +11,10 @@ var login = document.getElementById("LS");
 let redirect = document.getElementById("upgrade");
 let coordinates = null;
 let fullAnswer = null
+let overly = null
 solveBtn.onclick = async function() {
     resultDiv.innerText = ""
+    
     
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, { action: "startSnip" }, async (response) => {
@@ -21,6 +25,7 @@ solveBtn.onclick = async function() {
             }
             
             coordinates = response.coords;
+            
             
             chrome.runtime.sendMessage(
                 { action: "solveProblem", tcoordinates: [coordinates,chatHistory] },
@@ -40,7 +45,11 @@ solveBtn.onclick = async function() {
                     
                     fullAnswer = apiResponse.answer;
                     overly = apiResponse.overly;
-                    if(overly){
+                    if (apiResponse.imageData){
+                        await addImage("user",apiResponse.imageData)
+                    }
+                    
+                    if(overly == "True"){
                         await goPremimumOverly();
 
                     }
@@ -74,7 +83,10 @@ solveBtn.onclick = async function() {
                                     }
                                     fullAnswer = apiResponse.answer;
                                     overly = apiResponse.overly;
-                                    if(overly){
+                                    if (apiResponse.imageData){
+                                        await addImage("user",apiResponse.imageData)
+                                    }
+                                    if(overly == "True"){
                                         await goPremimumOverly();
 
                                     }
@@ -143,7 +155,7 @@ redirect.onclick = async () => {
 };
 
 async function callCheckout(token) {
-    const response = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/create-session", {
+    const response = await fetch("http://127.0.0.1:8000/create-session", {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
     });
@@ -156,7 +168,7 @@ async function refreshAccessToken() {
     const result = await chrome.storage.local.get(["Refresh_token"])
     const Refresh_token = result.Refresh_token
     
-    const response = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/refresh_token", {
+    const response = await fetch("http://127.0.0.1:8000/refresh_token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ Refresh_token: Refresh_token })

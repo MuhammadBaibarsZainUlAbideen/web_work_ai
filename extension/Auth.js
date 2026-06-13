@@ -1,3 +1,4 @@
+import { chatHistory } from './send_message.js';
 // let element = document.getElementById("LS");
 var solveBtn = document.getElementById("solve");
 var approveBtn = document.getElementById("approve");
@@ -6,6 +7,8 @@ const loginBtn = document.getElementById("LS");
 const termsBtn = document.getElementById("termsOfService");
 const overlay = document.getElementById("termsOverlay");
 const acceptBtn = document.getElementById("acceptTermsBtn");
+
+
 let termsSource = null;
 
 async function storingLocal(token){
@@ -14,6 +17,7 @@ async function storingLocal(token){
     console.log(Access_token)
     console.log(Refresh_token)
     loginBtn.style.display = "none"
+    chatHistory.length = 0;
 
     try{
         await chrome.storage.local.set({"Access_token":Access_token,"Refresh_token":Refresh_token})
@@ -28,7 +32,7 @@ async function storingLocal(token){
 
 async function sendingBakcend(jsObject){
     console.log("h")
-    const sending = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/get",{
+    const sending = await fetch("http://127.0.0.1:8000/get",{
         method:"POST",
         headers:{"Content-Type": "application/json"},
         body:JSON.stringify({Auth:jsObject})

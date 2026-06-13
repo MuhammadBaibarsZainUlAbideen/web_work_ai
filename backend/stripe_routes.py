@@ -61,7 +61,6 @@ async def create_checkout(authorization: str = Header(None)):
 
 
 
-# processed_sessions = set()
 
 @router.post("/webhook")
 async def webhook(request: Request):

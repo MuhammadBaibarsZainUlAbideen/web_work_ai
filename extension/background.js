@@ -57,11 +57,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                     // Convert back to base64
                     const croppedBlob = await canvas.convertToBlob({ type: "image/png" });
                     const reader = new FileReader();
-                    reader.onloadend = () => {
+                    reader.onloadend = async () => {
                         const croppedBase64 = reader.result.split(',')[1];
+                        console.log("Base64 Image", croppedBase64)
                         console.log("----> "+request.tcoordinates[1])
+                        console.log("history length:", request.tcoordinates[1].length)
+                        console.log("history:", JSON.stringify(request.tcoordinates[1]))
 
-                        fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/solve", {
+                        fetch("http://127.0.0.1:8000/solve", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
@@ -77,7 +80,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                         .then(data => {
                             console.log("3453")
                             console.log(data.answer);
-                            sendResponse({ success: true, answer: data.answer });
+                            sendResponse({ success: true, answer: data.answer, overly:data.overly,imageData: croppedBase64 });
                         })
                         .catch(error => { 
                             sendResponse({ success: false, error: error.message });
@@ -98,7 +101,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
             try {
 
-                fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/solve", {
+                fetch("http://127.0.0.1:8000/solve", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -113,8 +116,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                 .then(r => r.json())
                 .then(data => {
                     console.log("3453");
-                    console.log(data.answer);
-                    sendResponse({ success: true, answer: data.answer });
+                    console.log(data.overly);
+                    sendResponse({ success: true, answer: data.answer,overly:data.overly });
                 })
                 .catch(error => { 
                     sendResponse({ success: false, error: error.message });

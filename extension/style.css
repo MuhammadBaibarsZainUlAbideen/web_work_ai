@@ -158,7 +158,7 @@ button:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
   background: rgba(240, 136, 62, 0.1);
   opacity: 1;
 }
-.display{
+#upgrade.display{
     display: none;  
 }
 
@@ -581,3 +581,5 @@ button:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
   margin-top: 4px;
 }
 #acceptTermsBtn:hover { opacity: 1; box-shadow: 0 0 10px var(--clr-accent-glow); }
+
+
