@@ -145,8 +145,10 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
                 return
                 
             Question_text, fact_text = await build_embedding_text(crumbs[0])
-            Question_embedding = await embed(Question_text)
-            fact_embedding = await embed(fact_text)
+            Question_embedding, fact_embedding = await asyncio.gather(
+                embed(Question_text),
+                embed(fact_text)
+            )
             duplicate = await is_duplicate(user_id, Question_embedding,fact_embedding)
             if duplicate:
                 return
@@ -184,8 +186,12 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     if not user:
         return {"answer": "Login_again"}  
     
-    total_tries = await get_tries(user_id)
-    status = await payment_status(user_id)
+    # total_tries = await get_tries(user_id)
+    # status = await payment_status(user_id)
+    total_tries,status = await asyncio.gather(
+        get_tries(user_id),
+        payment_status(user_id)
+    )
 
 
     # Pay Wall

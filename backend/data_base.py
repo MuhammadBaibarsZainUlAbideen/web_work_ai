@@ -2,6 +2,7 @@ import asyncpg
 from datetime import datetime, timezone, timedelta
 import os
 import numpy as np
+import asyncio
 from backend.building_embeding_text import build_embedding_text,embed
 
 
@@ -19,6 +20,8 @@ async def init_db():
         password="Supabase424",
         database="postgres",
         max_size=15,
+        timeout=30,
+        command_timeout=60,
         ssl="require"
     )
 async def Tables():
@@ -145,8 +148,10 @@ async def Editing_crumbs(type, action, user_id, previous_topic, topic, subtopic=
                     SET question = $2, fact = $3
                     WHERE id = $1
                 """, row['id'],new_question, new_fact)
-                new_question_embedding = await embed(new_question)
-                new_fact_embedding = await embed(new_fact)
+                new_question_embedding, new_fact_embedding = await asyncio.gather(
+                    embed(new_question),
+                    embed(new_fact)
+                )
                 await conn.execute("""
                     UPDATE embeddings
                     SET question_embedding = $2::vector, fact_embedding = $3::vector
