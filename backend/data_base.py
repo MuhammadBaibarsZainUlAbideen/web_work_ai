@@ -18,7 +18,7 @@ async def init_db():
         user="postgres.ltjzhbicxbcfxaoocsbu",
         password="Supabase424",
         database="postgres",
-        max_size=20,
+        max_size=15,
         ssl="require"
     )
 async def Tables():
