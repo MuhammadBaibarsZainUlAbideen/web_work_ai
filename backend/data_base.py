@@ -20,8 +20,6 @@ async def init_db():
         password="Supabase424",
         database="postgres",
         max_size=15,
-        timeout=30,
-        command_timeout=60,
         ssl="require"
     )
 async def Tables():
