@@ -14,16 +14,12 @@ let termsSource = null;
 async function storingLocal(token){
     const Access_token = token['Access_token']
     const Refresh_token = token['Refresh_token']
-    console.log(Access_token)
-    console.log(Refresh_token)
     loginBtn.style.display = "none"
     chatHistory.length = 0;
 
     try{
         await chrome.storage.local.set({"Access_token":Access_token,"Refresh_token":Refresh_token})
-        console.log("wrker")
     }catch(error){
-        console.log("Error is :",error)
     }
     
     solveBtn.disabled=false;
@@ -31,7 +27,6 @@ async function storingLocal(token){
 }
 
 async function sendingBakcend(jsObject){
-    console.log("h")
     const sending = await fetch("http://127.0.0.1:8000/get",{
         method:"POST",
         headers:{"Content-Type": "application/json"},
@@ -48,7 +43,6 @@ async function gettingToken(token){
         }
     })
     const converting = await sending_request.json()
-    console.log(converting)
     sendingBakcend(converting)
 }
 
@@ -87,7 +81,6 @@ function startOAuth() {
 
     const redirectURL = chrome.identity.getRedirectURL();
 
-    console.log("Redirect URL:", redirectURL);
 
     const authURL = new URL(
         "https://accounts.google.com/o/oauth2/v2/auth"
@@ -108,25 +101,17 @@ function startOAuth() {
 
         if (chrome.runtime.lastError) {
 
-            console.error(
-                "Auth error:",
-                chrome.runtime.lastError
-            );
-
             resultDiv.textContent =
-                "Login failed: " +
-                chrome.runtime.lastError.message;
+                "Login failed"
 
             return;
         }
 
-        console.log("Redirect URL received:", redirectUrl);
 
         const fragment = redirectUrl.split('#')[1];
 
         if (!fragment) {
 
-            console.error("No fragment in redirect URL");
 
             resultDiv.textContent =
                 "Login failed: No token received";
@@ -140,7 +125,6 @@ function startOAuth() {
 
         if (token) {
 
-            console.log("Token obtained successfully");
 
             resultDiv.textContent =
                 "Login successful! You are good to start solving problems";
@@ -149,7 +133,6 @@ function startOAuth() {
 
         } else {
 
-            console.error("No access token found");
 
             resultDiv.textContent =
                 "Login failed: No access token";

@@ -39,12 +39,10 @@ def converting(token):
 @router.post("/checkout")
 async def create_checkout(authorization: str = Header(None)):
     session_id = authorization.replace("Bearer ", "")
-    #await adding_column()
-    print(session_id)
+
     
     
     user_id = sessions.get(session_id, None)
-    print(user_id)
     
     if not user_id:
         return {"error": "invalid_session"}
@@ -79,20 +77,16 @@ async def webhook(request: Request):
     await store_stripe_event(event_id)
 
     if event["type"] == "checkout.session.completed":
-        # session = event["data"]["object"]
-        # session_id = data["id"]
+
         user_id = data["metadata"]["user_id"]
-        print("tyhjm,")
         customer_id = getattr(data, "customer", None)
         subscription_id = getattr(data, "subscription", None)
-        print("tyhjm,")
         await inserting_payment(
             user_id=user_id,
             customer_id=customer_id,
             subscription_id=subscription_id,
             status="active"
         )
-        print("1")
 
 
     elif event["type"] == "customer.subscription.updated":
@@ -101,62 +95,26 @@ async def webhook(request: Request):
 
         await updating_payment_status(subscription_id, status)
 
-        print(f"Subscription updated: {status}")
 
     elif event["type"] == "customer.subscription.deleted":
         subscription_id = data["id"]
 
         await updating_payment_status(subscription_id, "canceled")
 
-        print("Subscription canceled")
 
     elif event["type"] == "invoice.payment_failed":
         subscription_id = data["subscription"]
  
         await updating_payment_status(subscription_id, "past_due")
 
-        print("Payment failed")
     elif event["type"] == "invoice.paid":
         subscription_id = getattr(data, "subscription", None)
 
         await updating_payment_status(subscription_id, "active")
 
-        print("Payment successful (renewal)")
 
 
 
-
-
-
-
-
-
-
-
-
-        # sessions.pop(session_id, None)
-
-        # if session_id in processed_sessions:
-        #     print("Duplicate, skipping")
-        #     return {"status": "ok"}
-
-        # processed_sessions.add(session_id)
-        
-
-        # email = session["customer_details"]["email"]
-        # await inserting_payment(
-        #     user_id=user_id,
-        #     customer_id=customer_id,
-        #     subscription_id=subscription_id,
-        #     status="active"
-        # )
-
-        # expiry_date = datetime.now(timezone.utc) + timedelta(days=60)
-        # expiry_str = expiry_date.isoformat()
-        # print(expiry_str)
-        # await updating_payment(expiry_str,user_id)
-        # print(f"Paid: {email}")
-        await Get()
 
     return {"status": "ok"}
 
@@ -180,6 +138,5 @@ async def billing_portal(authorization: str = Header(None)):
         customer=customer_id,
         return_url="https://webworkaipayment.netlify.app//dashboard"
     )
-    print(session.url)
 
     return {"url": session.url}

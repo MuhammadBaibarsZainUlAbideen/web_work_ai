@@ -9,7 +9,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         chrome.storage.local.get(["Access_token"], async (result) => {
             const Access_token = result.Access_token;
             
-            fetch("http://127.0.0.1:8000/solve", {
+            fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/solve", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -23,7 +23,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             })
             .then(r => r.json())
             .then(data => {
-                console.log(data)
                 sendResponse({ success: true, answer: data.answer, overly: data.overly });
             })
             .catch(error => { 
@@ -36,7 +35,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         chrome.storage.local.get(["Access_token"], async (result) => {
             const Access_token = result.Access_token;
             
-            fetch("http://127.0.0.1:8000/solve", {
+            fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/solve", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -50,7 +49,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             })
             .then(r => r.json())
             .then(data => {
-                console.log(data)
                 sendResponse({ success: true, answer: data.answer, overly: data.overly });
             })
             .catch(error => { 

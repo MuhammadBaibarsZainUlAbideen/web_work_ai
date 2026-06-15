@@ -2,6 +2,8 @@ import asyncpg
 from datetime import datetime, timezone, timedelta
 import os
 import numpy as np
+from backend.building_embeding_text import build_embedding_text,embed
+
 
 def from_blob(blob):
     return np.frombuffer(blob, dtype=np.float32)
@@ -86,7 +88,7 @@ async def Tables():
 async def get_topics(user_id):
     async with pool.acquire() as conn:
         rows = await conn.fetch("""
-            SELECT sub_topic
+            SELECT sub_topic,topic
             FROM crumbs
             WHERE user_id = $1
         """, user_id)
@@ -105,7 +107,6 @@ async def printing_crumbs(user_id):
 
 #Editing Crumbs
 async def Editing_crumbs(type, action, user_id, previous_topic, topic, subtopic=None, new_subtopic=None, old_question=None,old_fact=None, new_question=None, new_fact=None):
-    # print(f"old_questiion {old_question}:::: old_fact {old_fact}::::new_question {new_question}")
     async with pool.acquire() as conn:
         if type == "topic" and action == "edit":
             await conn.execute("""
@@ -133,24 +134,26 @@ async def Editing_crumbs(type, action, user_id, previous_topic, topic, subtopic=
                 WHERE user_id = $1 AND topic = $2 AND sub_topic = $3
             """, user_id, previous_topic, subtopic)
         elif type == "fact" and action == "edit":
-            result = await conn.fetch("""
-                    SELECT * FROM crumbs
-                    WHERE user_id = $1 AND topic = $2 AND sub_topic = $3 
-                    
-                """, user_id, previous_topic, subtopic)
-                
-            print(f"Found {len(result)} matching records")
-            if result:
-                print(f"Record: {result[0]["question"]}")
-                print(old_question)
-            # return
-            print("testing")
-            await conn.execute("""
-                UPDATE crumbs
-                SET question = $5, fact = $6
+            row = await conn.fetchrow("""
+                SELECT id FROM crumbs
                 WHERE user_id = $1 AND topic = $2 AND sub_topic = $3 
-                AND TRIM(question) = TRIM($4) AND TRIM(fact) = TRIM($7)
-            """, user_id, previous_topic, subtopic, old_question, new_question, new_fact, old_fact)
+                AND TRIM(question) = TRIM($4) AND TRIM(fact) = TRIM($5)
+            """, user_id, previous_topic, subtopic, old_question, old_fact)
+            if row:
+                await conn.execute("""
+                    UPDATE crumbs
+                    SET question = $2, fact = $3
+                    WHERE id = $1
+                """, row['id'],new_question, new_fact)
+                new_question_embedding = await embed(new_question)
+                new_fact_embedding = await embed(new_fact)
+                await conn.execute("""
+                    UPDATE embeddings
+                    SET question_embedding = $2::vector, fact_embedding = $3::vector
+                    WHERE crumb_id = $1
+                """, row['id'],str(new_question_embedding),str(new_fact_embedding))
+
+
         elif type == "fact" and action == "delete":
             await conn.execute("""
                 DELETE FROM crumbs
@@ -158,14 +161,12 @@ async def Editing_crumbs(type, action, user_id, previous_topic, topic, subtopic=
                 AND TRIM(question) = TRIM($4) AND TRIM(fact) = TRIM($5)
             """, user_id, previous_topic, subtopic, old_question, old_fact)
             
-            print("Fact deleted successfully")
         elif type == "subtopic" and action == "move_to_topic":
             await conn.execute("""
                 UPDATE crumbs
                 SET topic = $3
                 WHERE user_id = $1 AND topic = $2 AND sub_topic = $4
             """, user_id, previous_topic, topic, subtopic)
-            print(f"Subtopic {subtopic} moved from topic {previous_topic} to {topic}")
         elif type == "fact" and action == "move_to_subtopic":
             await conn.execute("""
                 UPDATE crumbs
@@ -299,7 +300,11 @@ async def updating_payment_status(subscription_id, status):
 async def payment_status(user_id):
     async with pool.acquire() as conn:
         data = await conn.fetch("SELECT status FROM Payments WHERE user_id = $1", user_id)
-        return data
+        if (not data):
+            return False
+        elif (data[0][0] != "active"):
+            return False
+        return True
 
 async def get_subscrption(user_id):
     async with pool.acquire() as conn:
@@ -383,21 +388,19 @@ async def getting_user(id):
 async def Get():
     async with pool.acquire() as conn:
         data = await conn.fetch("SELECT * FROM StripeEvents")
-        for row in data:
-            print(dict(row))
         return data
 
-async def Get_users():
-    async with pool.acquire() as conn:
-        data = await conn.fetch("""
-            SELECT 
-                Authentication.name, 
-                Authentication.email, 
-                refresh_token.revoked,
-                Payments.status,
-                Authentication.tries
-            FROM Authentication
-            LEFT JOIN refresh_token ON Authentication.id = refresh_token.user_id
-            LEFT JOIN Payments ON Authentication.id = Payments.user_id
-        """)
-        return data
+# async def Get_users():
+#     async with pool.acquire() as conn:
+#         data = await conn.fetch("""
+#             SELECT 
+#                 Authentication.name, 
+#                 Authentication.email, 
+#                 refresh_token.revoked,
+#                 Payments.status,
+#                 Authentication.tries
+#             FROM Authentication
+#             LEFT JOIN refresh_token ON Authentication.id = refresh_token.user_id
+#             LEFT JOIN Payments ON Authentication.id = Payments.user_id
+#         """)
+#         return data

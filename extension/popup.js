@@ -102,7 +102,6 @@ solveBtn.onclick = async function() {
                     
                     fullAnswer = apiResponse.answer;
                     overly = apiResponse.overly;
-                    console.log("overly",overly)
                     
                     if (overly == "True") {
                         await goPremimumOverly();
@@ -169,7 +168,6 @@ redirect.onclick = async () => {
     let accessToken = result.Access_token;
 
     if (!accessToken) {
-        console.log("No access token found!");
         return;
     }
 
@@ -178,7 +176,6 @@ redirect.onclick = async () => {
     if (data.Verify === "false" && data.reason === "token_expired") {
         accessToken = await refreshAccessToken();
         if (!accessToken) {
-            console.log("Plz login again");
             return;
         }
         data = await callCheckout(accessToken);
@@ -187,17 +184,15 @@ redirect.onclick = async () => {
     if (data.plans_url) {
         chrome.tabs.create({ url: data.plans_url });
     } else {
-        console.log("Invalid response from server");
     }
 };
 
 async function callCheckout(token) {
-    const response = await fetch("http://127.0.0.1:8000/create-session", {
+    const response = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/create-session", {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
     });
     const data = await response.json();
-    console.log(data);
     return data;
 }
 
@@ -205,7 +200,7 @@ async function refreshAccessToken() {
     const result = await chrome.storage.local.get(["Refresh_token"]);
     const Refresh_token = result.Refresh_token;
     
-    const response = await fetch("http://127.0.0.1:8000/refresh_token", {
+    const response = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/refresh_token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ Refresh_token: Refresh_token })

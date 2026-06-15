@@ -1,39 +1,30 @@
 import {sending_Refresh_token} from "./Refrsh_token.js"
+let resulElementtDiv = document.getElementById("result");
+
 export async function editCrumbs(editedCrumbs){
 
     let result = await chrome.storage.local.get(["Access_token"]);
-    console.log(result.Access_token)
     let access_token = result.Access_token;
-    console.log('1')
 
 
     
     let data = await sendEditCrumbs(access_token,editedCrumbs)
-    console.log('1')
 
 
 
    
     if (data.reason === "token_expired") {
-        console.log('1')
-        console.log("Token expired, refreshing...");
         access_token = await sending_Refresh_token("True");
-        console.log('1')
 
         if (access_token) {
-            console.log('1')
             data = await sendEditCrumbs(access_token,editedCrumbs); 
-            console.log('1')
         } else {
-            console.log("Refresh token invalid. Forcing local logout.");
-            return;
-            chrome.storage.local.remove(["Access_token", "Refresh_token"]);
-            return;
+            resulElementtDiv.innerText = "Something Went Wrong Contact Support"
+            return
         }
     }
 
     if (data.Status === "True") {
-        console.log(data.Crumbs)
         return data.Crumbs
     }
 
@@ -42,7 +33,6 @@ export async function editCrumbs(editedCrumbs){
 }
 
 async function sendEditCrumbs(access_token, editedCrumbs){
-    console.log('11')
     
     let message = {};
     
@@ -105,7 +95,7 @@ async function sendEditCrumbs(access_token, editedCrumbs){
     }
 
     
-    let data = await fetch("http://127.0.0.1:8000/edittopic",{
+    let data = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/edittopic",{
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -115,6 +105,5 @@ async function sendEditCrumbs(access_token, editedCrumbs){
     })
 
     let dataJsonConversion = await data.json()
-    console.log(dataJsonConversion)
     return dataJsonConversion
 }

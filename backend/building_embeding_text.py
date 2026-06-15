@@ -17,19 +17,10 @@ client = AsyncAzureOpenAI(
 async def build_embedding_text(crumb):
     concept = crumb["Question"]
     fact = crumb["fact"]
-    topic = crumb["topic"]
-    sub_topic = crumb["Sub-Topic"]
 
-    concept_text = f"""
-    Concept: {concept}
-    Topic: {topic}
-    Subtopic: {sub_topic}
-    """
 
-    fact_text = f"""
-    Fact: {fact}
-    Related to: {topic} - {sub_topic}
-    """
+    concept_text = f"{concept}"
+    fact_text = f"{fact}"
 
     return concept_text.strip(), fact_text.strip()
 
@@ -39,5 +30,6 @@ async def embed(text: str):
         model="text-embedding-3-small",
         input=text
     )
+    print("something worked")
     # print(response.data[0].embedding)
     return response.data[0].embedding

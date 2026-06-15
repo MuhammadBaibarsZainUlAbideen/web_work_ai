@@ -4,7 +4,7 @@ async function refreshAccessToken() {
     const result = await chrome.storage.local.get(["Refresh_token"]);
     const refresh_token = result.Refresh_token;
 
-    const response = await fetch("http://127.0.0.1:8000/refresh_token", {
+    const response = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/refresh_token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ Refresh_token: refresh_token })
@@ -23,7 +23,7 @@ async function refreshAccessToken() {
 
 
 async function performLogout(access_token) {
-    const response = await fetch("http://127.0.0.1:8000/logout", {
+    const response = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/logout", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -41,13 +41,11 @@ document.getElementById("Logout").addEventListener('click', async function () {
 
    
     if (data.reason === "token_expired") {
-        console.log("Token expired, refreshing...");
         access_token = await refreshAccessToken();
 
         if (access_token) {
             data = await performLogout(access_token); 
         } else {
-            console.log("Refresh token invalid. Forcing local logout.");
             chrome.storage.local.remove(["Access_token", "Refresh_token"]);
             return;
         }
@@ -56,7 +54,6 @@ document.getElementById("Logout").addEventListener('click', async function () {
     if (data.logout === "true") {
         chrome.storage.local.remove(["Access_token", "Refresh_token"]);
         showToast("Logged out successfully");
-        console.log("Logged out successfully.");
         login1.style.display = "block";
     }
 });

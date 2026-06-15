@@ -1,4 +1,3 @@
-console.log("popup.js loaded");
 import { sending_Refresh_token } from './Refrsh_token.js'
 import { goPremimumOverly } from './goPremimum_overly.js'
 
@@ -52,7 +51,6 @@ export async function addImage(role, imageBase64) {
 }
 async function handleSend(){
     const text = chatInput.value.trim();
-    console.log(text)
     if (!text) return;
 
 
@@ -77,16 +75,13 @@ async function handleSend(){
 
 };
 async function getAIResponse(input) {
-    console.log("yo123")
 
     let apiResponse = await new Promise((resolve) => {
-        console.log("yo123")
         chrome.runtime.sendMessage(
             { action: "sendMessage", message: [input,chatHistory] },
             resolve
         );
     });
-    console.log("yo123")
 
     if (!apiResponse || apiResponse.success === false) {
         resultDiv.innerText = "ERROR: Something went wrong";

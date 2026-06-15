@@ -19,7 +19,6 @@ function getAvailableSubtopics(topic) {
             .map(x => x.sub_topic)
     )];
 }
-// toggle dropdown
 gearBtn.onclick = () => {
     if (dropdown.style.display === "block") {
         dropdown.style.display = "none";
@@ -28,7 +27,6 @@ gearBtn.onclick = () => {
     }
 };
 
-// close when clicking outside
 document.addEventListener("click", (e) => {
     if (!gearBtn.contains(e.target) && !dropdown.contains(e.target)) {
         dropdown.style.display = "none";
@@ -46,13 +44,8 @@ document.getElementById("editModeBtn").addEventListener("click", () => {
 });
 
 document.getElementById("memoryBtn").addEventListener("click", async() => {
-    console.log("12")
 
     const data = await getStoredCrumbs(); 
-    // let data = [{ topic: "Math", sub_topic: "Trig" ,"question":"what is sin(inf)",fact: "bab"},
-    //             { topic: "Physics", sub_topic: "Motion" }
-
-    // ]
 
     await openMemory(data);
 });
@@ -68,7 +61,6 @@ async function renderTopics() {
     document.getElementById("memoryTitle").innerText = "Topics";
 
     const topics = [...new Set(memoryData.map(x => x.topic))];
-    console.log(topics);
 
     const container = document.getElementById("memoryContent");
     container.innerHTML = "";
@@ -79,7 +71,6 @@ async function renderTopics() {
         
         if (!editMode) {
             div.onclick = async () => {
-                console.log("TOPIC CLICKED");
                 selectedTopic = topic;
                 await renderSubTopics();
             };
