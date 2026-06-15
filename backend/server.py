@@ -190,8 +190,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
 
     # Pay Wall
     if status == False and total_tries > 500:
-        model_name = "gpt-4o-mini"
-        deployment = "gpt-4o-mini"
+
         return {"answer":"False", "overly":"True"}
     if status == False and not await check_rate_limit(user_id):
         model_name = "gpt-4o-mini"
