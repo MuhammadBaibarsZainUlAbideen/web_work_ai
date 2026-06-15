@@ -189,7 +189,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
 
 
     # Pay Wall
-    if status == False and total_tries > 500:
+    if status == False and total_tries > 50:
 
         return {"answer":"False", "overly":"True"}
     if status == False and not await check_rate_limit(user_id):
