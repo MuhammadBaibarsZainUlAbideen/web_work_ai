@@ -89,6 +89,7 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
             response = await client.chat.completions.create(
                 model=deployment,
                 temperature=0,
+                max_completion_tokens=200,
                 messages=[
                     {
                         "role": "system",
@@ -98,7 +99,7 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
     Extract ONLY important learning concepts from the solution.
 
     Rules:
-    - Ignore filler text
+    - Ignore filler text, Make sure to give a small/breaf answer
     - Never use backslashes
     - Keep only Questions(only correct spellings), definitions, formulas, and mistakes
     - If the question and answer are unrelated to Maths, Physics,Political Science OR Computer/Tech set topic to "Ignore"
