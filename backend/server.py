@@ -24,7 +24,6 @@ from backend.redis_verification import check_rate_limit, get_cached_answer, set_
 import json
 import time
 import asyncio
-from openai_cost_calculator import estimate_cost
 
 load_dotenv()
 our_secret_key = os.getenv("our_secret_key")
