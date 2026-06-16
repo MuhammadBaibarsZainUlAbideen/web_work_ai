@@ -8,6 +8,7 @@ var solveBtn = document.getElementById("solve");
 var resultDiv = document.getElementById("result");
 var login = document.getElementById("LS");
 let redirect = document.getElementById("upgrade");
+const sendBtn = document.getElementById("sendBtn");
 let coordinates = null;
 let fullAnswer = null;
 let overly = null;
@@ -60,6 +61,8 @@ async function captureAndCropImage(coordinates) {
 }
 
 solveBtn.onclick = async function() {
+    solveBtn.disabled = true;
+    sendBtn.disabled = true;
     resultDiv.innerText = ""
     
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
@@ -67,6 +70,9 @@ solveBtn.onclick = async function() {
             if (!response || response.coords === null) {
                 resultDiv.innerText = "Something Went Wrong, Refreshing your page, Try again"
                 chrome.tabs.reload(tabs[0].id);
+                solveBtn.disabled = false;
+                sendBtn.disabled = false;
+
                 return;
             }
             
@@ -82,6 +88,9 @@ solveBtn.onclick = async function() {
                     }
             } catch (err) {
                 resultDiv.innerText = "Failed to capture image: " + err.message;
+                solveBtn.disabled = false;
+                sendBtn.disabled = false;
+
                 return;
             }
             
@@ -91,12 +100,14 @@ solveBtn.onclick = async function() {
                     if (!apiResponse) {
                         resultDiv.innerText = "ERROR: Something Went Wrong, Contact Support";
                         solveBtn.disabled = false;
+                        sendBtn.disabled = false;
                         return;
                     }
                     
                     if (apiResponse.success === false) {
                         resultDiv.innerText = "ERROR: Something Went Wrong, Contact Support";
                         solveBtn.disabled = false;
+                        sendBtn.disabled = false;
                         return;
                     }
                     
@@ -105,10 +116,15 @@ solveBtn.onclick = async function() {
                     
                     if (overly == "True") {
                         await goPremimumOverly();
+                        solveBtn.disabled = false;
+                        sendBtn.disabled = false;
+                        return
                     }
                     
                     if (fullAnswer === "False") {
                         resultDiv.innerText = "Pay to Continue";
+                        solveBtn.disabled = false;
+                        sendBtn.disabled = false;
                         return;
                     }
 
@@ -117,6 +133,9 @@ solveBtn.onclick = async function() {
                         if (response === "No") {
                             login.style.display = "block";
                             resultDiv.innerText = "Please Login again";
+                            solveBtn.disabled = false;
+                            sendBtn.disabled = false;
+                            return
                         } else {
                             chrome.runtime.sendMessage(
                                 { action: "solveProblem", imageData: croppedBase64, history: chatHistory },
@@ -124,12 +143,14 @@ solveBtn.onclick = async function() {
                                     if (!apiResponse) {
                                         resultDiv.innerText = "ERROR: No API response";
                                         solveBtn.disabled = false;
+                                        sendBtn.disabled = false;
                                         return;
                                     }
                                     
                                     if (apiResponse.success === false) {
                                         resultDiv.innerText = "ERROR: " + apiResponse.error;
                                         solveBtn.disabled = false;
+                                        sendBtn.disabled = false;
                                         return;
                                     }
                                     
@@ -138,14 +159,23 @@ solveBtn.onclick = async function() {
                                     
                                     if (overly == "True") {
                                         await goPremimumOverly();
+                                        solveBtn.disabled = false;
+                                        sendBtn.disabled = false;
+                                        return
                                     }
                                     
                                     if (fullAnswer === "False") {
                                         resultDiv.innerText = "Pay to Continue";
+                                        solveBtn.disabled = false;
+                                        sendBtn.disabled = false;
+                                        return
                                     } else {
                                         chatHistory.push({ role: "assistant", content: fullAnswer });
                                         await addMessage("ai", fullAnswer);
+                                        solveBtn.disabled = false;
+                                        sendBtn.disabled = false;
                                         resultDiv.scrollTop = 0;
+
                                     }
                                     return;
                                 }
@@ -154,6 +184,8 @@ solveBtn.onclick = async function() {
                     } else {
                         chatHistory.push({ role: "assistant", content: fullAnswer });
                         await addMessage("ai", fullAnswer);
+                        solveBtn.disabled = false;
+                        sendBtn.disabled = false;
                         resultDiv.scrollTop = 0;
                     }
                     return;

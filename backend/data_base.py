@@ -15,11 +15,12 @@ async def init_db():
     global pool
     pool = await asyncpg.create_pool(
         host="aws-1-us-west-1.pooler.supabase.com",
-        port=5432,
+        port=6543,
         user="postgres.ltjzhbicxbcfxaoocsbu",
         password="Supabase424",
         database="postgres",
-        max_size=15,
+        max_size=50,
+        statement_cache_size=0,
         ssl="require"
     )
 async def Tables():

@@ -94,34 +94,26 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
                     {
                         "role": "system",
                         "content": f"""
-    You are a learning assistant.
+            You are a learning assistant. Extract key concepts from the solution.
 
-    Extract ONLY important learning concepts from the solution.
+            Return ONE JSON object in an array. No text outside JSON.
 
-    Rules:
-    - Ignore filler text, Make sure to give a small/breaf answer
-    - Never use backslashes
-    - Keep only Questions(only correct spellings), definitions, formulas, and mistakes
-    - If the question and answer are unrelated to Maths, Physics,Political Science OR Computer/Tech set topic to "Ignore"
-    - First check whether the Topic,Sub-Topic matches to one of the Available Topic, subtopics
-    - Only create a new Topcic, Sub-Topic if none match
-    - Return JSON ONLY
-    - No explanations outside JSON
-    - Return exactly ONE object inside the JSON array
-    - Never return multiple objects
-    - If multiple facts exist, combine them into a single concise fact
+            Rules:
+            - Brief answers only like 2 or 3 sentences, no backslashes
+            - Keep: questions (correct spelling), definitions, formulas, mistakes
+            - Set topic to "Ignore" if unrelated to Maths, Physics, Political Science, Computer/Tech, Chemistry, or Biology
+            - Combine multiple facts into one concise fact
+            - "Store": Yes only if the question make sense to worth saving for later review, else No 
 
-    Format:
-    [
-      {{
-        "Question": "...",
-        "fact": "...",
-        "topic": "May be one of: {final_topics} OR Maths | Physics | Political Science | Computer Science |  Chemistry | Biology | Ignore",
-        "Sub-Topic": "May be one of: {final_subtopics} or a new one which you think from the question if none match OR | other",
-        "confidence": 0-1
-      }}
-    ]
-    """
+            [{{
+            "Store": "Yes|No",
+            "Question": "...",
+            "fact": "...",
+            "topic": "May be one of {final_topics} OR |Maths|Physics|Political Science|Computer Science|Chemistry|Biology|other",
+            "Sub-Topic": "May be one of {final_subtopics} |OR| You generate new Sub-Topic based on the question asked",
+            "confidence": 0-1
+            }}]
+        """
                     },
                     {
                         "role": "user",
@@ -139,10 +131,11 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
             crumbs_raw = response.choices[0].message.content
             try:
                 crumbs = json.loads(crumbs_raw)
+                print(crumbs)
             except Exception as e:
                 continue
 
-            if crumbs[0]["topic"].lower()  == "ignore" :
+            if crumbs[0]["topic"].lower()  == "ignore" or crumbs[0]["Store"].lower() == "no":
                 return
                 
             Question_text, fact_text = await build_embedding_text(crumbs[0])
@@ -152,6 +145,7 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
             )
             duplicate = await is_duplicate(user_id, Question_embedding,fact_embedding)
             if duplicate:
+                print("nipe")
                 return
             
             await stroing_question_and_embedding(user_id,crumbs[0]["Question"],crumbs[0]["fact"],crumbs[0]["topic"],crumbs[0]["Sub-Topic"],crumbs[0]["confidence"],Question_embedding,fact_embedding)

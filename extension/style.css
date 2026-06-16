@@ -176,6 +176,10 @@ button:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
   color: var(--clr-text);
   opacity: 1;
 }
+#sendBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
 /* ============================================================
    RESULT AREA
