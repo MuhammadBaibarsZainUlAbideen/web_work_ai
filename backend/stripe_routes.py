@@ -66,7 +66,8 @@ async def webhook(request: Request):
     sig = request.headers.get("stripe-signature")
 
     try:
-        event = stripe.Webhook.construct_event(payload, sig,"whsec_IESIUBKQuGs8nkq5zQUXbNcympZ4QfzB")
+        signing_key = os.getenv("stripe_signing_key")
+        event = stripe.Webhook.construct_event(payload, sig,signing_key)
     except Exception:
         return {"error": "invalid"}
     data = event["data"]["object"]
