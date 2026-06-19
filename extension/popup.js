@@ -3,6 +3,7 @@ import { addMessage } from './send_message.js';
 import { chatHistory } from './send_message.js';
 import { goPremimumOverly } from './goPremimum_overly.js'
 import { addImage } from "./send_message.js";
+import { get_solve_endpoint} from "./solve_endpoint.js"
 
 var solveBtn = document.getElementById("solve");
 var resultDiv = document.getElementById("result");
@@ -94,105 +95,104 @@ solveBtn.onclick = async function() {
                 return;
             }
             
-            chrome.runtime.sendMessage(
-                { action: "solveProblem", imageData: croppedBase64, history: chatHistory },
-                async function(apiResponse) {
-                    if (!apiResponse) {
-                        resultDiv.innerText = "ERROR: Something Went Wrong, Contact Support";
-                        solveBtn.disabled = false;
-                        sendBtn.disabled = false;
-                        return;
-                    }
-                    
-                    if (apiResponse.success === false) {
-                        resultDiv.innerText = "ERROR: Something Went Wrong, Contact Support";
-                        solveBtn.disabled = false;
-                        sendBtn.disabled = false;
-                        return;
-                    }
-                    
-                    fullAnswer = apiResponse.answer;
-                    overly = apiResponse.overly;
-                    
-                    if (overly == "True") {
-                        await goPremimumOverly();
-                        solveBtn.disabled = false;
-                        sendBtn.disabled = false;
-                        return
-                    }
-                    
-                    if (fullAnswer === "False") {
-                        resultDiv.innerText = "Pay to Continue";
-                        solveBtn.disabled = false;
-                        sendBtn.disabled = false;
-                        return;
-                    }
+            let apiResponse = await get_solve_endpoint( { action:"solveProblem", imageData: croppedBase64, history: chatHistory})
+            
+            if (!apiResponse) {
+                resultDiv.innerText = "ERROR: Something Went Wrong, Contact Support";
+                solveBtn.disabled = false;
+                sendBtn.disabled = false;
+                return;
+            }
+            
+            if (apiResponse.success === false) {
+                resultDiv.innerText = "ERROR: Something Went Wrong, Contact Support";
+                solveBtn.disabled = false;
+                sendBtn.disabled = false;
+                return;
+            }
+            
+            fullAnswer = apiResponse.answer;
+            overly = apiResponse.overly;
+            
+            if (overly == "True") {
+                await goPremimumOverly();
+                solveBtn.disabled = false;
+                sendBtn.disabled = false;
+                return
+            }
+            
+            if (fullAnswer === "False") {
+                resultDiv.innerText = "Pay to Continue";
+                solveBtn.disabled = false;
+                sendBtn.disabled = false;
+                return;
+            }
 
-                    if (fullAnswer === "Login_again" || apiResponse.success === 401) {
-                        const response = await sending_Refresh_token(true);
-                        if (response === "No") {
-                            login.style.display = "block";
-                            resultDiv.innerText = "Please Login again";
-                            solveBtn.disabled = false;
-                            sendBtn.disabled = false;
-                            return
-                        } else {
-                            chrome.runtime.sendMessage(
-                                { action: "solveProblem", imageData: croppedBase64, history: chatHistory },
-                                async function(apiResponse) {
-                                    if (!apiResponse) {
-                                        resultDiv.innerText = "ERROR: No API response";
-                                        solveBtn.disabled = false;
-                                        sendBtn.disabled = false;
-                                        return;
-                                    }
-                                    
-                                    if (apiResponse.success === false) {
-                                        resultDiv.innerText = "ERROR: " + apiResponse.error;
-                                        solveBtn.disabled = false;
-                                        sendBtn.disabled = false;
-                                        return;
-                                    }
-                                    
-                                    fullAnswer = apiResponse.answer;
-                                    overly = apiResponse.overly;
-                                    
-                                    if (overly == "True") {
-                                        await goPremimumOverly();
-                                        solveBtn.disabled = false;
-                                        sendBtn.disabled = false;
-                                        return
-                                    }
-                                    
-                                    if (fullAnswer === "False") {
-                                        resultDiv.innerText = "Pay to Continue";
-                                        solveBtn.disabled = false;
-                                        sendBtn.disabled = false;
-                                        return
-                                    } else {
-                                        chatHistory.push({ role: "assistant", content: fullAnswer });
-                                        await addMessage("ai", fullAnswer);
-                                        solveBtn.disabled = false;
-                                        sendBtn.disabled = false;
-                                        resultDiv.scrollTop = 0;
+            if (fullAnswer === "Login_again" || apiResponse.success === 401) {
+                const response = await sending_Refresh_token(true);
+                if (response === "No") {
+                    login.style.display = "block";
+                    resultDiv.innerText = "Please Login again";
+                    solveBtn.disabled = false;
+                    sendBtn.disabled = false;
+                    return
+                } else {
+                    chrome.runtime.sendMessage(
+                        { action: "solveProblem", imageData: croppedBase64, history: chatHistory },
+                        async function(apiResponse) {
+                            if (!apiResponse) {
+                                resultDiv.innerText = "ERROR: No API response";
+                                solveBtn.disabled = false;
+                                sendBtn.disabled = false;
+                                return;
+                            }
+                            
+                            if (apiResponse.success === false) {
+                                resultDiv.innerText = "ERROR: " + apiResponse.error;
+                                solveBtn.disabled = false;
+                                sendBtn.disabled = false;
+                                return;
+                            }
+                            
+                            fullAnswer = apiResponse.answer;
+                            overly = apiResponse.overly;
+                            
+                            if (overly == "True") {
+                                await goPremimumOverly();
+                                solveBtn.disabled = false;
+                                sendBtn.disabled = false;
+                                return
+                            }
+                            
+                            if (fullAnswer === "False") {
+                                resultDiv.innerText = "Pay to Continue";
+                                solveBtn.disabled = false;
+                                sendBtn.disabled = false;
+                                return
+                            } else {
+                                chatHistory.push({ role: "assistant", content: fullAnswer });
+                                await addMessage("ai", fullAnswer);
+                                solveBtn.disabled = false;
+                                sendBtn.disabled = false;
+                                resultDiv.scrollTop = 0;
 
-                                    }
-                                    return;
-                                }
-                            );
+                            }
+                            return;
                         }
-                    } else {
-                        chatHistory.push({ role: "assistant", content: fullAnswer });
-                        await addMessage("ai", fullAnswer);
-                        solveBtn.disabled = false;
-                        sendBtn.disabled = false;
-                        resultDiv.scrollTop = 0;
-                    }
-                    return;
+                    );
                 }
-            );
-        });
-    });
+            } else {
+                chatHistory.push({ role: "assistant", content: fullAnswer });
+                await addMessage("ai", fullAnswer);
+                solveBtn.disabled = false;
+                sendBtn.disabled = false;
+                resultDiv.scrollTop = 0;
+            }
+            return;
+        
+    
+});
+});
 };
 
 redirect.onclick = async () => {
@@ -220,7 +220,7 @@ redirect.onclick = async () => {
 };
 
 async function callCheckout(token) {
-    const response = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/create-session", {
+    const response = await fetch("http://127.0.0.1:8000/create-session", {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
     });
@@ -232,7 +232,7 @@ async function refreshAccessToken() {
     const result = await chrome.storage.local.get(["Refresh_token"]);
     const Refresh_token = result.Refresh_token;
     
-    const response = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/refresh_token", {
+    const response = await fetch("http://127.0.0.1:8000/refresh_token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ Refresh_token: Refresh_token })

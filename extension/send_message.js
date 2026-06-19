@@ -1,5 +1,6 @@
 import { sending_Refresh_token } from './Refrsh_token.js'
 import { goPremimumOverly } from './goPremimum_overly.js'
+import { get_solve_endpoint} from "./solve_endpoint.js"
 
 const chatBox = document.getElementById("chatBox");
 const chatInput = document.getElementById("chatInput");
@@ -41,7 +42,7 @@ export async function addImage(role, imageBase64) {
     img.style.maxHeight = '300px';
     img.style.borderRadius = '8px';
     img.style.marginTop = '8px';
-    
+
     msg.appendChild(img);
 
     const chatBox = document.getElementById("chatBox");
@@ -50,12 +51,10 @@ export async function addImage(role, imageBase64) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 async function handleSend(){
-    if (sendBtn.disabled) return;
     const text = chatInput.value.trim();
     if (!text) return;
 
-    sendBtn.disabled = true;
-    solveBtn.disabled = true;
+
     addMessage("user", text);
 
     chatHistory.push({ role: "user", content: text });
@@ -74,23 +73,17 @@ async function handleSend(){
     if (chatHistory.length > 10) {
         chatHistory = chatHistory.slice(-10);
     }
-    sendBtn.disabled = false;
-    solveBtn.disabled = false;
 
 };
 async function getAIResponse(input) {
 
-    let apiResponse = await new Promise((resolve) => {
-        chrome.runtime.sendMessage(
-            { action: "sendMessage", message: [input,chatHistory] },
-            resolve
-        );
-    });
+    let apiResponse = await get_solve_endpoint( { action: "sendMessage", message: [input,chatHistory] })
+    console.log("-->",apiResponse)
+
 
     if (!apiResponse || apiResponse.success === false) {
         resultDiv.innerText = "ERROR: Something went wrong";
         solveBtn.disabled = false;
-        sendBtn.disabled = false;
         return;
     }
 
@@ -98,15 +91,11 @@ async function getAIResponse(input) {
     let overly = apiResponse.overly;
     if (overly == "True") {
         await goPremimumOverly();
-        solveBtn.disabled = false;
-        sendBtn.disabled = false;
         return null;
     }
 
     if (fullAnswer === "False") {
         resultDiv.innerText = "Pay to Continue";
-        solveBtn.disabled = false;
-        sendBtn.disabled = false;
         return;
     }
 
@@ -117,8 +106,6 @@ async function getAIResponse(input) {
         if (refresh === "No") {
             login.style.display = "block";
             resultDiv.innerText = "Please Login again";
-            solveBtn.disabled = false;
-            sendBtn.disabled = false;
             return;
         }
 
@@ -132,13 +119,10 @@ async function getAIResponse(input) {
         if (!apiResponse || apiResponse.success === false) {
             resultDiv.innerText = "ERROR after retry";
             solveBtn.disabled = false;
-            sendBtn.disabled = false;
             return;
         }
         if (apiResponse.overly == "True") {
             await goPremimumOverly();
-            solveBtn.disabled = false;
-            sendBtn.disabled = false;
             return null;
         }
 
@@ -147,12 +131,10 @@ async function getAIResponse(input) {
 
 
 
-    // resultDiv.scrollTop = 0;
 
 
     return fullAnswer;
 }
-
 
 sendBtn.addEventListener("click", handleSend);
 

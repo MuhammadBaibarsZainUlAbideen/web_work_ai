@@ -1,4 +1,5 @@
 from fastapi import FastAPI,Header,BackgroundTasks
+from starlette.responses import StreamingResponse
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from openai import OpenAI
@@ -108,7 +109,7 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
             [{{
             "Store": "Yes|No",
             "Question": "...",
-            "fact": "...",
+            "fact": "..." Proper In unicode,
             "topic": "May be one of {final_topics} OR |Maths|Physics|Political Science|Computer Science|Chemistry|Biology|other",
             "Sub-Topic": "May be one of {final_subtopics} |OR| You generate new Sub-Topic based on the question asked",
             "confidence": 0-1
@@ -164,16 +165,16 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
 
 
     token = authorization.replace("Bearer ", "")
-
-    if token == "undefined":
-        return {"answer":"Login_again"}
-    
     try:
-        payload = jwt.decode(token,our_secret_key,algorithms=["HS256"])
+        payload = jwt.decode(token, our_secret_key, algorithms=["HS256"])
         user_id = payload["key"]
-
+    
     except ExpiredSignatureError:
-        return {"answer":"Login_again"}
+        return {"logout": "false", "reason": "token_expired"}
+    
+    except InvalidTokenError:
+        return {"answer": "Login_again", "reason": "invalid_token"}
+
     
 
 
@@ -214,68 +215,73 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     else:
   
         user_content = problem_data.message
-    
+    async def generate():
+        answer = ""
 
-    response1 = await client.chat.completions.create(
-        messages = [
+        stream = await client.chat.completions.create(
+            messages=[
                 {
                     "role": "system",
-                    "content": f"""Solve the following math problem or text question. Format using Markdown.
+                    "content": """Solve the following math problem or text question. Format using Markdown.
 
-                        ONLY apply the following math rules IF the question involves math or equations:
-                            CRITICAL MATH FORMATTING RULES:
-                            - ALL inline math MUST use $...$ (e.g. $x^2$)
-                            - ALL display math MUST use $$...$$ on its own line
-                            - NEVER use \\( \\) or \\[ \\] — ONLY $ and $$
-                            - NEVER write math without delimiters
-                            - ALWAYS place an explicit operator between \\right) and \\left(
-                            WRONG:  \\right) \\left(   
-                            CORRECT: \\right) - \\left(   or   \\right) + \\left(
-                            - NEVER use unicode math symbols (∑ ∞ · ≤ ≥) — use LaTeX (\\sum \\infty \\cdot \\leq \\geq)
-                            - NEVER output a $$ block that spans more than one blank line
-                        FOR NON-MATH QUESTIONS:
-                            - Use plain Markdown only (**, *, backticks, bullet points)
-                            - Use inline code with backticks for commands, code, or file paths: `git show <hash>`
-                            - NEVER use $ or $$ delimiters for non-math content
-                        OTHER FORMATTING:
-                            - **Bold** for step headings and final answers
-                            - Bullet points for steps
-                        CORRECT example:
-                            The integral evaluates as
-                            $$\\int_2^4 (y^2 - 3y + 5)\\,dy = \\left[\\frac{{y^3}}{{3}}\\right]_2^4$$
-                            giving $\\frac{{32}}{{3}}$.
-                    """
-            
+                            ONLY apply the following math rules IF the question involves math or equations:
+                                CRITICAL MATH FORMATTING RULES:
+                                - ALL inline math MUST use $...$ (e.g. $x^2$)
+                                - ALL display math MUST use $$...$$ on its own line
+                                - NEVER use \\( \\) or \\[ \\] — ONLY $ and $$
+                                - NEVER write math without delimiters
+                                - ALWAYS place an explicit operator between \\right) and \\left(
+                                WRONG:  \\right) \\left(   
+                                CORRECT: \\right) - \\left(   or   \\right) + \\left(
+                                - NEVER use unicode math symbols (∑ ∞ · ≤ ≥) — use LaTeX (\\sum \\infty \\cdot \\leq \\geq)
+                                - NEVER output a $$ block that spans more than one blank line
+                            FOR NON-MATH QUESTIONS:
+                                - Use plain Markdown only (**, *, backticks, bullet points)
+                                - Use inline code with backticks for commands, code, or file paths: `git show <hash>`
+                                - NEVER use $ or $$ delimiters for non-math content
+                            OTHER FORMATTING:
+                                - **Bold** for step headings and final answers
+                                - Bullet points for steps
+                            CORRECT example:
+                                The integral evaluates as
+                                $$\\int_2^4 (y^2 - 3y + 5)\\,dy = \\left[\\frac{{y^3}}{{3}}\\right]_2^4$$
+                                giving $\\frac{{32}}{{3}}$."""
                 },
                 *problem_data.history,
                 {
                     "role": "user",
                     "content": user_content
                 }
-        ],
-        max_completion_tokens=600,
-        temperature=0,
-        model=deployment,
+            ],
+            max_completion_tokens=600,
+            temperature=0,
+            model=deployment,
+            stream=True,
+        )
+
+        async for chunk in stream:
+            delta = chunk.choices[0].delta.content if chunk.choices and chunk.choices[0].delta else None
+
+            if delta:
+                answer += delta
+                print(answer)
+                yield delta
+
+        background_tasks.add_task(
+            extract_and_store_crumbs,
+            user_id,
+            problem_data,
+            answer
+        )
+
+        await increment_tries(user_id)
+
+
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/plain"
     )
-
-    # cost = estimate_cost(response1)
-    # print(cost)
-    
-    answer = response1.choices[0].message.content
-
-    background_tasks.add_task(
-        extract_and_store_crumbs,
-        user_id,
-        problem_data,
-        answer
-    )
-    # print(response1.usage)
-    
-    await increment_tries(user_id)
-
-
-
-    return {"answer":answer}
 
 @app.post("/crumbs")
 async def get(authorization: str = Header(None)):

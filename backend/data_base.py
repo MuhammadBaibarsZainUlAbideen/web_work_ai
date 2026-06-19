@@ -240,6 +240,7 @@ async def printing_crumbs_embeddings(user_id,new_question_emb, new_fact_emb,thre
             return result
     
 async def stroing_question(id, user_id, question, fact, topic, sub_topic, confidence):
+
     async with pool.acquire() as conn:
         await conn.execute("""
             INSERT INTO crumbs (id, user_id, question, fact, topic, sub_topic, confidence)

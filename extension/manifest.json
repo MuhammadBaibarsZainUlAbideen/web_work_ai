@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "WebWork AI Solver",
+  "name": "AI Helper",
   "version": "1.0",
   "description": "AI explanations for WebWork problems",
   "permissions": ["activeTab", "scripting", "storage", "tabCapture","sidePanel","identity"],

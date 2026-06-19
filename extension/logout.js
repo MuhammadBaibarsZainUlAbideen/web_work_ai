@@ -4,7 +4,7 @@ async function refreshAccessToken() {
     const result = await chrome.storage.local.get(["Refresh_token"]);
     const refresh_token = result.Refresh_token;
 
-    const response = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/refresh_token", {
+    const response = await fetch("http://127.0.0.1:8000/refresh_token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ Refresh_token: refresh_token })
@@ -23,7 +23,7 @@ async function refreshAccessToken() {
 
 
 async function performLogout(access_token) {
-    const response = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/logout", {
+    const response = await fetch("http://127.0.0.1:8000/logout", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

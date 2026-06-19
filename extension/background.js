@@ -9,7 +9,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         chrome.storage.local.get(["Access_token"], async (result) => {
             const Access_token = result.Access_token;
             
-            fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/solve", {
+            fetch("http://127.0.0.1:8000/solve", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -35,7 +35,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         chrome.storage.local.get(["Access_token"], async (result) => {
             const Access_token = result.Access_token;
             
-            fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/solve", {
+            fetch("http://127.0.0.1:8000/solve", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -47,10 +47,37 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                     history: request.message[1]
                 })
             })
-            .then(r => r.json())
-            .then(data => {
+            .then(async (r) => {
+            const contentType = r.headers.get("content-type") || "";
+
+            if (contentType.includes("application/json")) {
+                const data = await r.json();
                 sendResponse({ success: true, answer: data.answer, overly: data.overly });
-            })
+                return;
+            }
+
+            const reader = r.body.getReader();
+
+            const decoder = new TextDecoder();
+            let answer = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+
+                answer += chunk;
+
+                chrome.tabs.sendMessage(tabId, {
+                    action: "streamChunk",
+                    chunk: chunk
+                });
+            }
+
+            chrome.tabs.sendMessage(tabId, { action: "streamDone", answer });
+            sendResponse({ success: true }); 
+        })
             .catch(error => { 
                 sendResponse({ success: false, error: error.message });
             });
