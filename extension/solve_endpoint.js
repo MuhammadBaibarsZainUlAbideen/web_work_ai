@@ -15,11 +15,13 @@ export async function get_solve_endpoint(request){
 
     if (request.action === "solveProblem"){
         let data = await getdata(access_token,{type: "image",message: request.imageData,history: request.history})
+        if (data.stream_response){chatHistory.push({ role: "assistant", content: data.stream_response });return "stream_true"}
         if (data.reason === "token_expired") {
             access_token = await sending_Refresh_token("True");
 
             if (access_token) {
                 data = await getdata(access_token,{type: "image",message: request.imageData,history: request.history}); 
+                if (data.stream_response){chatHistory.push({ role: "assistant", content: data.stream_response });return "stream_true"}
                 console.log("---->",data)
                 return { success: true, answer: data.answer, overly: data.overly }
             } else {

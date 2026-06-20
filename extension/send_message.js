@@ -64,11 +64,12 @@ async function handleSend(){
 
 
     const aiReply = await getAIResponse(text);
-    if (apReply = "stream_true"){return}
+    if (aiReply = "stream_true"){return}
     if (aiReply !== null) {
         addMessage("ai", aiReply);
         chatHistory.push({ role: "assistant", content: aiReply });
         console.log("Work",chatHistory)
+        
     }
 
 };

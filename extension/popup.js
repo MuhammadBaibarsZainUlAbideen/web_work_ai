@@ -61,6 +61,8 @@ solveBtn.onclick = async function() {
                 croppedBase64 = await captureAndCropImage(coordinates);
                     if (croppedBase64) {
                         await addImage("user", croppedBase64);
+                        chatHistory.push({role: "user",content: [{type: "image_url",image_url: {url: `data:image/png;base64,${croppedBase64}`,detail: "low"}}]});
+
                     }
             } catch (err) {
                 resultDiv.innerText = "Failed to capture image: " + err.message;
@@ -71,7 +73,8 @@ solveBtn.onclick = async function() {
             }
             
             let apiResponse = await get_solve_endpoint( { action:"solveProblem", imageData: croppedBase64, history: chatHistory})
-            chatHistory.push({role: "user",content: [{type: "image_url",image_url: {url: `data:image/png;base64,${croppedBase64}`,detail: "low"}}]});
+            console.log("Work",chatHistory)
+            if (apiResponse = "stream_true"){return}
 
             
             if (!apiResponse) {
@@ -115,6 +118,7 @@ solveBtn.onclick = async function() {
                     return
                 } else {
                     let apiResponse = await get_solve_endpoint( { action:"solveProblem", imageData: croppedBase64, history: chatHistory})
+                    if (apiResponse = "stream_true"){return}
 
 
                     if (!apiResponse) {
