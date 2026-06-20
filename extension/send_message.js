@@ -58,27 +58,24 @@ async function handleSend(){
     addMessage("user", text);
 
     chatHistory.push({ role: "user", content: text });
-    if (chatHistory.length > 10) {
-        chatHistory = chatHistory.slice(-10);
-    }
+
 
     chatInput.value = "";
 
 
     const aiReply = await getAIResponse(text);
+    if (apReply = "stream_true"){return}
     if (aiReply !== null) {
         addMessage("ai", aiReply);
         chatHistory.push({ role: "assistant", content: aiReply });
-    }
-    if (chatHistory.length > 10) {
-        chatHistory = chatHistory.slice(-10);
+        console.log("Work",chatHistory)
     }
 
 };
 async function getAIResponse(input) {
 
     let apiResponse = await get_solve_endpoint( { action: "sendMessage", message: [input,chatHistory] })
-    console.log("-->",apiResponse)
+    if (apiResponse = "stream_true"){return "stream_true"}
 
 
     if (!apiResponse || apiResponse.success === false) {
@@ -89,6 +86,7 @@ async function getAIResponse(input) {
 
     let fullAnswer = apiResponse.answer;
     let overly = apiResponse.overly;
+    console.log(overly)
     if (overly == "True") {
         await goPremimumOverly();
         return null;
@@ -109,13 +107,8 @@ async function getAIResponse(input) {
             return;
         }
 
-        apiResponse = await new Promise((resolve) => {
-            chrome.runtime.sendMessage(
-                { action: "sendMessage", message: [input,chatHistory] },
-                resolve
-            );
-        });
-
+        apiResponse =  await get_solve_endpoint( { action: "sendMessage", message: [input,chatHistory] })
+        if ( apiResponse.stream_response_true){return apiResponse.stream_response_true}
         if (!apiResponse || apiResponse.success === false) {
             resultDiv.innerText = "ERROR after retry";
             solveBtn.disabled = false;

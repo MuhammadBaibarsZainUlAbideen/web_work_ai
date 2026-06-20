@@ -195,8 +195,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
 
         return {"answer":"False", "overly":"True"}
     if status == False and not await check_rate_limit(user_id):
-        model_name = "gpt-4o-mini"
-        deployment = "gpt-4o-mini"
+        print(1)
         return {"answer": "Too many requests. Please wait a minute.Or get the premimum","overly":"True"}
     if not await check_paid_rate_limit(user_id):
         return {"answer": "I know You have paid version but calm down"}
@@ -314,7 +313,7 @@ async def get(data:Geti):
         algorithm="HS256"
     )
     Access_token = jwt.encode(
-        {"key": user_data["id"], "exp": datetime.utcnow() + timedelta(minutes=10)},
+        {"key": user_data["id"], "exp": datetime.utcnow() + timedelta(seconds=10)},
         our_secret_key,
         algorithm="HS256"
     )
@@ -342,7 +341,7 @@ async def validating(request:RefreshTokenRequest):
 
     else:
         Access_token = jwt.encode(
-            {"key": data[0][1], "exp": datetime.utcnow() + timedelta(minutes=10)},
+            {"key": data[0][1], "exp": datetime.utcnow() + timedelta(seconds=10)},
             our_secret_key,
             algorithm="HS256"
         )

@@ -13,50 +13,26 @@ const sendBtn = document.getElementById("sendBtn");
 let coordinates = null;
 let fullAnswer = null;
 let overly = null;
+let croppedBase64 = null;
 
 async function captureAndCropImage(coordinates) {
     return new Promise((resolve, reject) => {
         chrome.tabs.captureVisibleTab(null, { format: "png" }, async (screenshotUrl) => {
-            if (chrome.runtime.lastError) {
-                reject(chrome.runtime.lastError);
-                return;
-            }
-
+            if (chrome.runtime.lastError) { reject(chrome.runtime.lastError); return; }
             try {
-                const base64Image = screenshotUrl.split(',')[1];
-                const byteString = atob(base64Image);
-                const byteArray = new Uint8Array(byteString.length);
-                for (let i = 0; i < byteString.length; i++) {
-                    byteArray[i] = byteString.charCodeAt(i);
-                }
-                
-                const blob = new Blob([byteArray], { type: "image/png" });
-                const bitmap = await createImageBitmap(blob);
-                const cropRegion = {
-                    x: parseInt(coordinates.x),
-                    y: parseInt(coordinates.y),
-                    width: parseInt(coordinates.width),
-                    height: parseInt(coordinates.height)
-                };
-                
-                const canvas = new OffscreenCanvas(cropRegion.width, cropRegion.height);
+                const bitmap = await createImageBitmap(await fetch(screenshotUrl).then(r => r.blob()));
+
+                const { x, y, width, height } = coordinates;
+                const canvas = new OffscreenCanvas(width, height);
                 const ctx = canvas.getContext("2d");
-                ctx.drawImage(
-                    bitmap,
-                    cropRegion.x, cropRegion.y, cropRegion.width, cropRegion.height,
-                    0, 0, cropRegion.width, cropRegion.height
-                );
-                
-                const croppedBlob = await canvas.convertToBlob({ type: "image/png" });
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    const croppedBase64 = reader.result.split(',')[1];
-                    resolve(croppedBase64);
-                };
-                reader.readAsDataURL(croppedBlob);
-            } catch (err) {
-                reject(err);
-            }
+                ctx.drawImage(bitmap, x, y, width, height, 0, 0, width, height);
+
+                // Use ImageData directly — no re-encoding to blob then back
+                const croppedBlob = await canvas.convertToBlob({ type: "image/png", quality: 0.92 });
+                const buf = await croppedBlob.arrayBuffer();
+                const croppedBase64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+                resolve(croppedBase64);
+            } catch (err) { reject(err); }
         });
     });
 }
@@ -80,12 +56,11 @@ solveBtn.onclick = async function() {
             coordinates = response.coords;
             
             // Take screenshot and crop HERE before sending to background
-            let croppedBase64;
+            
             try {
                 croppedBase64 = await captureAndCropImage(coordinates);
                     if (croppedBase64) {
                         await addImage("user", croppedBase64);
-                        chatHistory.push({ role: "user", content: "[Image]", image: croppedBase64 });
                     }
             } catch (err) {
                 resultDiv.innerText = "Failed to capture image: " + err.message;
@@ -96,6 +71,8 @@ solveBtn.onclick = async function() {
             }
             
             let apiResponse = await get_solve_endpoint( { action:"solveProblem", imageData: croppedBase64, history: chatHistory})
+            chatHistory.push({role: "user",content: [{type: "image_url",image_url: {url: `data:image/png;base64,${croppedBase64}`,detail: "low"}}]});
+
             
             if (!apiResponse) {
                 resultDiv.innerText = "ERROR: Something Went Wrong, Contact Support";
@@ -137,49 +114,49 @@ solveBtn.onclick = async function() {
                     sendBtn.disabled = false;
                     return
                 } else {
-                    chrome.runtime.sendMessage(
-                        { action: "solveProblem", imageData: croppedBase64, history: chatHistory },
-                        async function(apiResponse) {
-                            if (!apiResponse) {
-                                resultDiv.innerText = "ERROR: No API response";
-                                solveBtn.disabled = false;
-                                sendBtn.disabled = false;
-                                return;
-                            }
-                            
-                            if (apiResponse.success === false) {
-                                resultDiv.innerText = "ERROR: " + apiResponse.error;
-                                solveBtn.disabled = false;
-                                sendBtn.disabled = false;
-                                return;
-                            }
-                            
-                            fullAnswer = apiResponse.answer;
-                            overly = apiResponse.overly;
-                            
-                            if (overly == "True") {
-                                await goPremimumOverly();
-                                solveBtn.disabled = false;
-                                sendBtn.disabled = false;
-                                return
-                            }
-                            
-                            if (fullAnswer === "False") {
-                                resultDiv.innerText = "Pay to Continue";
-                                solveBtn.disabled = false;
-                                sendBtn.disabled = false;
-                                return
-                            } else {
-                                chatHistory.push({ role: "assistant", content: fullAnswer });
-                                await addMessage("ai", fullAnswer);
-                                solveBtn.disabled = false;
-                                sendBtn.disabled = false;
-                                resultDiv.scrollTop = 0;
+                    let apiResponse = await get_solve_endpoint( { action:"solveProblem", imageData: croppedBase64, history: chatHistory})
 
-                            }
-                            return;
-                        }
-                    );
+
+                    if (!apiResponse) {
+                        resultDiv.innerText = "ERROR: No API response";
+                        solveBtn.disabled = false;
+                        sendBtn.disabled = false;
+                        return;
+                    }
+                    
+                    if (apiResponse.success === false) {
+                        resultDiv.innerText = "ERROR: " + apiResponse.error;
+                        solveBtn.disabled = false;
+                        sendBtn.disabled = false;
+                        return;
+                    }
+                    
+                    fullAnswer = apiResponse.answer;
+                    overly = apiResponse.overly;
+                    
+                    if (overly == "True") {
+                        await goPremimumOverly();
+                        solveBtn.disabled = false;
+                        sendBtn.disabled = false;
+                        return
+                    }
+                    
+                    if (fullAnswer === "False") {
+                        resultDiv.innerText = "Pay to Continue";
+                        solveBtn.disabled = false;
+                        sendBtn.disabled = false;
+                        return
+                    } else {
+                        chatHistory.push({ role: "assistant", content: fullAnswer });
+                        await addMessage("ai", fullAnswer);
+                        solveBtn.disabled = false;
+                        sendBtn.disabled = false;
+                        resultDiv.scrollTop = 0;
+
+                    }
+                    return;
+                        
+                    
                 }
             } else {
                 chatHistory.push({ role: "assistant", content: fullAnswer });
