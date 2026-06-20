@@ -42,7 +42,9 @@ export async function get_solve_endpoint(request){
         if (data.stream_response){chatHistory.push({ role: "assistant", content: data.stream_response });return "stream_true"}
         console.log(chatHistory)
         if (data.reason === "token_expired") {
+            console.log("131")
             access_token = await sending_Refresh_token("True");
+            console.log("131")
 
             if (access_token) {
                 data = await getdata(access_token,{type: "text",message: request.message[0],history: request.message[1]}); 

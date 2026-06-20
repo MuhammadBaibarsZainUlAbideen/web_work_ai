@@ -51,6 +51,7 @@ export async function addImage(role, imageBase64) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 async function handleSend(){
+    resultDiv.innerText = ""
     const text = chatInput.value.trim();
     if (!text) return;
 
@@ -64,7 +65,7 @@ async function handleSend(){
 
 
     const aiReply = await getAIResponse(text);
-    if (aiReply = "stream_true"){return}
+    if (aiReply == "stream_true"){return}
     if (aiReply !== null) {
         addMessage("ai", aiReply);
         chatHistory.push({ role: "assistant", content: aiReply });
@@ -76,7 +77,7 @@ async function handleSend(){
 async function getAIResponse(input) {
 
     let apiResponse = await get_solve_endpoint( { action: "sendMessage", message: [input,chatHistory] })
-    if (apiResponse = "stream_true"){return "stream_true"}
+    if (apiResponse == "stream_true"){return "stream_true"}
 
 
     if (!apiResponse || apiResponse.success === false) {
@@ -103,6 +104,7 @@ async function getAIResponse(input) {
         const refresh = await sending_Refresh_token(true);
 
         if (refresh === "No") {
+            console.log("login")
             login.style.display = "block";
             resultDiv.innerText = "Please Login again";
             return;

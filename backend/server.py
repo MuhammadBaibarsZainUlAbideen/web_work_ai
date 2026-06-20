@@ -313,7 +313,7 @@ async def get(data:Geti):
         algorithm="HS256"
     )
     Access_token = jwt.encode(
-        {"key": user_data["id"], "exp": datetime.utcnow() + timedelta(seconds=10)},
+        {"key": user_data["id"], "exp": datetime.utcnow() + timedelta(minutes=10)},
         our_secret_key,
         algorithm="HS256"
     )
@@ -341,7 +341,7 @@ async def validating(request:RefreshTokenRequest):
 
     else:
         Access_token = jwt.encode(
-            {"key": data[0][1], "exp": datetime.utcnow() + timedelta(seconds=10)},
+            {"key": data[0][1], "exp": datetime.utcnow() + timedelta(minutes=10)},
             our_secret_key,
             algorithm="HS256"
         )
@@ -407,7 +407,7 @@ async def create_session(data:EditedCrumbs,authorization: str = Header(None)):
         await Editing_crumbs("fact", data.message["action"], user_id,data.message["prevTopic"],None,data.message["subtopic"],None,data.message["question"], data.message["fact"],None,None)
     if data.message["type"] == "subtopic" and data.message["action"] == "move_to_topic":
         await Editing_crumbs("subtopic", data.message["action"], user_id,data.message["prevTopic"], data.message["newTopic"],data.message["subtopic"])
-    elif data.message["type"] == "fact" and data.message["action"] == "move_to_subtopic":
+    if data.message["type"] == "fact" and data.message["action"] == "move_to_subtopic":
         await Editing_crumbs("fact", data.message["action"], user_id,data.message["prevTopic"], None,data.message["oldSubtopic"], data.message["newSubtopic"],data.message["question"], data.message["fact"])
 
 @app.post("/create-session")
