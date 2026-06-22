@@ -52,8 +52,8 @@ async def create_checkout(authorization: str = Header(None)):
         line_items=[{"price": PRICE_ID, "quantity": 1}],
         mode="subscription",
         metadata={"user_id": user_id},
-        success_url="https://webworkaipayment.netlify.app//success.html",
-        cancel_url=f"https://webworkaipayment.netlify.app//cancel.html?session_id={session_id}",
+        success_url="https://asolve.me/success.html",
+        cancel_url=f"https://asolve.me/cancel.html?session_id={session_id}",
     )
     return {"url": session.url}
 
