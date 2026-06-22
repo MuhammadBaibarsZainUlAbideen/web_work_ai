@@ -201,7 +201,7 @@ redirect.onclick = async () => {
 };
 
 async function callCheckout(token) {
-    const response = await fetch("http://127.0.0.1:8000/create-session", {
+    const response = await fetch("https://api.asolve.me/create-session", {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
     });
