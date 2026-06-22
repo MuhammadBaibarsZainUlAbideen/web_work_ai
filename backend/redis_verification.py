@@ -12,7 +12,7 @@ if REDIS_URL and REDIS_URL.startswith(('redis://', 'rediss://')):
         async def check_rate_limit(user_id:str):
             minute_key = f"rate:{user_id}:{datetime.utcnow().strftime('%Y-%m-%d-%H:%M')}" # "2026-05-30-14:35"
             count = await redis_client.get(minute_key)
-            if count and int(count) > 2:
+            if count and int(count) > 1:
                 return False
             await redis_client.incr(minute_key)
             await redis_client.expire(minute_key,60)

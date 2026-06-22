@@ -600,108 +600,6 @@
 
     .feature-card p { font-size: 0.87rem; color: var(--muted); line-height: 1.65; }
 
-    /* PRICING */
-    #pricing { background: var(--surface); }
-
-    .pricing-wrap {
-      max-width: 780px;
-      margin: 0 auto;
-      padding: 100px 24px;
-    }
-
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    @media (max-width: 560px) { .pricing-grid { grid-template-columns: 1fr; } }
-
-    .plan {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 32px 28px;
-    }
-
-    .plan.featured {
-      border-color: var(--green-dim);
-      box-shadow: 0 0 40px #22C55E10;
-      background: #071208;
-    }
-
-    .plan-badge {
-      display: inline-block;
-      background: var(--green);
-      color: #020802;
-      font-size: 0.68rem;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 20px;
-      margin-bottom: 16px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .plan-name {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-
-    .plan-price {
-      font-family: var(--font-display);
-      font-size: 2.6rem;
-      font-weight: 800;
-      letter-spacing: -1.5px;
-      margin-bottom: 4px;
-    }
-
-    .plan-price span { font-size: 0.95rem; font-weight: 400; color: var(--muted); letter-spacing: 0; }
-
-    .plan-desc {
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-bottom: 24px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--border);
-      line-height: 1.6;
-    }
-
-    .plan-features { list-style: none; }
-
-    .plan-features li {
-      font-size: 0.87rem;
-      color: var(--muted);
-      padding: 6px 0;
-      display: flex;
-      gap: 9px;
-      align-items: flex-start;
-    }
-
-    .plan-features li::before { content: "✓"; color: var(--green); font-weight: 700; flex-shrink: 0; }
-    .plan-features li.no::before { content: "✕"; color: var(--border); }
-    .plan-features li.no { color: #3A4A3A; }
-
-    .plan-btn {
-      display: block;
-      text-align: center;
-      margin-top: 28px;
-      padding: 12px;
-      border-radius: 9px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      text-decoration: none;
-      transition: opacity 0.2s;
-    }
-
-    .plan-btn.free { border: 1px solid var(--border); color: var(--muted); }
-    .plan-btn.free:hover { border-color: var(--muted); color: var(--white); }
-    .plan-btn.paid { background: var(--green); color: #020802; }
-    .plan-btn.paid:hover { opacity: 0.85; }
-
     /* LEGAL */
     .legal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
 
@@ -800,7 +698,6 @@
     <ul class="nav-links" id="navLinks">
       <li><a href="#features">Features</a></li>
       <li><a href="#screenshots">How it works</a></li>
-      <li><a href="#pricing">Pricing</a></li>
       <li><a href="#privacy">Privacy</a></li>
       <li><a href="#" class="nav-cta">Add to Chrome</a></li>
     </ul>
@@ -989,48 +886,6 @@
 
   <hr class="divider"/>
 
-  <!-- PRICING -->
-  <section id="pricing">
-    <div class="pricing-wrap">
-      <div class="section-label">Pricing</div>
-      <h2 class="section-title">Start free. Upgrade when you're ready.</h2>
-      <p class="section-sub" style="margin-bottom:44px">No credit card required to get started.</p>
-      <div class="pricing-grid">
-        <div class="plan">
-          <div class="plan-name">Free</div>
-          <div class="plan-price">$0 <span>/ forever</span></div>
-          <div class="plan-desc">Everything you need to get started and try Asolve.</div>
-          <ul class="plan-features">
-            <li>50 questions total</li>
-            <li>Personal knowledge base</li>
-            <li>Image questions</li>
-            <li>Conversation history</li>
-            <li class="no">Unlimited questions</li>
-            <li class="no">Priority speed</li>
-          </ul>
-          <a href="#" class="plan-btn free">Add to Chrome — Free</a>
-        </div>
-        <div class="plan featured">
-          <div class="plan-badge">Most Popular</div>
-          <div class="plan-name">Premium</div>
-          <div class="plan-price">$X <span>/ month</span></div>
-          <div class="plan-desc">For students who are serious about learning.</div>
-          <ul class="plan-features">
-            <li>Unlimited questions</li>
-            <li>Priority response speed</li>
-            <li>Personal knowledge base</li>
-            <li>Image questions</li>
-            <li>Conversation history</li>
-            <li>Early access to new features</li>
-          </ul>
-          <a href="#" class="plan-btn paid">Get Premium</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <hr class="divider"/>
-
   <!-- PRIVACY & TERMS -->
   <section id="privacy">
     <div class="section-wrap">
@@ -1043,7 +898,7 @@
           <p>We collect only the data needed to run Asolve: your Google account info (name, email, profile picture) and usage counts.</p>
           <p>Your questions are sent to Azure OpenAI for processing. Key concepts are saved to your personal knowledge base, which you can delete at any time from within the extension.</p>
           <p>We do not sell your data to third parties. Ever.</p>
-          <p>To delete all your data, email us at <a href="mailto:your@email.com" style="color:var(--green-light);text-decoration:none">your@email.com</a></p>
+          <p>To delete all your data, email us at <a href="mailto:supportasolve@gmail.com" style="color:var(--green-light);text-decoration:none">supportasolve@gmail.com</a></p>
         </div>
         <div class="legal-block">
           <h3>Terms of Service</h3>
@@ -1052,10 +907,10 @@
             <li>Do not submit sensitive or personal information in questions.</li>
             <li>Do not attempt to bypass rate limits or misuse the service.</li>
             <li>Asolve is provided "as is" — we are not liable for inaccuracies in AI-generated answers or decisions made based on them.</li>
-            <li>Paid subscriptions are processed through Paddle and can be cancelled anytime.</li>
+            <li>Paid subscriptions are processed through Stripe and can be cancelled anytime.</li>
             <li>We may update these terms at any time. Continued use means acceptance.</li>
           </ul>
-          <p style="margin-top:14px">Questions? <a href="mailto:your@email.com" style="color:var(--green-light);text-decoration:none">supportasolve@gmail.com</a></p>
+          <p style="margin-top:14px">Questions? <a href="mailto:supportasolve@gmail.com" style="color:var(--green-light);text-decoration:none">supportasolve@gmail.com</a></p>
         </div>
       </div>
     </div>
@@ -1189,5 +1044,6 @@
       window.carousel = { goTo, move, currentIndex: () => currentIndex };
     })();
   </script>
+  <script src="stripe.js"></script>
 </body>
 </html>
