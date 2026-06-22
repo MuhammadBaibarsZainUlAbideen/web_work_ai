@@ -1,5 +1,4 @@
 import {sending_Refresh_token} from "./Refrsh_token.js"
-import {addMessage} from "./send_message.js"
 import { chatHistory } from './send_message.js';
 let streamingMessageDiv = null;
 
@@ -67,7 +66,7 @@ export async function get_solve_endpoint(request){
 }
 
 async function getdata(access_token,body){
-    let data =  await fetch("http://127.0.0.1:8000/solve",{
+    let data =  await fetch("https://api.asolve.me/solve",{
         method:"POST",
         headers: {
             "Content-Type": "application/json",

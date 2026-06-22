@@ -30,7 +30,7 @@ export async function getStoredCrumbs(){
 }
 
 async function getCrumbs(access_token){
-    let data =  await fetch("http://127.0.0.1:8000/crumbs",{
+    let data =  await fetch("https://api.asolve.me/crumbs",{
         method:"POST",
         headers: {
             "Content-Type": "application/json",
