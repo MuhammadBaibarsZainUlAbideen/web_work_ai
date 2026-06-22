@@ -85,76 +85,75 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
     final_subtopics = ", ".join(item[0] for item in data)
 
     
-    for attempt in range(2):
-        try:
-            response = await client.chat.completions.create(
-                model=deployment,
-                temperature=0,
-                max_completion_tokens=200,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": f"""
-            You are a learning assistant. Extract key concepts from the solution.
+    
+    try:
+        response = await client.chat.completions.create(
+            model=deployment,
+            temperature=0,
+            max_completion_tokens=200,
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"""
+        You are a learning assistant. Extract key concepts from the solution.
 
-            Return ONE JSON object in an array. No text outside JSON.
+        Return ONE JSON object in an array. No text outside JSON.
 
-            Rules:
-            - Brief answers only like 2 or 3 sentences, no backslashes
-            - Keep: questions (correct spelling), definitions, formulas, mistakes
-            - Set topic to "Ignore" if unrelated to Maths, Physics, Political Science, Computer/Tech, Chemistry, or Biology
-            - Combine multiple facts into one concise fact
-            - "Store": Yes only if the question make sense to worth saving for later review, else No 
+        Rules:
+        - Brief answers only like 2 or 3 sentences, no backslashes
+        - Keep: questions (correct spelling), definitions, formulas, mistakes
+        - Set topic to "Ignore" if unrelated to Maths, Physics, Political Science, Computer/Tech, Chemistry, or Biology
+        - Combine multiple facts into one concise fact
+        - "Store": Yes only if the question make sense to worth saving for later review, else No 
 
-            [{{
-            "Store": "Yes|No",
-            "Question": "...",
-            "fact": "..." Proper In unicode,
-            "topic": "May be one of {final_topics} OR |Maths|Physics|Political Science|Computer Science|Chemistry|Biology|other",
-            "Sub-Topic": "May be one of {final_subtopics} |OR| You generate new Sub-Topic based on the question asked",
-            "confidence": 0-1
-            }}]
-        """
-                    },
-                    {
-                        "role": "user",
-                        "content": f"""
-    Question:
-    {problem_data.message}
-
-    Answer:
-    {answer}
+        [{{
+        "Store": "Yes|No",
+        "Question": "...",
+        "fact": "..." Proper In unicode,
+        "topic": "May be one of {final_topics} OR |Maths|Physics|Political Science|Computer Science|Chemistry|Biology|other",
+        "Sub-Topic": "May be one of {final_subtopics} |OR| You generate new Sub-Topic based on the question asked",
+        "confidence": 0-1
+        }}]
     """
-                    }
-                ]
-            )
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+Question:
+{problem_data.message}
 
-            crumbs_raw = response.choices[0].message.content
-            try:
-                crumbs = json.loads(crumbs_raw)
-                print(crumbs)
-            except Exception as e:
-                continue
+Answer:
+{answer}
+"""
+                }
+            ]
+        )
 
-            if crumbs[0]["topic"].lower()  == "ignore" or crumbs[0]["Store"].lower() == "no":
-                return
-                
-            Question_text, fact_text = await build_embedding_text(crumbs[0])
-            Question_embedding, fact_embedding = await asyncio.gather(
-                embed(Question_text),
-                embed(fact_text)
-            )
-            duplicate = await is_duplicate(user_id, Question_embedding,fact_embedding)
-            if duplicate:
-                print("nipe")
-                return
-            
-            await stroing_question_and_embedding(user_id,crumbs[0]["Question"],crumbs[0]["fact"],crumbs[0]["topic"],crumbs[0]["Sub-Topic"],crumbs[0]["confidence"],Question_embedding,fact_embedding)
-           
-            return
+        crumbs_raw = response.choices[0].message.content
+        try:
+            crumbs = json.loads(crumbs_raw)
+            print(crumbs)
         except Exception as e:
-            if attempt < 1:
-                await asyncio.sleep(2)
+            return
+
+        if crumbs[0]["topic"].lower()  == "ignore" or crumbs[0]["Store"].lower() == "no":
+            return
+            
+        Question_text, fact_text = await build_embedding_text(crumbs[0])
+        Question_embedding, fact_embedding = await asyncio.gather(
+            embed(Question_text),
+            embed(fact_text)
+        )
+        duplicate = await is_duplicate(user_id, Question_embedding,fact_embedding)
+        if duplicate:
+            print("nipe")
+            return
+        
+        await stroing_question_and_embedding(user_id,crumbs[0]["Question"],crumbs[0]["fact"],crumbs[0]["topic"],crumbs[0]["Sub-Topic"],crumbs[0]["confidence"],Question_embedding,fact_embedding)
+        
+        return
+    except Exception as e:
+        return 
 
 
 
@@ -193,7 +192,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
     # Pay Wall
     if status == False and total_tries > 50:
 
-        return {"answer":"False", "overly":"True"}
+        return {"answer":"Get the Paid version buddy, thats enough demo for you", "overly":"True"}
     if status == False and not await check_rate_limit(user_id):
         print(1)
         return {"answer": "Too many requests. Please wait a minute.Or get the premimum","overly":"True"}
@@ -402,6 +401,8 @@ async def create_session(data:EditedCrumbs,authorization: str = Header(None)):
         await Editing_crumbs("subtopic", data.message["action"], user_id, data.message["prevTopic"],None, data.message["subtopic"])
         
     if data.message["type"] == "fact" and data.message["action"] == "edit":
+        status = payment_status(user_id)
+
         await Editing_crumbs("fact",data.message["action"],user_id,data.message["prevTopic"],None,data.message["subtopic"],None,data.message["oldQuestion"],data.message["oldFact"],data.message["newQuestion"],data.message["newFact"])
     if data.message["type"] == "fact" and data.message["action"] == "delete":
         await Editing_crumbs("fact", data.message["action"], user_id,data.message["prevTopic"],None,data.message["subtopic"],None,data.message["question"], data.message["fact"],None,None)

@@ -77,6 +77,10 @@ async function renderTopics() {
         }
         
         if (editMode) {
+            div.onclick = async () => {
+                selectedTopic = topic;
+                await renderSubTopics();
+            };
             const editBtn = document.createElement("button");
             editBtn.innerText = "✏️";
             editBtn.className = "cell-btn edit-btn";
@@ -149,6 +153,10 @@ async function renderSubTopics() {
         }
 
         if (editMode) {
+            div.onclick = async () => {
+                selectedSubTopic = sub;
+                await renderFacts();
+            };
             const editBtn = document.createElement("button");
             editBtn.className = "cell-btn edit-btn";
             editBtn.innerHTML = '<i class="fas fa-pen-to-square"></i>'; 

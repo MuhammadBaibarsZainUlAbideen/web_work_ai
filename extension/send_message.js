@@ -52,6 +52,8 @@ export async function addImage(role, imageBase64) {
 }
 async function handleSend(){
     resultDiv.innerText = ""
+    solveBtn.disabled = true;
+    sendBtn.disabled = true;
     const text = chatInput.value.trim();
     if (!text) return;
 
@@ -65,9 +67,11 @@ async function handleSend(){
 
 
     const aiReply = await getAIResponse(text);
-    if (aiReply == "stream_true"){return}
+    if (aiReply == "stream_true"){solveBtn.disabled = false;sendBtn.disabled = false;return}
     if (aiReply !== null) {
         addMessage("ai", aiReply);
+        solveBtn.disabled = false;
+        sendBtn.disabled = false;
         chatHistory.push({ role: "assistant", content: aiReply });
         console.log("Work",chatHistory)
         
