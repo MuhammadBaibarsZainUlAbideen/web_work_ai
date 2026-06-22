@@ -100,6 +100,7 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
         Return ONE JSON object in an array. No text outside JSON.
 
         Rules:
+        - If you think that the asked question {problem_data.message} is not important set Store to No
         - Brief answers only like 1 or 2 sentences, no backslashes
         - Keep: questions (correct spelling), definitions, formulas, mistakes
         - Set topic to "Ignore" if unrelated to Maths, Physics, Political Science, Computer/Tech, Chemistry, or Biology
