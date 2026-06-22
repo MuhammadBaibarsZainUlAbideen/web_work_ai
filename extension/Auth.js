@@ -27,7 +27,7 @@ async function storingLocal(token){
 }
 
 async function sendingBakcend(jsObject){
-    const sending = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/get",{
+    const sending = await fetch("https://api.asolve.me/get",{
         method:"POST",
         headers:{"Content-Type": "application/json"},
         body:JSON.stringify({Auth:jsObject})

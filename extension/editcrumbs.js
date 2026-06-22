@@ -1,5 +1,6 @@
 import {sending_Refresh_token} from "./Refrsh_token.js"
 let resulElementtDiv = document.getElementById("result");
+import { goPremimumOverly } from './goPremimum_overly.js'
 
 export async function editCrumbs(editedCrumbs){
 
@@ -105,5 +106,21 @@ async function sendEditCrumbs(access_token, editedCrumbs){
     })
 
     let dataJsonConversion = await data.json()
+    let isBlocking = await blocking(dataJsonConversion)
+    if(!isBlocking){
+        return
+    }
     return dataJsonConversion
+}
+
+async function blocking(apiResponse){
+    let overly = apiResponse.overly;
+    if (overly == "True") {
+        await goPremimumOverly();
+        return null;
+    }
+    
+
+
+
 }

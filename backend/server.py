@@ -100,7 +100,7 @@ async def extract_and_store_crumbs(user_id, problem_data, answer):
         Return ONE JSON object in an array. No text outside JSON.
 
         Rules:
-        - Brief answers only like 2 or 3 sentences, no backslashes
+        - Brief answers only like 1 or 2 sentences, no backslashes
         - Keep: questions (correct spelling), definitions, formulas, mistakes
         - Set topic to "Ignore" if unrelated to Maths, Physics, Political Science, Computer/Tech, Chemistry, or Biology
         - Combine multiple facts into one concise fact
@@ -384,9 +384,6 @@ async def create_session(data:EditedCrumbs,authorization: str = Header(None)):
     try:
         payload = jwt.decode(token, our_secret_key, algorithms=["HS256"])
         user_id = payload["key"]
-        user = await getting_user(user_id)
-        if not user:
-            return {"Verify": "false"}
     except ExpiredSignatureError:
         return {"Verify": "false", "reason": "token_expired"}
     except InvalidTokenError:
@@ -401,8 +398,9 @@ async def create_session(data:EditedCrumbs,authorization: str = Header(None)):
         await Editing_crumbs("subtopic", data.message["action"], user_id, data.message["prevTopic"],None, data.message["subtopic"])
         
     if data.message["type"] == "fact" and data.message["action"] == "edit":
-        status = payment_status(user_id)
-
+        status = await payment_status(user_id)
+        if status == False:
+            return {"overly":"True"}
         await Editing_crumbs("fact",data.message["action"],user_id,data.message["prevTopic"],None,data.message["subtopic"],None,data.message["oldQuestion"],data.message["oldFact"],data.message["newQuestion"],data.message["newFact"])
     if data.message["type"] == "fact" and data.message["action"] == "delete":
         await Editing_crumbs("fact", data.message["action"], user_id,data.message["prevTopic"],None,data.message["subtopic"],None,data.message["question"], data.message["fact"],None,None)

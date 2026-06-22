@@ -120,6 +120,12 @@ button:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 /* ============================================================
    SPECIFIC BUTTONS
    ============================================================ */
+.settings-item {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  display: block; /* makes it behave like a div if needed */
+}
 .buttons {
   display: flex;
   align-items: center;

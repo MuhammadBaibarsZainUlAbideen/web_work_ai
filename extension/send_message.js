@@ -73,7 +73,6 @@ async function handleSend(){
         solveBtn.disabled = false;
         sendBtn.disabled = false;
         chatHistory.push({ role: "assistant", content: aiReply });
-        console.log("Work",chatHistory)
         
     }
 
@@ -92,7 +91,6 @@ async function getAIResponse(input) {
 
     let fullAnswer = apiResponse.answer;
     let overly = apiResponse.overly;
-    console.log(overly)
     if (overly == "True") {
         await goPremimumOverly();
         return null;
@@ -108,7 +106,6 @@ async function getAIResponse(input) {
         const refresh = await sending_Refresh_token(true);
 
         if (refresh === "No") {
-            console.log("login")
             login.style.display = "block";
             resultDiv.innerText = "Please Login again";
             return;

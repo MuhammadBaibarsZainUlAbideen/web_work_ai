@@ -4,7 +4,6 @@ export async function goPremimumOverly() {
 
   const close = () => { overlay.style.display = "none"; };
 
-  document.getElementById("closeOverlay").onclick = close;
   document.getElementById("closeOverlayText").onclick = close;
 
   document.getElementById("upgradeFromOverlay").onclick = () => {

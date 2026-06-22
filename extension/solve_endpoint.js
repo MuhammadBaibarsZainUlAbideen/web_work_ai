@@ -21,10 +21,8 @@ export async function get_solve_endpoint(request){
             if (access_token) {
                 data = await getdata(access_token,{type: "image",message: request.imageData,history: request.history}); 
                 if (data.stream_response){chatHistory.push({ role: "assistant", content: data.stream_response });return "stream_true"}
-                console.log("---->",data)
                 return { success: true, answer: data.answer, overly: data.overly }
             } else {
-                console.log("please contact")
                 return
             }
         }
@@ -36,30 +34,23 @@ export async function get_solve_endpoint(request){
 
     }
     if (request.action === "sendMessage") {
-        console.log("1")
         let data = await getdata(access_token,{type: "text",message: request.message[0],history: request.message[1]})
         if (data.stream_response){chatHistory.push({ role: "assistant", content: data.stream_response });return "stream_true"}
-        console.log(chatHistory)
         if (data.reason === "token_expired") {
-            console.log("131")
             access_token = await sending_Refresh_token("True");
-            console.log("131")
 
             if (access_token) {
                 data = await getdata(access_token,{type: "text",message: request.message[0],history: request.message[1]}); 
                 if (data.stream_response){chatHistory.push({ role: "assistant", content: data.stream_response });return "stream_true"}
-                console.log(chatHistory)
-                console.log("---->",data)
+
                 return { success: true, answer: data.answer, overly: data.overly }
             } else {
-                console.log("please contact")
                 return
             }
         }
         if (data.reason === "invalid_token") {
             return {answer: data.answer}
         }
-        console.log("---->",data)
         return { success: true, answer: data.answer, overly: data.overly }
 
     }
@@ -81,13 +72,10 @@ async function getdata(access_token,body){
 }
 
 async function data_type(r){
-    console.log("1")
     const contentType = r.headers.get("content-type") || "";
 
     if (contentType.includes("application/json")) {
-        console.log("1")
         const data = await r.json();
-        console.log("11",data)
         return data;
     }
 
@@ -103,7 +91,6 @@ async function data_type(r){
         const chunk = decoder.decode(value, { stream: true });
 
         answer += chunk;
-        console.log(answer)
         updateStreamingMessage(answer)
 
 

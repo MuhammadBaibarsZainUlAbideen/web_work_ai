@@ -73,7 +73,6 @@ solveBtn.onclick = async function() {
             }
             
             let apiResponse = await get_solve_endpoint( { action:"solveProblem", imageData: croppedBase64, history: chatHistory})
-            console.log("Work",chatHistory)
             if (apiResponse == "stream_true"){return}
 
             
