@@ -1,8 +1,13 @@
 {
   "manifest_version": 3,
   "name": "aSolve",
+  "icons": {
+  "16": "./Logos/16x16.png",
+  "48": "./Logos/48x48.png",
+  "128": "./Logos/128x128.png"
+  },
   "version": "1.0",
-  "description": "AI explanations for WebWork problems",
+  "description": "AI Assitant for all of your problems that also makes the knowledge base from the conversation history",
   "permissions": ["activeTab", "scripting", "storage", "tabCapture","sidePanel","identity"],
   "host_permissions": [
     "http://localhost:8000/*",
@@ -21,7 +26,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://*/*", "http://*/*","file://*/*"],
+      "matches": ["<all_urls>"],
       "js": ["content.js"],
       "run_at": "document_start"
     }

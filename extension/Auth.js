@@ -27,7 +27,7 @@ async function storingLocal(token){
 }
 
 async function sendingBakcend(jsObject){
-    const sending = await fetch("http://127.0.0.1:8000/get",{
+    const sending = await fetch("https://marksup-hjgvdbdbdmhdbff7.eastus2-01.azurewebsites.net/get",{
         method:"POST",
         headers:{"Content-Type": "application/json"},
         body:JSON.stringify({Auth:jsObject})
