@@ -17,6 +17,7 @@ stripe.api_key = os.getenv("stripe_key")
 
 
 PRICE_ID = os.getenv("price_id")
+STRIPE_PUBLISHABLE_KEY = "pk_test_51TR1gD0OMb8UaZikwCqxrlQ1401jRlLtKGByeXpWOEJ3uH12Q9E6WayYilZ87oE9gDxh05BjegFcqimEDXeHHmLf000iCcBYdC"
 our_secret_key = os.getenv("our_secret_key")
 
 
