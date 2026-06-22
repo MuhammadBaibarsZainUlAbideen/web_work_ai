@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Asolve — Your AI Study Assistant</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aSolve — Your AI Study Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -61,7 +61,14 @@
       text-decoration: none;
     }
 
-    .logo span { color: var(--green); }
+    /* Only the 's' in aSolve is white — all other letters inherit green */
+    .logo .highlight-s {
+      color: var(--white);
+    }
+
+    .logo .rest {
+      color: var(--green);
+    }
 
     .nav-links {
       display: flex;
@@ -374,40 +381,33 @@
       overflow: hidden;
       border: 1px solid #1a2a1a;
       background: #0a100a;
-      /* fixed aspect ratio so the card doesn't jump in height */
       height: 550px;
     }
 
-    /* Each img sits absolutely so they stack */
     .stair-img img {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;    /* back to cover — your screenshots fill the full frame */
-      object-position: top; /* anchor to top so the important content shows */
+      object-fit: cover;
+      object-position: top;
       display: block;
       transition: opacity 0.4s ease, transform 0.4s ease;
     }
 
-    /* First image: visible by default, slides out left on hover */
-    /* First image */
     .stair-img img:nth-child(1) {
       opacity: 1;
       transform: translateX(0);
       z-index: 2;
     }
 
-    /* Second image: hidden until hover */
     .stair-img img:nth-child(2) {
       opacity: 1;
       transform: translateX(6%);
       z-index: 1;
       object-position: center;
-      
     }
 
-    /* Hover swap (active card only) */
     .stair-item.active .stair-img:hover img:nth-child(1) {
       opacity: 0;
       transform: translateX(-6%);
@@ -418,7 +418,6 @@
       transform: translateX(0);
     }
 
-    /* Dot indicators inside image */
     .img-dots {
       position: absolute;
       bottom: 8px;
@@ -444,7 +443,6 @@
       transition: background 0.3s ease, width 0.3s ease;
     }
 
-    /* On hover, second dot becomes active */
     .stair-item.active .stair-img:hover .img-dot:last-child {
       background: #22C55E;
       width: 14px;
@@ -455,19 +453,16 @@
       background: rgba(255,255,255,0.25);
     }
 
-    /* Default state: first dot active */
     .img-dot:first-child {
       background: #22C55E;
       width: 14px;
       border-radius: 3px;
     }
 
-    /* Hover cursor hint */
     .stair-item.active .stair-img {
       cursor: pointer;
     }
 
-    /* Hover hint label */
     .img-hover-hint {
       position: absolute;
       top: 10px;
@@ -694,7 +689,10 @@
 
   <!-- NAV -->
   <nav>
-    <a href="#" class="logo">A<span>solve</span></a>
+    <a href="#" class="logo">
+      <!-- aSolve: 'a' and 'Solve' are green, only the 's' is white -->
+      <span class="highlight-s">a</span><span class="rest">S</span><span class="highlight-s">olve</span>
+    </a>
     <ul class="nav-links" id="navLinks">
       <li><a href="#features">Features</a></li>
       <li><a href="#screenshots">How it works</a></li>
@@ -707,7 +705,7 @@
   <!-- HERO -->
   <section class="hero" id="home">
     <div class="badge">✦ Chrome Extension · Free to install</div>
-    <h1>Solve anything.<br><em>Remember everything.</em></h1>
+    <h1>Solve anything.<br /><em>Remember everything.</em></h1>
     <p class="hero-sub">Your AI study assistant that answers math, science, and text questions instantly — then builds a personal knowledge base so nothing slips away.</p>
     <div class="hero-actions">
       <a href="#" class="btn-primary">
@@ -727,7 +725,7 @@
       <div class="demo-content">
         <div class="demo-question">💬 &nbsp;Solve: ∫ x² dx from 0 to 3</div>
         <div class="demo-answer">
-          <strong>▸ Asolve</strong>
+          <strong>▸ aSolve</strong>
           <div class="demo-step"><div class="step-num">1</div><div>Apply the power rule: ∫ x² dx = x³/3 + C</div></div>
           <div class="demo-step"><div class="step-num">2</div><div>Evaluate bounds: [3³/3] − [0³/3] = 27/3 − 0</div></div>
           <div class="demo-step"><div class="step-num">3</div><div style="color:#F0FFF0;font-weight:600">Answer: 9</div></div>
@@ -737,7 +735,7 @@
     </div>
   </div>
 
-  <hr class="divider" style="margin-top:80px"/>
+  <hr class="divider" style="margin-top:80px" />
 
   <!-- FEATURES -->
   <section id="features">
@@ -754,17 +752,17 @@
         <div class="feature-card">
           <div class="feature-icon">🧠</div>
           <h3>Personal Knowledge Base</h3>
-          <p>Asolve automatically saves key concepts from your questions — your own AI-curated study notes, organized by topic.</p>
+          <p>aSolve automatically saves key concepts from your questions — your own AI-curated study notes, organized by topic.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🖼️</div>
           <h3>Image Questions</h3>
-          <p>Screenshot a problem and let Asolve read and solve it. No typing needed.</p>
+          <p>Screenshot a problem and let aSolve read and solve it. No typing needed.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">💬</div>
           <h3>Conversation History</h3>
-          <p>Follow up, ask for clarification, go deeper. Asolve keeps the full context of your conversation.</p>
+          <p>Follow up, ask for clarification, go deeper. aSolve keeps the full context of your conversation.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🗂️</div>
@@ -780,7 +778,7 @@
     </div>
   </section>
 
-  <hr class="divider"/>
+  <hr class="divider" />
 
   <!-- SCREENSHOTS — HORIZONTAL STAIRCASE CAROUSEL -->
   <section id="screenshots">
@@ -788,17 +786,13 @@
       <div class="carousel-header">
         <div class="section-label">How it works</div>
         <h2 class="section-title">From question to knowledge in seconds.</h2>
-        <p class="section-sub">See Asolve in action — every step of the way. Hover over any image to preview more.</p>
+        <p class="section-sub">See aSolve in action — every step of the way. Hover over any image to preview more.</p>
       </div>
 
       <div class="carousel-wrapper">
         <div class="carousel-track" id="carouselTrack">
 
-          <!-- Step 1
-               Replace src values below with your real image paths.
-               img:first-child = default image shown
-               img:last-child  = image revealed on hover
-          -->
+          <!-- Step 1 -->
           <div class="stair-item" data-index="0">
             <div class="stair-img">
               <img src="./icons/image1.png" alt="Ask a question — default view" />
@@ -812,7 +806,7 @@
             <div class="stair-num">01</div>
             <div class="stair-text">
               <h3>Ask your question</h3>
-              <p>Type any question or paste a screenshot. Asolve handles math equations, science problems, and general knowledge.</p>
+              <p>Type any question or paste a screenshot. aSolve handles math equations, science problems, and general knowledge.</p>
             </div>
           </div>
 
@@ -884,7 +878,7 @@
     </div>
   </section>
 
-  <hr class="divider"/>
+  <hr class="divider" />
 
   <!-- PRIVACY & TERMS -->
   <section id="privacy">
@@ -895,7 +889,7 @@
       <div class="legal-grid">
         <div class="legal-block">
           <h3>Privacy Policy</h3>
-          <p>We collect only the data needed to run Asolve: your Google account info (name, email, profile picture) and usage counts.</p>
+          <p>We collect only the data needed to run aSolve: your Google account info (name, email, profile picture) and usage counts.</p>
           <p>Your questions are sent to Azure OpenAI for processing. Key concepts are saved to your personal knowledge base, which you can delete at any time from within the extension.</p>
           <p>We do not sell your data to third parties. Ever.</p>
           <p>To delete all your data, email us at <a href="mailto:supportasolve@gmail.com" style="color:var(--green-light);text-decoration:none">supportasolve@gmail.com</a></p>
@@ -903,10 +897,10 @@
         <div class="legal-block">
           <h3>Terms of Service</h3>
           <ul>
-            <li>By using Asolve you agree to these terms.</li>
+            <li>By using aSolve you agree to these terms.</li>
             <li>Do not submit sensitive or personal information in questions.</li>
             <li>Do not attempt to bypass rate limits or misuse the service.</li>
-            <li>Asolve is provided "as is" — we are not liable for inaccuracies in AI-generated answers or decisions made based on them.</li>
+            <li>aSolve is provided "as is" — we are not liable for inaccuracies in AI-generated answers or decisions made based on them.</li>
             <li>Paid subscriptions are processed through Stripe and can be cancelled anytime.</li>
             <li>We may update these terms at any time. Continued use means acceptance.</li>
           </ul>
@@ -925,7 +919,7 @@
 
   <!-- FOOTER -->
   <footer>
-    <p>© 2025 Asolve. All rights reserved.</p>
+    <p>© 2025 aSolve. All rights reserved.</p>
     <div class="footer-links">
       <a href="#privacy">Privacy Policy</a>
       <a href="#privacy">Terms of Service</a>
@@ -1017,7 +1011,6 @@
         if (e.key === 'ArrowRight') move(1);
       });
 
-      /* Clicking an inactive card navigates to it */
       items.forEach((item, idx) => {
         item.addEventListener('click', () => {
           if (!item.classList.contains('active')) goTo(idx);
@@ -1030,13 +1023,11 @@
         resizeTimer = setTimeout(() => updateCarousel(false), 150);
       });
 
-      /* Initial layout */
       setTimeout(() => {
         updateCarousel(false);
         setTimeout(() => updateCarousel(true), 50);
       }, 100);
 
-      /* Recalculate after images load */
       track.querySelectorAll('img').forEach(img => {
         img.addEventListener('load', () => setTimeout(() => updateCarousel(false), 50));
       });

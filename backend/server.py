@@ -426,7 +426,7 @@ async def create_session(authorization: str = Header(None)):
         sessions[session_id] = user_id
 
         
-        plans_url = f"http://localhost:8001/stripe.html?session_id={session_id}"
+        plans_url = f"https://asolve.me/stripe.html?session_id={session_id}"
         return {"plans_url": plans_url}
 
     except ExpiredSignatureError:
