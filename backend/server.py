@@ -21,7 +21,7 @@ from contextlib import asynccontextmanager
 from backend.building_embeding_text import build_embedding_text,embed
 import numpy as np
 from backend.helper_function import is_duplicate,cosine_similarity,to_blob,stroing_question_and_embedding
-from backend.redis_verification import check_rate_limit, get_cached_answer, set_cached_answer,check_paid_rate_limit
+from backend.redis_verification import check_rate_limit,check_paid_rate_limit,check_monthly_paid_limit,check_paid_edit_rate_limit
 import json
 import time
 import asyncio
@@ -191,14 +191,16 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
 
 
     # Pay Wall
-    if status == False and total_tries > 50:
-
+    if status == False and total_tries > 25:
         return {"answer":"Get the Paid version buddy, thats enough demo for you", "overly":"True"}
     if status == False and not await check_rate_limit(user_id):
         print(1)
         return {"answer": "Too many requests. Please wait a minute.Or get the premimum","overly":"True"}
     if not await check_paid_rate_limit(user_id):
         return {"answer": "I know You have paid version but calm down"}
+    if status == True and not await check_monthly_paid_limit(user_id):
+        return {"answer": "You've hit your 1,500 monthly request limit. It resets at the start of next month.Please email me at supportasolve@gmail"}
+    
     
     user_content = []
     if problem_data.type == "image":
@@ -402,6 +404,8 @@ async def create_session(data:EditedCrumbs,authorization: str = Header(None)):
         status = await payment_status(user_id)
         if status == False:
             return {"overly":"True"}
+        if not await check_paid_edit_rate_limit(user_id):
+            return {"answer": "Too many edits. Please wait a minute.You can only edit 5 times in a minute"}
         await Editing_crumbs("fact",data.message["action"],user_id,data.message["prevTopic"],None,data.message["subtopic"],None,data.message["oldQuestion"],data.message["oldFact"],data.message["newQuestion"],data.message["newFact"])
     if data.message["type"] == "fact" and data.message["action"] == "delete":
         await Editing_crumbs("fact", data.message["action"], user_id,data.message["prevTopic"],None,data.message["subtopic"],None,data.message["question"], data.message["fact"],None,None)

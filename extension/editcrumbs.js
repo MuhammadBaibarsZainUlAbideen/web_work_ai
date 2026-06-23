@@ -106,10 +106,16 @@ async function sendEditCrumbs(access_token, editedCrumbs){
     })
 
     let dataJsonConversion = await data.json()
-    let isBlocking = await blocking(dataJsonConversion)
-    if(!isBlocking){
+    if(dataJsonConversion.overly){
+        await blocking(dataJsonConversion)
         return
     }
+    
+    if(dataJsonConversion.answer){
+        await editRateLimt(dataJsonConversion)
+        return
+    }
+
     return dataJsonConversion
 }
 
@@ -121,6 +127,11 @@ async function blocking(apiResponse){
     }
     
 
-
+}
+async function editRateLimt(apiResponse){
+    let final = apiResponse.answer;
+    resulElementtDiv.innerText=final
+    document.getElementById("memoryOverlay").classList.add("hidden");
+    
 
 }

@@ -1,4 +1,4 @@
-var login1 = document.getElementById("LS");
+let login1 = document.getElementById("LS");
 
 async function refreshAccessToken() {
     const result = await chrome.storage.local.get(["Refresh_token"]);
@@ -34,6 +34,7 @@ async function performLogout(access_token) {
 }
 
 document.getElementById("Logout").addEventListener('click', async function () {
+    login1.style.display = "block";
     let result = await chrome.storage.local.get(["Access_token"]);
     let access_token = result.Access_token;
 
@@ -54,7 +55,7 @@ document.getElementById("Logout").addEventListener('click', async function () {
     if (data.logout === "true") {
         chrome.storage.local.remove(["Access_token", "Refresh_token"]);
         showToast("Logged out successfully");
-        login1.style.display = "block";
+        // login1.style.display = "block";
     }
 });
 
