@@ -21,16 +21,21 @@ async function captureAndCropImage(coordinates) {
             if (chrome.runtime.lastError) { reject(chrome.runtime.lastError); return; }
             try {
                 const bitmap = await createImageBitmap(await fetch(screenshotUrl).then(r => r.blob()));
-
                 const { x, y, width, height } = coordinates;
                 const canvas = new OffscreenCanvas(width, height);
                 const ctx = canvas.getContext("2d");
                 ctx.drawImage(bitmap, x, y, width, height, 0, 0, width, height);
 
-                // Use ImageData directly — no re-encoding to blob then back
                 const croppedBlob = await canvas.convertToBlob({ type: "image/png", quality: 0.92 });
                 const buf = await croppedBlob.arrayBuffer();
-                const croppedBase64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+
+                const bytes = new Uint8Array(buf);
+                let binary = '';
+                for (let i = 0; i < bytes.byteLength; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                const croppedBase64 = btoa(binary);
+
                 resolve(croppedBase64);
             } catch (err) { reject(err); }
         });
