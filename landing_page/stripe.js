@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let upgrade_button = document.getElementById("payBtn");
 
     upgrade_button.onclick = async function checkout() {
-        const response = await fetch("http://api.asolve.me/checkout", {
+        const response = await fetch("https://api.asolve.me/checkout", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${session_id}`
