@@ -1,5 +1,5 @@
 import { sending_Refresh_token } from './Refrsh_token.js'
-import { goPremimumOverly } from './goPremimum_overly.js'
+import { goPremiumOverlay } from './goPremimum_overly.js'
 import { get_solve_endpoint} from "./solve_endpoint.js"
 
 const chatBox = document.getElementById("chatBox");
@@ -92,7 +92,15 @@ async function getAIResponse(input) {
     let fullAnswer = apiResponse.answer;
     let overly = apiResponse.overly;
     if (overly == "True") {
-        await goPremimumOverly();
+        await goPremiumOverlay({
+            title: "You've used your free credits",
+            subtitle: "Upgrade to keep going with unlimited AI solves.",
+            perks: [
+                "Unlimited AI solves",
+                "Priority response speed",
+                "Full memory & history",
+            ],
+        });
         solveBtn.disabled = false;
         sendBtn.disabled = false;
         return null;
@@ -126,7 +134,15 @@ async function getAIResponse(input) {
             return;
         }
         if (apiResponse.overly == "True") {
-            await goPremimumOverly();
+            await goPremiumOverlay({
+                title: "You've used your free credits",
+                subtitle: "Upgrade to keep going with unlimited AI solves.",
+                perks: [
+                    "Unlimited AI solves",
+                    "Priority response speed",
+                    "Full memory & history",
+                ],
+            });
             solveBtn.disabled = false;
             sendBtn.disabled = false;
             return null;

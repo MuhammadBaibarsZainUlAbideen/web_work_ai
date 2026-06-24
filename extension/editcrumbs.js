@@ -1,6 +1,6 @@
 import {sending_Refresh_token} from "./Refrsh_token.js"
 let resulElementtDiv = document.getElementById("result");
-import { goPremimumOverly } from './goPremimum_overly.js'
+import { goPremiumOverlay } from './goPremimum_overly.js'
 
 export async function editCrumbs(editedCrumbs){
 
@@ -108,7 +108,6 @@ async function sendEditCrumbs(access_token, editedCrumbs){
     let dataJsonConversion = await data.json()
     if(dataJsonConversion.overly){
         await blocking(dataJsonConversion)
-        return
     }
     
     if(dataJsonConversion.answer){
@@ -122,8 +121,17 @@ async function sendEditCrumbs(access_token, editedCrumbs){
 async function blocking(apiResponse){
     let overly = apiResponse.overly;
     if (overly == "True") {
-        await goPremimumOverly();
-        return null;
+        await goPremiumOverlay({
+            title: "Editing is a Premium feature",
+            subtitle: "Upgrade to edit, refine, and iterate on any response.",
+            perks: [
+                "Edit & regenerate any response",
+                "Unlimited AI solves",
+                "Full memory & history",
+            ],
+            btnText: "Unlock Editing",
+            dismissText: "Not now",
+            });
     }
     
 

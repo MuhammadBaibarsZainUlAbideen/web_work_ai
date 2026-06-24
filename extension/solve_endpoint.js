@@ -8,6 +8,10 @@ const sendBtn = document.getElementById("sendBtn");
 
 
 export async function get_solve_endpoint(request){
+    console.log(chatHistory);
+    if (chatHistory.length >= 5) {
+        chatHistory.splice(0, chatHistory.length - 5);
+    }
     
     let result = await chrome.storage.local.get(["Access_token"]);
     let access_token = result.Access_token;

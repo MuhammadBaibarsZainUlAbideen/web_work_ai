@@ -131,13 +131,12 @@ async def billing_portal(authorization: str = Header(None)):
     row = await get_subscrption(user_id)
 
     if not row:
-        return {"error": "no_customer_found"}
+        return {"error": "Please get the Premium first, obviously then you can manage it"}
 
     customer_id = row[0]
 
     session = stripe.billing_portal.Session.create(
         customer=customer_id,
-        return_url="https://webworkaipayment.netlify.app//dashboard"
     )
 
     return {"url": session.url}

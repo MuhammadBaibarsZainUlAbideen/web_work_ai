@@ -1,12 +1,21 @@
+let resulElementtDiv = document.getElementById("result");
 subElememt = document.getElementById("sub")
 subElememt.addEventListener("click",async function(){
     let result = await chrome.storage.local.get(["Access_token"]);
     let access_token = result.Access_token;
     let data = await sub_request(access_token);
+    if (data.error){
+        resulElementtDiv.innerText=data.error
+        return
+    }
     if (data.reason === "token_expired") {
         access_token = await refreshAccessToken();
         if (access_token) {
             data = await sub_request(access_token); 
+            if (data.error){
+                resulElementtDiv.innerText=data.error
+                return
+            }
             chrome.tabs.create({ url: data.url });
         } 
     }else{

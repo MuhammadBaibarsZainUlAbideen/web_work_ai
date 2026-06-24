@@ -1,7 +1,7 @@
 import { sending_Refresh_token } from './Refrsh_token.js'
 import { addMessage } from './send_message.js';
 import { chatHistory } from './send_message.js';
-import { goPremimumOverly } from './goPremimum_overly.js'
+import { goPremiumOverlay } from './goPremimum_overly.js'
 import { addImage } from "./send_message.js";
 import { get_solve_endpoint} from "./solve_endpoint.js"
 
@@ -94,7 +94,15 @@ solveBtn.onclick = async function() {
             overly = apiResponse.overly;
             
             if (overly == "True") {
-                await goPremimumOverly();
+                await goPremiumOverlay({
+                    title: "You've used your free credits",
+                    subtitle: "Upgrade to keep going with unlimited AI solves.",
+                    perks: [
+                        "Unlimited AI solves",
+                        "Priority response speed",
+                        "Full memory & history",
+                    ],
+                    });
                 solveBtn.disabled = false;
                 sendBtn.disabled = false;
                 return
@@ -138,7 +146,15 @@ solveBtn.onclick = async function() {
                     overly = apiResponse.overly;
                     
                     if (overly == "True") {
-                        await goPremimumOverly();
+                        await goPremiumOverlay({
+                            title: "You've used your free credits",
+                            subtitle: "Upgrade to keep going with unlimited AI solves.",
+                            perks: [
+                                "Unlimited AI solves",
+                                "Priority response speed",
+                                "Full memory & history",
+                            ],
+                        });
                         solveBtn.disabled = false;
                         sendBtn.disabled = false;
                         return
