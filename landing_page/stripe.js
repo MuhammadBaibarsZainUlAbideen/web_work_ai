@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let upgrade_button = document.getElementById("payBtn");
 
     upgrade_button.onclick = async function checkout() {
-        upgrade_button.disable = true; 
+        upgrade_button.disabled = true; 
         const response = await fetch("https://api.asolve.me/checkout", {
             method: "POST",
             headers: {
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const data = await response.json();
 
         if (data.error === "invalid_session") {
-            upgrade_button.disable = false; 
+            upgrade_button.disabled = false; 
             return;
         }
 
