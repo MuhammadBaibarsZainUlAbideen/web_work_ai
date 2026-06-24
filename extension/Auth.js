@@ -53,6 +53,7 @@ const CLIENT_ID = "761181264175-1qmk12gfnsbo8k58dk4mmvbt6c8ujurt.apps.googleuser
 
 
 loginBtn.addEventListener("click", () => {
+    loginBtn.disabled=true;
     overlay.classList.remove("hidden");
     termsSource = "login"
 });
@@ -103,7 +104,9 @@ function startOAuth() {
         if (chrome.runtime.lastError) {
 
             resultDiv.textContent =
-                "Login failed"
+                "Login failed Try again or contact support by going to the settings"
+                loginBtn.disabled = false;
+
 
             return;
         }
@@ -115,7 +118,8 @@ function startOAuth() {
 
 
             resultDiv.textContent =
-                "Login failed: No token received";
+                "Login failed Try again or contact support by going to the settings";
+                loginBtn.disabled = false;
 
             return;
         }
@@ -136,7 +140,8 @@ function startOAuth() {
 
 
             resultDiv.textContent =
-                "Login failed: No access token";
+                "Login failed Try again or contact support by going to the settings";
+                loginBtn.disabled = false;
         }
     });
 }

@@ -224,12 +224,21 @@
       background: var(--green);
       color: #020802;
       border: 1px solid var(--green);
+      cursor: pointer;
+      width: 100%;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.9rem;
     }
 
     .plan-btn.paid:hover {
       opacity: 0.85;
       background: var(--green-dim);
       border-color: var(--green-dim);
+    }
+    .plan-btn.paid:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     /* optional extra text */
@@ -304,7 +313,7 @@
           <li>Conversation history</li>
           <li>Early access to new features</li>
         </ul>
-        <a id="payBtn" class="plan-btn paid" style="cursor: pointer;">Get Premium</a>
+        <button id="payBtn" class="plan-btn paid">Get Premium</button>
       </div>
 
     </div>
