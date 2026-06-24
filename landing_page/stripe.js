@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let upgrade_button = document.getElementById("payBtn");
 
     upgrade_button.onclick = async function checkout() {
+        upgrade_button.disable = true; 
         const response = await fetch("https://api.asolve.me/checkout", {
             method: "POST",
             headers: {
@@ -20,10 +21,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         const data = await response.json();
 
         if (data.error === "invalid_session") {
+            upgrade_button.disable = false; 
             return;
         }
 
         if (data.url) {
+            upgrade_button.disable = false; 
             window.location.href = data.url;
         }
     };
