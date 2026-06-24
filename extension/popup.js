@@ -216,11 +216,13 @@ redirect.onclick = async () => {
 };
 
 async function callCheckout(token) {
-    const response = await fetch("https://api.asolve.me/create-session", {
+    
+    const response = await fetch("http://localhost:8000/create-session", {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
     });
     const data = await response.json();
+    document.getElementById("reloadOverlay").style.display = "flex";
     return data;
 }
 
@@ -228,7 +230,7 @@ async function refreshAccessToken() {
     const result = await chrome.storage.local.get(["Refresh_token"]);
     const Refresh_token = result.Refresh_token;
     
-    const response = await fetch("https://api.asolve.me/refresh_token", {
+    const response = await fetch("http://localhost:8000/refresh_token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ Refresh_token: Refresh_token })

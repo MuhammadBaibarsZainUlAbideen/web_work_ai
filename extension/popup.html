@@ -56,7 +56,7 @@
     </div>
         <div id="settingsDropdown" class="settings-dropdown">
         
-       
+            
             <div class="settings-item" id="sub">
                 Manage Subscription
             </div>
@@ -148,7 +148,20 @@
             <p class="overlay-dismiss" id="closeOverlayText">Maybe later</p>
         </div>
     </div>
-    
+    <div id="reloadOverlay" style="display:none;">
+        <div class="reload-box">
+            <div class="reload-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a0a0a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a10 10 0 1 0 10 10"/>
+                    <polyline points="22 2 22 8 16 8"/>
+                </svg>
+            </div>
+            <p class="reload-title">If you have paid</p>
+            <p class="reload-sub">Reload the extension to activate your Premium access.</p>
+            <button id="reloadExtensionBtn">Reload extension</button>
+            <p class="reload-hint">Not seeing changes? Try again in a moment.</p>
+        </div>
+    </div>
 
     
 
@@ -163,6 +176,8 @@
     <script type="module" src="goPremimum_overly.js"></script>
     <script type="module" src="background.js"></script>
     <script type="module" src="solve_endpoint.js"></script>
+    <script type="module" src= "Premium_Manage.js"></script>
+    <script type="module" src= "reloadExtension.js"></script>
     <script src="auto-render.min.js"></script>
     <script src="logout.js"></script>
     <script src="manage_subscrption.js"></script>

@@ -21,13 +21,14 @@ async function storingLocal(token){
         await chrome.storage.local.set({"Access_token":Access_token,"Refresh_token":Refresh_token})
     }catch(error){
     }
+    setTimeout(() => location.reload(), 1000);
     
     solveBtn.disabled=false;
     approveBtn.disabled=false;
 }
 
 async function sendingBakcend(jsObject){
-    const sending = await fetch("https://api.asolve.me/get",{
+    const sending = await fetch("http://localhost:8000/get",{
         method:"POST",
         headers:{"Content-Type": "application/json"},
         body:JSON.stringify({Auth:jsObject})

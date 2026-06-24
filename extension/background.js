@@ -9,7 +9,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         chrome.storage.local.get(["Access_token"], async (result) => {
             const Access_token = result.Access_token;
             
-            fetch("https://api.asolve.me/solve", {
+            fetch("http://localhost:8000/solve", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -35,7 +35,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         chrome.storage.local.get(["Access_token"], async (result) => {
             const Access_token = result.Access_token;
             
-            fetch("https://api.asolve.me/solve", {
+            fetch("http://localhost:8000/solve", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

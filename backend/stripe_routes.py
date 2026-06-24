@@ -140,3 +140,23 @@ async def billing_portal(authorization: str = Header(None)):
     )
 
     return {"url": session.url}
+
+@router.get("/subscription-status")
+async def subscription_status(authorization: str = Header(None)):
+    token = authorization.replace("Bearer ", "")
+    try:
+        payload = jwt.decode(token, our_secret_key, algorithms=["HS256"])
+    except ExpiredSignatureError:
+        return {"logout": "false", "reason": "token_expired"}
+    
+    user_id = payload["key"]
+    row = await get_subscrption(user_id)
+
+    if not row:
+        return {"is_premium": False}
+
+    customer_id = row[0]
+    
+    subscriptions = stripe.Subscription.list(customer=customer_id, status="active")
+    
+    return {"is_premium": len(subscriptions.data) > 0}

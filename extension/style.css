@@ -715,3 +715,73 @@ button:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
   transition: color 0.15s;
 }
 .overlay-dismiss:hover { color: var(--clr-text-muted); }
+
+
+
+/* Reload Extension */
+#reloadOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.reload-box {
+    background: #1a1a1a;
+    border: 0.5px solid #333;
+    border-radius: 10px;
+    padding: 32px 28px;
+    width: 260px;
+    text-align: center;
+}
+
+.reload-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #2a2a2a;
+    border: 0.5px solid #3a3a3a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.reload-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #e0e0e0;
+    margin: 0 0 8px;
+}
+
+.reload-sub {
+    font-size: 12px;
+    color: #888;
+    margin: 0 0 24px;
+    line-height: 1.5;
+}
+
+#reloadExtensionBtn {
+    width: 100%;
+    padding: 10px;
+    background: #2e2e2e;
+    border: 0.5px solid #444;
+    border-radius: 8px;
+    color: #e0e0e0;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+#reloadExtensionBtn:hover {
+    background: #383838;
+}
+
+.reload-hint {
+    font-size: 11px;
+    color: #555;
+    margin: 14px 0 0;
+}
