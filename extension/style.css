@@ -364,6 +364,11 @@ button:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
   color: var(--clr-danger);
   font-weight: 600;
 }
+#sub.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
 
 /* ============================================================
    TOAST

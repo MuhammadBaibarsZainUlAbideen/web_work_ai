@@ -1,31 +1,36 @@
 let resulElementtDiv = document.getElementById("result");
 subElememt = document.getElementById("sub")
-subElememt.addEventListener("click",async function(){
+subElememt.addEventListener("click", async function() {
+    if (subElememt.classList.contains("disabled")) return; 
+    subElememt.classList.add("disabled");
+
     let result = await chrome.storage.local.get(["Access_token"]);
     let access_token = result.Access_token;
     let data = await sub_request(access_token);
-    if (data.error){
-        resulElementtDiv.innerText=data.error
-        return
+
+    if (data.error) {
+        resulElementtDiv.innerText = data.error;
+        subElememt.classList.remove("disabled");
+        return;
     }
+
     if (data.reason === "token_expired") {
         access_token = await refreshAccessToken();
         if (access_token) {
-            data = await sub_request(access_token); 
-            if (data.error){
-                resulElementtDiv.innerText=data.error
-                return
+            data = await sub_request(access_token);
+            if (data.error) {
+                resulElementtDiv.innerText = data.error;
+                subElememt.classList.remove("disabled");
+                return;
             }
             chrome.tabs.create({ url: data.url });
-        } 
-    }else{
+        }
+    } else {
         chrome.tabs.create({ url: data.url });
     }
 
-
-
-
-})
+    subElememt.classList.remove("disabled");
+});
 async function sub_request(access_token) {
     const response = await fetch("https://api.asolve.me/billing-portal", {
         method: "POST",
