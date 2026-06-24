@@ -61,7 +61,7 @@ export async function get_solve_endpoint(request){
 }
 
 async function getdata(access_token,body){
-    let data =  await fetch("http://localhost:8000/solve",{
+    let data =  await fetch("https://api.asolve.me/solve",{
         method:"POST",
         headers: {
             "Content-Type": "application/json",

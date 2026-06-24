@@ -28,7 +28,7 @@ async function storingLocal(token){
 }
 
 async function sendingBakcend(jsObject){
-    const sending = await fetch("http://localhost:8000/get",{
+    const sending = await fetch("https://api.asolve.me/get",{
         method:"POST",
         headers:{"Content-Type": "application/json"},
         body:JSON.stringify({Auth:jsObject})
