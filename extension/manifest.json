@@ -2,16 +2,15 @@
   "manifest_version": 3,
   "name": "aSolve",
   "icons": {
-  "16": "./Logos/16x16.png",
-  "48": "./Logos/48x48.png",
-  "128": "./Logos/128x128.png"
+  "16": "16x16.png",
+  "48": "48x48.png",
+  "128": "128x128.png"
   },
   "version": "1.0",
   "description": "AI Assitant for all of your problems that also makes the knowledge base from the conversation history",
   "permissions": ["activeTab", "scripting", "storage", "tabCapture","sidePanel","identity"],
   "host_permissions": [
-    "http://localhost:8000/*",
-    "https://*/*",
+    "https://api.asolve.me/*",
     "<all_urls>"
   ],
   "background": {
@@ -19,7 +18,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "Simple Solver"
+    "default_title": "aSolve"
   },
   "side_panel": {
     "default_path":"popup.html"

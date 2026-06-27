@@ -251,7 +251,7 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
                     "content": user_content
                 }
             ],
-            max_completion_tokens=600,
+            max_completion_tokens=1000,
             temperature=0,
             model=deployment,
             stream=True,

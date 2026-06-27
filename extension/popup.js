@@ -22,6 +22,10 @@ async function captureAndCropImage(coordinates) {
             try {
                 const bitmap = await createImageBitmap(await fetch(screenshotUrl).then(r => r.blob()));
                 const { x, y, width, height } = coordinates;
+                if (width === 0 || height === 0) {
+                    reject(new Error("No area selected"));
+                    return;
+                }
                 const canvas = new OffscreenCanvas(width, height);
                 const ctx = canvas.getContext("2d");
                 ctx.drawImage(bitmap, x, y, width, height, 0, 0, width, height);
