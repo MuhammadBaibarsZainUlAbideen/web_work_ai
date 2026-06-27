@@ -191,8 +191,8 @@ async def solve(problem_data:Problem, authorization:str= Header(None),background
 
 
     # Pay Wall
-    if status == False and total_tries > 25:
-        return {"answer":"Get the Paid version buddy, thats enough demo for you, You have made the totoal of 25 Requests", "overly":"True"}
+    if status == False and total_tries > 50:
+        return {"answer":"Get the Paid version buddy, thats enough demo for you, You have made the totoal of 50 Requests", "overly":"True"}
     if status == True and not await check_paid_rate_limit(user_id):
         return {"answer": "I know You have paid version but calm down"}
     if status == True and not await check_monthly_paid_limit(user_id):
