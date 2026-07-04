@@ -8,8 +8,7 @@ const sendBtn = document.getElementById("sendBtn");
 
 
 export async function get_solve_endpoint(request){
-    console.log(chatHistory);
-    if (chatHistory.length >= 5) {
+    if (chatHistory.length >= 10) {
         chatHistory.splice(0, chatHistory.length - 5);
     }
     
