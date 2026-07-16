@@ -129,10 +129,4 @@ Please follow the existing code style and include tests for new behavior where a
 
 ---
 
-<div align="center">
 
-[![Made with ReadmeBuddy](https://img.shields.io/badge/Made%20with-ReadmeBuddy-8B5CFF?style=for-the-badge&logo=markdown&logoColor=white)](https://readmebuddy.com)
-
-<sub>Generate beautiful READMEs in seconds → <a href="https://readmebuddy.com">readmebuddy.com</a></sub>
-
-</div>
