@@ -39,9 +39,9 @@
    ============================================================ */
 *, *::before, *::after { box-sizing: border-box; }
 
-body {
+html,body {
   width: 500px;
-  height: 600px;
+  height: 100%;
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 13px;
   background: var(--clr-bg);
