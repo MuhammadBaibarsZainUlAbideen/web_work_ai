@@ -1,11 +1,12 @@
 import asyncpg
 from datetime import datetime, timezone, timedelta
 import os
+from dotenv import load_dotenv
 import numpy as np
 import asyncio
 from backend.building_embeding_text import build_embedding_text,embed
 
-
+load_dotenv()
 def from_blob(blob):
     return np.frombuffer(blob, dtype=np.float32)
 
@@ -16,8 +17,8 @@ async def init_db():
     pool = await asyncpg.create_pool(
         host="aws-1-us-west-1.pooler.supabase.com",
         port=6543,
-        user="postgres.ltjzhbicxbcfxaoocsbu",
-        password="Supabase424",
+        user=os.getenv("DBUSER"),
+        password=os.getenv("DBPASSWORD"),
         database="postgres",
         max_size=50,
         statement_cache_size=0,
